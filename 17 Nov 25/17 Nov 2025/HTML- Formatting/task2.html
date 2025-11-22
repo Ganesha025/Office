@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Premium Blog</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #202124;
+            color: #e8eaed;
+            font-family: 'Roboto', sans-serif;
+            line-height: 1.6;
+        }
+
+        header {
+            background: #292a2d;
+            border-bottom: 1px solid #3c4043;
+            padding: 16px 24px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(20px);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            font-family: 'Google Sans', sans-serif;
+            font-size: 22px;
+            font-weight: 500;
+            color: #e8eaed;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logo span {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #8ab4f8;
+        }
+
+        nav {
+            display: flex;
+            gap: 32px;
+        }
+
+        nav a {
+            color: #9aa0a6;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        nav a:hover {
+            color: #e8eaed;
+        }
+
+        main {
+            max-width: 760px;
+            margin: 0 auto;
+            padding: 64px 24px;
+        }
+
+        .category {
+            display: inline-block;
+            background: #8ab4f8;
+            color: #202124;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+            margin-bottom: 16px;
+            letter-spacing: 0.5px;
+        }
+
+        h1 {
+            font-family: 'Google Sans', sans-serif;
+            font-size: 48px;
+            font-weight: 400;
+            color: #e8eaed;
+            margin-bottom: 24px;
+            line-height: 1.2;
+        }
+
+        .meta {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            margin-bottom: 48px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid #3c4043;
+        }
+
+        .author-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #8ab4f8, #81c995);
+        }
+
+        .author-details h3 {
+            font-size: 14px;
+            font-weight: 500;
+            color: #e8eaed;
+        }
+
+        .author-details p {
+            font-size: 13px;
+            color: #9aa0a6;
+        }
+
+        .date {
+            color: #9aa0a6;
+            font-size: 13px;
+        }
+
+        article p {
+            font-size: 18px;
+            color: #bdc1c6;
+            margin-bottom: 24px;
+            font-weight: 300;
+        }
+
+        article p:first-of-type {
+            font-size: 20px;
+            color: #e8eaed;
+        }
+
+        blockquote {
+            margin: 40px 0;
+            padding: 24px 24px 24px 20px;
+            background: #292a2d;
+            border-left: 4px solid #8ab4f8;
+            border-radius: 4px;
+            font-size: 20px;
+            font-style: italic;
+            color: #e8eaed;
+        }
+
+        ul {
+            margin: 32px 0;
+            padding-left: 0;
+            list-style: none;
+        }
+
+        ul li {
+            padding: 12px 0 12px 32px;
+            position: relative;
+            font-size: 18px;
+            color: #bdc1c6;
+        }
+
+        ul li::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 22px;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #8ab4f8;
+        }
+
+        code {
+            background: #292a2d;
+            color: #81c995;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 16px;
+            font-family: 'Roboto Mono', monospace;
+        }
+
+        .actions {
+            display: flex;
+            gap: 16px;
+            margin-top: 64px;
+            padding-top: 32px;
+            border-top: 1px solid #3c4043;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 24px;
+            background: transparent;
+            color: #8ab4f8;
+            border: 1px solid #5f6368;
+            border-radius: 24px;
+            font-size: 14px;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            background: rgba(138, 180, 248, 0.08);
+            border-color: #8ab4f8;
+        }
+
+        .btn-primary {
+            background: #8ab4f8;
+            color: #202124;
+            border-color: #8ab4f8;
+        }
+
+        .btn-primary:hover {
+            background: #aecbfa;
+            border-color: #aecbfa;
+        }
+
+        footer {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 48px 24px;
+            border-top: 1px solid #3c4043;
+            text-align: center;
+        }
+
+        footer p {
+            color: #9aa0a6;
+            font-size: 13px;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 32px;
+            }
+
+            article p {
+                font-size: 16px;
+            }
+
+            nav {
+                gap: 16px;
+            }
+
+            .actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <div class="logo">
+                <span></span>
+                Material Blog
+            </div>
+            <nav>
+                <a href="#">Articles</a>
+                <a href="#">Design</a>
+                <a href="#">About</a>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <div class="category">DESIGN</div>
+        
+        <h1>The Art of Building a Premium Dark Theme UI</h1>
+
+        <div class="meta">
+            <div class="author-info">
+                <div class="avatar"></div>
+                <div class="author-details">
+                    <h3>Alex Morgan</h3>
+                    <p>UI/UX Director</p>
+                </div>
+            </div>
+            <span class="date">Nov 17, 2025</span>
+        </div>
+
+        <article>
+            <p>
+                A premium dark theme UI is not just dark colors. It is a balance of subtle lighting,
+                gradients, shadows and spacing that creates an elegant, cinematic feel.
+            </p>
+
+            <p>
+                Modern interfaces require careful attention to contrast ratios, visual hierarchy, and 
+                accessibility. Every element must serve a purpose while maintaining aesthetic appeal.
+            </p>
+
+            <blockquote>
+                "A luxury interface is not built with color — it is built with light and spacing."
+            </blockquote>
+
+            <p>
+                Here are some things that define a premium dark interface:
+            </p>
+
+            <ul>
+                <li>Soft, layered shadows that add depth</li>
+                <li>Controlled glow to highlight important elements</li>
+                <li>Glass-like cards with subtle transparency</li>
+                <li>Neutral greys instead of pure black</li>
+            </ul>
+
+            <p>
+                Even a small detail like using a smoother shade such as 
+                <code>#292a2d</code> instead of harsh black can dramatically elevate the UI.
+                These nuances separate professional designs from amateur attempts.
+            </p>
+
+            <p>
+                The key is restraint. Too many effects create visual noise. Too few leave the interface 
+                feeling flat. Strike the balance, and your UI will feel both modern and timeless.
+            </p>
+        </article>
+
+        <div class="actions">
+            <button class="btn btn-primary">Share Article</button>
+            <button class="btn">Save for Later</button>
+            <button class="btn">Copy Link</button>
+        </div>
+    </main>
+
+    <footer>
+        <p>© 2025 Material Blog. Designed with Material Design principles.</p>
+    </footer>
+</body>
+</html>

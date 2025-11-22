@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Futuristic Contact Form</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:'Roboto',sans-serif;
+}
+
+body{
+  background:#121212;
+  color:#F0F0F0;
+  height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  overflow:hidden;
+  padding:20px;
+}
+
+.center-btn{
+  padding:18px 36px;
+  font-size:18px;
+  font-weight:700;
+  border:none;
+  border-radius:14px;
+  cursor:pointer;
+  background:#00E5FF;
+  color:#121212;
+  box-shadow:0 6px 20px rgba(0,229,255,0.4);
+  transition:0.4s;
+}
+.center-btn:hover{
+  background:#00cde0;
+  transform: scale(1.05);
+}
+
+.contact-container{
+  position:fixed;
+  top:50%; left:50%;
+  transform:translate(-50%,-50%) scale(0);
+  opacity:0;
+  width:480px;
+  max-width:90%;
+  background: rgba(18,18,18,0.85);
+  border-radius:25px;
+  padding:50px 40px;
+  box-shadow:0 20px 60px rgba(0,0,0,0.7);
+  backdrop-filter: blur(15px);
+  transition:transform 0.6s ease,opacity 0.6s ease;
+  z-index:10;
+}
+
+.contact-container.show{
+  transform:translate(-50%,-50%) scale(1);
+  opacity:1;
+}
+
+.close-btn{
+  position:absolute;
+  top:15px;
+  right:20px;
+  background:none;
+  border:none;
+  font-size:24px;
+  color:#00E5FF;
+  cursor:pointer;
+  transition:0.3s;
+}
+.close-btn:hover{
+  color:#00cde0;
+}
+
+.contact-container h2{
+  text-align:center;
+  margin-bottom:35px;
+  color:#F0F0F0;
+  font-weight:700;
+  font-size:30px;
+  text-shadow:0 2px 8px rgba(0,229,255,0.7);
+}
+
+.form-group{
+  position:relative;
+  margin-bottom:25px;
+}
+
+.form-group input,
+.form-group textarea{
+  width:100%;
+  padding:16px 16px 16px 16px;
+  border:none;
+  border-radius:14px;
+  background: rgba(50,50,50,0.5);
+  color:#F0F0F0;
+  font-size:16px;
+  transition:0.3s;
+}
+.form-group input:focus,
+.form-group textarea:focus{
+  outline:none;
+  background: rgba(50,50,50,0.8);
+  box-shadow:0 0 10px #00E5FF;
+}
+
+.form-group label{
+  position:absolute;
+  left:16px;
+  top:16px;
+  color:#AAAAAA;
+  pointer-events:none;
+  transition:0.3s;
+  background:transparent;
+}
+.form-group input:focus + label,
+.form-group input:not(:placeholder-shown) + label,
+.form-group textarea:focus + label,
+.form-group textarea:not(:placeholder-shown) + label{
+  top:-10px;
+  left:12px;
+  font-size:12px;
+  color:#00E5FF;
+  background: rgba(18,18,18,0.85);
+  padding:0 5px;
+}
+
+textarea{
+  resize:none;
+  height:120px;
+}
+
+.contact-container button[type="submit"]{
+  width:100%;
+  padding:18px;
+  border:none;
+  border-radius:14px;
+  background:#00E5FF;
+  color:#121212;
+  font-size:18px;
+  font-weight:700;
+  cursor:pointer;
+  box-shadow:0 8px 25px rgba(0,229,255,0.5);
+  transition:0.3s;
+}
+.contact-container button[type="submit"]:hover{
+  background:#00cde0;
+  transform: scale(1.03);
+}
+
+@media (max-width: 500px){
+  .contact-container{
+    width:90%;
+    padding:40px 25px;
+    border-radius:20px;
+  }
+  .contact-container h2{
+    font-size:26px;
+    margin-bottom:25px;
+  }
+  .center-btn{
+    padding:16px 30px;
+    font-size:16px;
+  }
+  .form-group input,
+  .form-group textarea{
+    padding:14px 14px 14px 14px;
+    font-size:15px;
+  }
+  .contact-container button[type="submit"]{
+    padding:16px;
+    font-size:16px;
+  }
+}
+
+@media (max-height: 600px){
+  body{
+    align-items:flex-start;
+    padding-top:30px;
+  }
+}
+
+</style>
+</head>
+<body>
+
+<button class="center-btn" id="openForm">Contact Us</button>
+
+<div class="contact-container" id="contactForm">
+  <button class="close-btn" id="closeForm">&times;</button>
+  <h2>Contact Us</h2>
+  <form>
+    <div class="form-group">
+      <input type="text" id="name" placeholder=" " required>
+      <label for="name">Name *</label>
+    </div>
+    <div class="form-group">
+      <input type="email" id="email" placeholder=" " required>
+      <label for="email">Email Address *</label>
+    </div>
+    <div class="form-group">
+      <input type="text" id="subject" placeholder=" ">
+      <label for="subject">Subject</label>
+    </div>
+    <div class="form-group">
+      <textarea id="message" placeholder=" "></textarea>
+      <label for="message">Message</label>
+    </div>
+    <div class="form-group">
+      <input type="file" id="file">
+      <label for="file">Attach File</label>
+    </div>
+    <button type="submit">Send Message</button>
+  </form>
+</div>
+
+<script>
+const openBtn = document.getElementById('openForm');
+const closeBtn = document.getElementById('closeForm');
+const formContainer = document.getElementById('contactForm');
+
+openBtn.addEventListener('click', () => {
+  formContainer.classList.add('show');
+});
+
+closeBtn.addEventListener('click', () => {
+  formContainer.classList.remove('show');
+});
+</script>
+
+</body>
+</html>

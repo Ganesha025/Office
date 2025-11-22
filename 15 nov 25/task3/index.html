@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Portfolio — JS Version</title>
+  <style>
+    body{font-family:Arial,sans-serif; 
+      margin:0;padding:0;
+      background:#f7f9fc;
+      color:#0b1220;}
+    .container{max-width:1000px;
+      margin:auto;
+      padding:20px;}
+    header{display:flex;
+      align-items:center;
+      gap:10px;}
+    .logo{width:70px;
+      height:70px;
+      border-radius:10px;}
+    nav ul{list-style:none;
+      display:flex;
+      gap:10px;
+      padding:0;}
+    nav a{text-decoration:none;
+      color:#0656d1;
+      font-weight:bold;}
+    section{background:#fff;
+      margin-top:20px;padding:15px;
+      border-radius:8px;
+      box-shadow:0 3px 10px rgba(0,0,0,0.1);}
+    table{width:100%;
+      border-collapse:collapse;
+      margin-top:10px;}
+    th, td{border:1px solid #ccc;
+      padding:8px;
+      text-align:center;}
+    footer{margin-top:20px;
+      text-align:center;
+      padding:10px;
+      background:#032f63;
+      color:white;
+      border-radius:5px;}
+  </style>
+</head>
+<body>
+  <div class="container" id="portfolio"></div>
+
+  <script>
+    const student = {
+      name: "Ganesh",
+      degree: "BCA — Semester 2",
+      logo: "https://upload.wikimedia.org/wikipedia/commons/a/a7/React-icon.svg",  
+      nav: [
+        {name:"About", id:"about"},
+        {name:"Skills", id:"skills"},
+        {name:"Timetable", id:"timetable"},
+        {name:"Media", id:"media"},
+        {name:"Contact", id:"contact"},
+      ]
+    };
+
+    const about = {
+      img: "https://upload.wikimedia.org/wikipedia/commons/a/a7/React-icon.svg",  
+      caption: "Ganesh during a project presentation",
+      description: "Ganesh is an enthusiastic BCA student with a passion for web development, programming, and data analysis. Always eager to learn new technologies.",
+      quickFacts: [
+        {label:"Roll No", value:"221CA025"},
+        {label:"Department", value:"Computer Applications"},
+        {label:"Campus", value:"Main C Block"}
+      ]
+    };
+
+    const skills = {
+      tech: ["HTML5 & CSS3", "JavaScript (ES6+)", "Firebase","Three.js ", "React & REST APIs"],
+      proficiency: ["Web Development (front-end focus)", "Mobile Development (React Native)", "Version Control (Git & GitHub)", "Problem Solving (DSA fundamentals)"]
+    };
+
+    const timetable = [
+      ["08:30–10:00", "Computer Programming", "Mathematics", "Data Structures", "Web Technologies", "AI Fundamentals"],
+      ["10:15–11:45", "Database Systems", "Java Lab", "Logic Design", "Networking", "Project Work"],
+      ["12:15–13:15", "Lunch / Break", "Lunch / Break", "Lunch / Break", "Lecture", "Study Hour"],
+      ["14:00–15:30", "Software Engineering", "Machine Learning", "Lab: Database Systems", "Web Devop", "Project"],
+      ["15:45–17:15", "C Programming", "DSA Techniques", "Group Project Discussions", "Group Project Discussions", "Java Programming"]
+    ];
+
+    const media = [
+      {type:"video", title:"Web Development Project Demo (MP4)", src:"videoplayback.mp4", caption:"Demo of my web application built using React."},
+      {type:"audio", title:"Seminar on Data Structures (MP3)", src:"https://www.w3schools.com/html/horse.mp3", caption:"Audio from a seminar I attended on data structures."},
+      {type:"youtube", title:"Recorded Presentation (YouTube)", src:"https://www.youtube.com/embed/M7lc1UVf-VE", caption:"Lecture on AI concepts and applications."}
+    ];
+
+    const contact = {
+      address: "Department of Computer Applications, Main Block, Example College, 123 College Road, Cityville, State 560001",
+      email: "ganeshdeveloper@gmail.com",
+    
+    };
+
+    const container = document.getElementById("portfolio");
+
+    let headerHTML = `
+      <header>
+        <img class="logo" src="${student.logo}" alt="Logo">
+        <div>
+          <h1>${student.name}<br><small>${student.degree}</small></h1>
+          <nav><ul>${student.nav.map(item => `<li><a href="#${item.id}">${item.name}</a></li>`).join('')}</ul></nav>
+        </div>
+      </header>
+    `;
+    container.innerHTML += headerHTML;
+
+    let aboutHTML = `
+      <section id="about">
+        <h2>About</h2>
+        <img src="${about.img}" alt="Student photo" style="width:150px;float:left;margin-right:10px;">
+        <p>${about.description}</p>
+        <p><strong>Quick facts:</strong></p>
+        <ul>${about.quickFacts.map(f => `<li>${f.label}: ${f.value}</li>`).join('')}</ul>
+        <div style="clear:both"></div>
+      </section>
+    `;
+    container.innerHTML += aboutHTML;
+
+    let skillsHTML = `
+      <section id="skills">
+        <h2>Skills</h2>
+        <h3>Technical Skills</h3>
+        <ul>${skills.tech.map(s => `<li>${s}</li>`).join('')}</ul>
+        <h3>Proficiency</h3>
+        <ol>${skills.proficiency.map(s => `<li>${s}</li>`).join('')}</ol>
+      </section>
+    `;
+    container.innerHTML += skillsHTML;
+
+    let tableHTML = `
+      <section id="timetable">
+        <h2>Timetable</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Time</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${timetable.map(row => `<tr>${row.map(cell => `<td>${cell}</td>`).join('')}</tr>`).join('')}
+          </tbody>
+        </table>
+      </section>
+    `;
+    container.innerHTML += tableHTML;
+
+    let mediaHTML = `
+      <section id="media">
+        <h2>Media</h2>
+        ${media.map(m => {
+          if(m.type === "video") return `<h3>${m.title}</h3><video controls muted><source src="${m.src}" type="video/mp4"></video><p>${m.caption}</p>`;
+          if(m.type === "audio") return `<h3>${m.title}</h3><audio controls><source src="${m.src}" type="audio/mpeg"></audio><p>${m.caption}</p>`;
+          if(m.type === "youtube") return `<h3>${m.title}</h3><iframe width="100%" height="315" src="${m.src}" title="${m.title}" frameborder="0" allowfullscreen></iframe><p>${m.caption}</p>`;
+        }).join('')}
+      </section>
+    `;
+    container.innerHTML += mediaHTML;
+
+    let contactHTML = `
+      <section id="contact">
+        <h2>Contact</h2>
+        <p>${contact.address}</p>
+        <p>Email: <a href="mailto:${contact.email}">${contact.email}</a></p>
+      </section>
+    `;
+    container.innerHTML += contactHTML;
+
+    container.innerHTML += `<footer><p>&copy; <a style="color:#fff;" href='https://ganesa14.github.io/Portfolios/'>KASC College</a> — Student Portfolio</p>
+        </footer>`;
+  </script>
+</body>
+</html>

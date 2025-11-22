@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us</title>
+    <style>
+        /* General Styles */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f7f9fc;
+            color: #333;
+        }
+
+        /* Header Styles */
+        header {
+            background-color: #032f63;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        header h2 {
+            margin: 0;
+        }
+
+        /* Main Section Styling */
+        main {
+            max-width: 1000px;
+            margin: 30px auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Form Styles */
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        label {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        input[type="text"], input[type="email"], textarea {
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        input[type="submit"] {
+            padding: 10px;
+            font-size: 16px;
+            background-color: black;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        input[type="submit"]:hover {
+            background-color: #004bb5;
+        }
+
+        textarea {
+            resize: vertical;
+        }
+
+        /* Map Wrapper */
+        .map-wrapper {
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        iframe {
+            max-width: 100%;
+            border-radius: 8px;
+        }
+
+        /* Footer Styles */
+        footer {
+            background-color: #032f63;
+            color: white;
+            text-align: center;
+            padding: 15px;
+            margin-top: 30px;
+        }
+
+        footer a {
+            color: #ffd700;
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        footer p {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h2>Contact Us</h2>
+    </header>
+    <main>
+        <form id="contactform">
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="name" required>
+            
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required>
+            
+            <label for="message">Message:</label>
+            <textarea id="message" name="message" rows="4" required></textarea>
+            
+            <input type="submit" value="Submit">
+        </form>
+        <div class="map-wrapper">
+            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3915.35007022987!2d77.00432507502931!3d11.087265853383338!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ba8f9d68ed21d5f%3A0xb4e18df381531ba3!2seNova%20Software%20and%20Hardware%20Solutions%20P%20Ltd!5e0!3m2!1sen!2sin!4v1763185743876!5m2!1sen!2sin" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+        </div>
+    </main>
+    <footer>
+        <p>Contact me at <a href="https://ganesa14.github.io/Portfolios/">Dev@ganesa</a></p>
+        <p>&copy; 2025 Savage. All rights reserved.</p>
+    </footer>
+</body>
+</html>

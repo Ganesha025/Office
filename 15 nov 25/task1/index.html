@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>News portal</title>
+    <link rel="icon" href="https://img.freepik.com/free-vector/gradient-breaking-news-logo-design_23-2151157248.jpg" type="image/x-icon">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        nav {
+            background-color: #333;
+            color: white;
+            padding: 20px;padding-bottom: 0;
+            box-sizing: border-box;display: flex;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        nav header {
+            display: flex;flex-direction: column-reverse;
+            align-items: center;
+        }
+        nav header h3 {
+            margin: 0;
+            margin-left: 10px;
+        }
+        nav a {
+            color: white;
+            text-decoration: none;
+            display: block;
+            margin: 10px 0;
+        }
+        main {
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        section {
+            margin-bottom: 40px;
+        }
+        section img {
+            max-width: 100%;
+            height: auto;
+        }
+        footer {
+            background-color: #333;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }   
+        footer form {
+            margin-bottom: 20px;
+        }
+        footer input[type="email"] {
+            padding: 10px;
+            margin-right: 10px;
+            border: none;
+            border-radius: 4px;
+        }
+        footer button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            background-color: #555;
+            color: white;
+            cursor: pointer;
+        }
+        footer button:hover {
+            background-color: #777;
+        }section#featuredNews {
+            text-align: center;
+        }aside {
+            position: fixed;
+            top: 100px;
+            right: 0;
+            background-color: #f4f4f4;
+            padding: 10px;
+            border: 1px solid #ccc;
+        }
+        aside ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+        aside ul li {
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <header>
+            <h3>News Portal</h3>
+            <img src="https://img.freepik.com/free-vector/gradient-breaking-news-logo-design_23-2151157248.jpg" alt="News Portal Logo" width="50" height="50">
+        </header>
+        <a href="#">Home</a>
+        <a href="#politics">Politics</a>
+        <a href="#sports">Sports</a>
+        <a href="#technology">Technology</a>
+        <a href="#entertainment">Entertainment</a>
+    </nav>    <main>
+        <section id="featuredNews">
+            <img src="https://www.shutterstock.com/image-illustration/3d-newspaper-headline-reading-were-260nw-108726056.jpg" alt="Featured News">
+      <h2>Featured News</h2>
+            <p>Welcome to our news portal! Stay updated with the latest news from around the world. Explore various categories including politics, sports, technology, and entertainment.</p>
+        </section>
+    </main>
+        <iframe width="560" height="315" src="https://www.youtube.com/embed/o6NmShAq7bQ" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+<aside><ul>
+    <li><a href="#politics">Politics</a></li>
+<li><a href="#sports">Sports</a></li>
+<li><a href="#technology">Technology</a></li>
+<li><a href="#entertainment">Entertainment</a></li>
+</ul></aside>
+        <footer>
+            <h2>savage News</h2>
+            <form action="">
+                <label for="email">Subscribe to our newsletter:</label>
+                <input type="email" id="email" name="email" placeholder="Enter your email" required>
+                <button type="submit">Click</button>
+            </form>
+            <p>&copy; 2025  <a style="color:#fff;" href='https://ganesa14.github.io/Portfolios/'>News Portal</a>. All rights reserved.</p>
+        </footer>
+    <script>
+        var arraydata = [{title:'politics',newtitle:'Election Results Announced',newsinfo:'The results of the recent elections have been announced, with significant changes in the political landscape.',date:'2024-06-01'},
+        {title:'sports',newtitle:'Local Team Wins Championship',newsinfo:'In an exciting finale, the local team clinched the championship title after a nail-biting match.',date:'2024-06-02'},
+        {title:'technology',newtitle:'New Smartphone Released',newsinfo:'The latest smartphone model has been released, featuring cutting-edge technology and innovative features.',date:'2024-06-03'},
+        {title:'entertainment',newtitle:'Blockbuster Movie Premieres',newsinfo:'The much-anticipated blockbuster movie has premiered to rave reviews from critics and audiences alike.',date:'2024-06-04'}
+        ];
+        var main = document.querySelector('main');
+        arraydata.forEach(function(item){
+            var section = document.createElement('section');
+            section.id = item.title;
+            var artcle = document.createElement('article');
+            var h2 = document.createElement('h2');
+            h2.textContent = item.newtitle;
+            var p = document.createElement('p');    
+            p.textContent = item.newsinfo + " (Date: " + item.date + ")";
+            artcle.appendChild(h2);
+            artcle.appendChild(p);
+            section.appendChild(artcle);
+            main.appendChild(section);
+        });
+    </script>
+</body>
+</html>

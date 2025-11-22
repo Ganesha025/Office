@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Ultra Premium Portfolio</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+        font-family: "Inter", sans-serif;
+        background: #000;
+        color: #fff;
+        overflow-x: hidden;
+    }
+
+    /* BACKGROUND FX */
+    .bg-glow {
+        position: fixed;
+        width: 600px;
+        height: 600px;
+        background: radial-gradient(circle, #3f68ff55, transparent 70%);
+        top: -150px;
+        left: -150px;
+        filter: blur(140px);
+        z-index: -1;
+    }
+    .bg-glow2 {
+        position: fixed;
+        width: 600px;
+        height: 600px;
+        background: radial-gradient(circle, #b400ff55, transparent 70%);
+        bottom: -150px;
+        right: -150px;
+        filter: blur(140px);
+        z-index: -1;
+    }
+
+    /* HEADER */
+    header {
+        position: sticky;
+        top: 0;
+        padding: 25px 70px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        backdrop-filter: blur(22px);
+        background: rgba(0,0,0,0.35);
+        z-index: 20;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .logo {
+        font-size: 1.7rem;
+        font-weight: 800;
+        letter-spacing: 2px;
+        background: linear-gradient(90deg, #4a7bff, #b44bff);
+        -webkit-background-clip: text;
+        color: transparent;
+    }
+
+    nav a {
+        margin-left: 35px;
+        color: #cfcfcf;
+        font-size: 1.05rem;
+        text-decoration: none;
+        transition: 0.25s;
+    }
+
+    nav a:hover {
+        color: #4aa8ff;
+    }
+
+    /* CONTAINER */
+    .container {
+        width: 90%;
+        max-width: 1400px;
+        margin: auto;
+        padding: 90px 0;
+    }
+
+    /* INTRO */
+    .intro {
+        text-align: center;
+        margin-bottom: 130px;
+        animation: fadeIn 1.4s;
+    }
+
+    .intro h1 {
+        font-size: 4rem;
+        font-weight: 800;
+        margin-bottom: 25px;
+        letter-spacing: -1px;
+        background: linear-gradient(90deg, #4aa8ff 0%, #c24cff 100%);
+        -webkit-background-clip: text;
+        color: transparent;
+    }
+
+    .intro p {
+        font-size: 1.25rem;
+        opacity: 0.85;
+        width: 60%;
+        margin: auto;
+        line-height: 1.85;
+    }
+
+    /* SKILLS */
+    .skills h2, .projects h2, .contact h2 {
+        font-size: 2.4rem;
+        margin-bottom: 35px;
+        font-weight: 700;
+    }
+
+    .skills ul {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 20px;
+    }
+
+    .skills li {
+        background: linear-gradient(145deg, #0d0d0d, #1b1b1b);
+        padding: 20px 24px;
+        border-radius: 18px;
+        font-size: 1.05rem;
+        border: 1px solid #222;
+        transition: 0.3s;
+    }
+
+    .skills li:hover {
+        border-color: #4aa8ff;
+        transform: translateY(-8px);
+    }
+
+    /* PROJECTS */
+    .project-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 40px;
+    }
+
+    .project-card {
+        background: linear-gradient(150deg, #0a0a0a, #161616);
+        padding: 28px;
+        border-radius: 22px;
+        border: 1px solid #202020;
+        transition: 0.3s ease;
+    }
+
+    .project-card:hover {
+        transform: translateY(-10px) scale(1.02);
+        border-color: #4aa8ff;
+        box-shadow: 0 0 25px #4aa8ff33;
+    }
+
+    .project-card img {
+        width: 100%;
+        height: 230px;
+        object-fit: cover;
+        border-radius: 16px;
+        margin-bottom: 20px;
+    }
+
+    .project-card h3 {
+        font-size: 1.6rem;
+        background: linear-gradient(90deg, #4aa8ff, #c26bff);
+        -webkit-background-clip: text;
+        color: transparent;
+        margin-bottom: 14px;
+    }
+
+    .project-card ul li {
+        padding: 5px 0;
+        font-size: 1rem;
+        opacity: 0.85;
+    }
+
+    /* CONTACT */
+    .contact {
+        margin-top: 140px;
+        text-align: center;
+    }
+
+    .contact a {
+        font-size: 1.3rem;
+        color: #4aa8ff;
+        text-decoration: none;
+        transition: 0.25s;
+    }
+
+    .contact a:hover {
+        color: #ffffff;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(25px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+.project-frame { width: 100%; height: 230px; border: none; border-radius: 16px; margin-bottom: 20px; background: #111; cursor: pointer; }
+</style>
+</head>
+
+<body>
+<div class="bg-glow"></div>
+<div class="bg-glow2"></div>
+
+<header>
+    <div class="logo">Ganesh </div>
+    <nav>
+        <a href="#skills">Skills</a>
+        <a href="#projects">Projects</a>
+        <a href="#contact">Contact</a>
+    </nav>
+</header>
+
+<div class="container">
+
+    <section class="intro">
+        <h1>Designing the Future with Precision</h1>
+        <p>Creating ultra-premium digital experiences with futuristic UI, immersive interactions, and Google‑grade craftsmanship.</p>
+    </section>
+
+    <section id="skills" class="skills">
+        <h2>Skills</h2>
+
+        <div class="skills-grid">
+            <div class="skill-card">
+                <div class="skill-icon">⚡</div>
+                <h3>Frontend Engineering</h3>
+                <p>HTML, CSS, JS, Responsive Systems</p>
+            </div>
+
+            <div class="skill-card">
+                <div class="skill-icon">🎨</div>
+                <h3>UI / UX Design</h3>
+                <p>Advanced Layouts, Motion, Micro-Interactions</p>
+            </div>
+
+            <div class="skill-card">
+                <div class="skill-icon">🚀</div>
+                <h3>React / Next.js</h3>
+                <p>Modern frameworks & performance-first builds</p>
+            </div>
+
+            <div class="skill-card">
+                <div class="skill-icon">🌐</div>
+                <h3>API Architecture</h3>
+                <p>Cloud integration, secure workflows</p>
+            </div>
+        </div>
+
+        <style>
+            .skills-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+                gap: 30px;
+                margin-top: 25px;
+            }
+            .skill-card {
+                background: linear-gradient(160deg, #0b0b0b, #161616);
+                border: 1px solid #202020;
+                padding: 28px;
+                border-radius: 20px;
+                transition: 0.35s ease;
+                position: relative;
+                overflow: hidden;
+            }
+            .skill-card::before {
+                content: "";
+                position: absolute;
+                top: -50%;
+                left: -50%;
+                width: 200%;
+                height: 200%;
+                background: radial-gradient(circle, #4aa8ff22, transparent 70%);
+                transform: scale(0);
+                transition: 0.45s;
+            }
+            .skill-card:hover::before {
+                transform: scale(1);
+            }
+            .skill-card:hover {
+                transform: translateY(-10px) scale(1.02);
+                border-color: #4aa8ff;
+                box-shadow: 0 0 25px #4aa8ff33;
+            }
+            .skill-icon {
+                font-size: 2.3rem;
+                margin-bottom: 16px;
+                background: linear-gradient(90deg, #4aa8ff, #c24cff);
+                -webkit-background-clip: text;
+                color: transparent;
+            }
+            .skill-card h3 {
+                font-size: 1.35rem;
+                font-weight: 600;
+                margin-bottom: 10px;
+            }
+            .skill-card p {
+                opacity: 0.8;
+                font-size: 1rem;
+                line-height: 1.6;
+            }
+        </style>
+    </section>
+
+    <section id="projects" class="projects">
+        <h2>Projects</h2>
+        <div class="project-grid">
+
+            <div class="project-card">
+                <iframe src="https://ganesa14.github.io/Portfolios" class="project-frame" loading="lazy" onclick="openFullscreen(this)"></iframe>
+                <h3>Neon Control Center</h3>
+                <ul>
+                    <li>Next-gen dashboard design</li>
+                    <li>Real-time data systems</li>
+                    <li>Cinematic neon effects</li>
+                </ul>
+            </div>
+
+            <div class="project-card">
+                <iframe src="https://ganesa14.github.io/Supreme" class="project-frame" loading="lazy" onclick="openFullscreen(this)"></iframe>
+                <h3>Quantum Vision UI</h3>
+                <ul>
+                    <li>AI‑powered workflow</li>
+                    <li>Futuristic 3D visuals</li>
+                    <li>Glass & neon hybrid UI</li>
+                </ul>
+            </div>
+
+            <div class="project-card">
+                <iframe src="https://ganesa14.github.io/APM" class="project-frame" loading="lazy" onclick="openFullscreen(this)"></iframe>
+                <h3>Orion System</h3>
+                <ul>
+                    <li>Enterprise‑grade platform</li>
+                    <li>Extreme performance</li>
+                    <li>Secure cloud pipeline</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <section id="contact" class="contact">
+        <h2>Contact</h2>
+        <p><a href="mailto:Ganesh@gmail.com">Ganesh@example.com</a></p>
+        <p><a href="#">linkedin.com/in/Ganesh</a></p>
+    </section>
+
+</div>
+
+<script>
+function openFullscreen(el) {
+    if (el.requestFullscreen) el.requestFullscreen();
+    else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+    else if (el.msRequestFullscreen) el.msRequestFullscreen();
+}
+</script>
+</body>
+</html>

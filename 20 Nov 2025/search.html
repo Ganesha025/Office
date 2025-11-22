@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kongunadu Arts and Science - Student Directory</title>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+:root {--primary-color:#1e1d63}
+.highlight {background-color:#fcd34d;font-weight:bold}
+.no-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;     /* Firefox */
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;             /* Chrome, Safari, Opera */
+}
+
+</style>
+</head>
+<body class="bg-gray-100 flex flex-col min-h-screen">
+
+<header class="bg-[var(--primary-color)] text-white shadow-lg">
+  <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center">
+    <div class="text-center md:text-left mb-2 md:mb-0">
+      <h1 class="text-xl sm:text-2xl font-bold">Kongunadu Arts and Science</h1>
+      <p class="text-sm text-gray-200">College ERP System</p>
+    </div>
+    <nav>
+      <ul class="flex flex-wrap justify-center md:justify-end space-x-4 sm:space-x-6">
+        <li><a href="#" class="hover:underline">Dashboard</a></li>
+        <li><a href="#" class="hover:underline">Students</a></li>
+        <li><a href="#" class="hover:underline">Courses</a></li>
+        <li><a href="#" class="hover:underline">Settings</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<main class="flex-grow flex justify-center items-start p-4 sm:p-6">
+  <div class="bg-white shadow-lg rounded-lg w-full max-w-lg p-4 sm:p-6">
+    <h2 class="text-xl sm:text-2xl font-semibold mb-4 text-[var(--primary-color)] text-center">Student Directory</h2>
+    <input type="text" class="search-input w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-[var(--primary-color)] text-sm sm:text-base" placeholder="Search students...">
+    <!-- <ul class="student-list divide-y divide-gray-200 max-h-[400px] overflow-y-auto"></ul> -->
+    <ul class="student-list no-scrollbar divide-y divide-gray-200 max-h-[400px] overflow-y-auto"></ul>
+
+    <p class="no-results text-center text-red-500 mt-4 hidden">No results found</p>
+  </div>
+</main>
+z
+<footer class="bg-[var(--primary-color)] text-white mt-auto">
+  <div class="max-w-7xl mx-auto px-4 py-4 text-center text-sm sm:text-base">
+    &copy; 2025 Kongunadu Arts and Science. All rights reserved.
+  </div>
+</footer>
+
+<div class="modal fixed inset-0 bg-transparent hidden items-center justify-center p-4 sm:p-6">
+  <div class="modal-content bg-white rounded-lg shadow-lg w-full max-w-sm p-4 sm:p-6 relative">
+    <span class="close-modal absolute top-2 right-3 cursor-pointer text-gray-500 hover:text-gray-800 text-lg">&times;</span>
+    <h3 class="text-lg sm:text-xl font-semibold mb-4 text-[var(--primary-color)]">Student Details</h3>
+    <div class="modal-body space-y-2 text-sm sm:text-base"></div>
+  </div>
+</div>
+
+<script>
+$(()=>{
+const students=[
+{name:"Alice Johnson",age:20,dept:"Computer Science",roll:"CS101",cgpa:8.5,fees:"Paid",mobile:"9876543210"},
+{name:"Bob Smith",age:21,dept:"Physics",roll:"PH102",cgpa:7.8,fees:"Pending",mobile:"9876501234"},
+{name:"Charlie Brown",age:22,dept:"Mathematics",roll:"MA103",cgpa:9.0,fees:"Paid",mobile:"9876512345"},
+{name:"Diana Prince",age:20,dept:"Chemistry",roll:"CH104",cgpa:8.2,fees:"Paid",mobile:"9876523456"},
+{name:"Ethan Hunt",age:23,dept:"Biology",roll:"BI105",cgpa:7.5,fees:"Pending",mobile:"9876534567"},
+{name:"Fiona Gallagher",age:21,dept:"English",roll:"EN106",cgpa:8.0,fees:"Paid",mobile:"9876545678"},
+{name:"George Martin",age:22,dept:"History",roll:"HI107",cgpa:8.3,fees:"Paid",mobile:"9876556789"},
+{name:"Hannah Montana",age:20,dept:"Arts",roll:"AR108",cgpa:9.2,fees:"Paid",mobile:"9876567890"},
+{name:"Ian Fleming",age:23,dept:"Economics",roll:"EC109",cgpa:7.9,fees:"Pending",mobile:"9876578901"},
+{name:"Julia Roberts",age:21,dept:"Commerce",roll:"CO110",cgpa:8.6,fees:"Paid",mobile:"9876589012"},
+{name:"Kevin Hart",age:22,dept:"Computer Science",roll:"CS111",cgpa:8.1,fees:"Paid",mobile:"9876590123"},
+{name:"Laura Palmer",age:20,dept:"Psychology",roll:"PS112",cgpa:8.9,fees:"Paid",mobile:"9876501235"}
+];
+$('.search-input').focus();
+const renderList=(items,query="")=>{
+const $list=$(".student-list");$list.empty();
+if(!items.length){$(".no-results").show()}else{$(".no-results").hide();items.forEach(s=>{
+let displayName=s.name;
+if(query){const r=new RegExp(`(${query})`,"gi");displayName=s.name.replace(r,`<span class="highlight">$1</span>`)}
+$list.append(`<li class="py-2 px-2 hover:bg-gray-100 rounded cursor-pointer" data-roll="${s.roll}">${displayName}</li>`)})}};
+
+renderList(students);
+
+const closeModal=()=>{
+$(".modal").fadeOut();
+history.replaceState(null,null,location.pathname);
+};
+$(document).on('keydown', function(e) {
+    if (e.key === "Escape") {
+        closeModal();
+    }
+});
+
+$(".search-input").keyup(function(){
+const q=$(this).val().toLowerCase();
+renderList(students.filter(s=>s.name.toLowerCase().includes(q)),q);
+closeModal();
+});
+if(location.hash==="open") {
+$(".modal").fadeIn();
+}
+$(document).on("click",".student-list li",function(){
+const roll=$(this).data("roll");
+const s=students.find(x=>x.roll===roll);
+$(".modal-body").html(`<p><strong>Name:</strong> ${s.name}</p>
+<p><strong>Age:</strong> ${s.age}</p>
+<p><strong>Department:</strong> ${s.dept}</p>
+<p><strong>Roll No:</strong> ${s.roll}</p>
+<p><strong>Last Sem CGPA:</strong> ${s.cgpa}</p>
+<p><strong>Fees Status:</strong> ${s.fees}</p>
+<p><strong>Mobile:</strong> ${s.mobile}</p>`);
+$(".modal").fadeIn();
+location.hash="open";
+});
+
+$(".close-modal").click(closeModal);
+$(".modal").click(e=>{if($(e.target).hasClass("modal")) closeModal()});
+if(location.hash==="open") history.replaceState(null,null,location.pathname);
+$(window).on("hashchange", () => {
+    if (location.hash !== "#open") closeModal();
+});
+});
+</script>
+
+</body>
+</html>
