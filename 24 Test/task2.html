@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+#myDrop{width: 200px;position: relative;}
+#myDrop .b{display: none;position: absolute;width: 100%;z-index: 10;top:40px;background-color: #fff;}
+#myDrop .h{padding: 8px;background-color: #eee;}
+#myDrop .b.show{display: block;}
+#myDrop .i{padding: 8px;}
+#myDrop .i:hover{background-color: #f0f0f0;}
+.m {position: relative;top: 0;left: 0;width: 100%;height: 100%;display: none;}
+.m.s{display: flex;}
+.in{background-color: #fff;}
+.in p{padding: 8px;cursor: pointer;background-color: blue;margin-top:23px;}
+
+#uniqueModal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);justify-content:center;align-items:center}
+#uniqueModalContent{background:#fff;padding:20px;border-radius:5px;min-width:200px;position:relative}
+#uniqueModalClose{position:absolute;top:10px;right:10px;cursor:pointer;font-size:20px}
+    </style>
+</head>
+<body>
+    <button id="ButtonValue" onclick="openpick()">Select</button>
+    <div id='pick' class="m"></div>
+    <button onclick="showCustomModal('Hello World')">Open Modal</button>
+<div id="sample"></div>
+    <script>
+
+function openpick(){
+        pick.innerHTML=`<div class="in">${['one','wewe','23'].map(x=>`<p>${x}`).join("")}</div>`;
+            pick.classList.add("s");
+    }pick.onclick=e=>{
+        pick.classList.remove('s');
+        document.getElementById('ButtonValue').textContent=e.target.textContent;
+        }
+        window.onload=function(){
+            showCustomModal('sd')
+        }
+    </script>
+    <script src="valid.js"></script>
+</body>
+</html>
