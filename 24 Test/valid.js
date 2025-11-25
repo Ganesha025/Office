@@ -104,6 +104,22 @@ document.querySelectorAll(".val-com-name").forEach(el => {
         m(t, valid, "Letters & numbers only, 2-25 chars, no spaces");
     });
 });
+document.querySelectorAll(".val-coms-name").forEach(el => {
+    block(el, e => {
+        const t = e.target;
+        if (e.type === "keydown" && e.key.length === 1) {
+            if (!/[A-Za-z0-9]/.test(e.key)) e.preventDefault();
+            if (t.value.length >= 25) e.preventDefault();
+            const nums = t.value.match(/\d+/g) || [];
+            const lastNum = nums[nums.length - 1] || "";
+            if (/\d/.test(e.key) && lastNum.length >= 7) e.preventDefault();
+        }
+        const v = t.value.trim();
+        const nums = v.match(/\d+/g) || [];
+        const valid = /^[A-Za-z0-9]{1,25}$/.test(v) && nums.every(n => n.length <= 7);
+        m(t, valid, "Letters & numbers only, max 25 chars, numbers up to 7 digits");
+    });
+});
 
 document.querySelectorAll(".val-experience").forEach(el => {
     block(el, e => {
@@ -179,7 +195,22 @@ document.querySelectorAll(".val-registration-date").forEach(el => {
     el.setAttribute("type", "date");
     el.setAttribute("max", today);
     block(el, e => m(e.target, e.target.value === endedDate || e.target.value === today, "Select the ended date or today's date"));
+});document.querySelectorAll(".val-alt-email").forEach(el => {
+    block(el, e => {
+        const t = e.target;
+        if (e.type === "keydown" && e.key.length === 1) {
+            const pos = t.selectionStart;
+            const before = t.value.slice(0, pos);
+            if (!["Backspace","Delete","ArrowLeft","ArrowRight","Tab"].includes(e.key)) {
+                if (before.includes("@") && /[0-9]/.test(e.key) || !/[A-Za-z0-9@._]/.test(e.key)) e.preventDefault();
+            }
+        }
+        const valid = /^[A-Za-z0-9._]+@[A-Za-z]+\.[A-Za-z]{2,}$/.test(t.value);
+        t.value === "" ? t.style.border = t.nextElementSibling && (t.nextElementSibling.textContent="") : m(t, valid, "Invalid email");
+    });
 });
+
+
 document.querySelectorAll(".val-username").forEach(el => {
     block(el, e => {
         const t = e.target;
@@ -189,12 +220,32 @@ document.querySelectorAll(".val-username").forEach(el => {
         }
         m(t, /^[A-Za-z]{1,25}$/.test(t.value), "Letters only, max 25 characters");
     });
-});document.querySelectorAll(".val-address").forEach(el => {
-        block(el, e => {
-            if (e.type === "keydown" && e.target.value.length >= 250 && e.key.length === 1) e.preventDefault();
-            m(e.target, e.target.value.trim() !== "", "Required");
-        });
-    });document.querySelectorAll(".val-mark").forEach(el => {
+});document.querySelectorAll(".val-alt-mobile").forEach(el => {
+    block(el, e => {
+        const t = e.target;
+        if (e.type === "keydown" && (!/^[0-9]$/.test(e.key) && e.key !== "Backspace" || t.value.length >= 10 && e.key.length === 1)) e.preventDefault();
+        const valid = /^[6-9][0-9]{9}$/.test(t.value);
+        if (t.value === "") t.style.border = t.nextElementSibling&&(t.nextElementSibling.textContent="");
+        else m(t, valid, "Mobile number must start with 6-9 and be 10 digits");
+    });
+});
+document.querySelectorAll(".val-address").forEach(el => {
+    block(el, e => {
+        const t = e.target;
+
+        if (t.value.length > 250) {
+            t.value = t.value.substring(0, 250);
+        }
+
+        if (e.type === "keydown" && t.value.length >= 250 && e.key.length === 1) {
+            e.preventDefault();
+        }
+
+        const valid = t.value.trim().length >= 10 && t.value.trim().length <= 250;
+        m(t, valid, "Address must be between 10 and 250 characters");
+    });
+});
+;document.querySelectorAll(".val-mark").forEach(el => {
         block(el, e => {
             if (e.type === "keydown") {
                 if (!/^[0-9]$/.test(e.key) && e.key.length === 1) e.preventDefault();
@@ -344,4 +395,36 @@ document.body.appendChild(uniqueModal);
 function showCustomModal(value){
   uniqueText.innerText=value;
   uniqueModal.style.display='flex';
+}
+
+
+
+function spawnUniquePopup(qTitle = "Modal Title", qMsg = "Message") {
+    const uniqModalEl = document.getElementById("uniqDynamicPopupX1");
+    if (uniqModalEl) uniqModalEl.remove();
+
+    document.body.insertAdjacentHTML("beforeend", `
+    <div class="modal fade" id="uniqDynamicPopupX1" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h1 class="modal-title fs-5">${qTitle}</h1>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">${qMsg}</div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    `);
+
+    const uniqPopupCtrl = new bootstrap.Modal(document.getElementById("uniqDynamicPopupX1"));
+    uniqPopupCtrl.show();
+
+    document.getElementById("uniqDynamicPopupX1").addEventListener("hidden.bs.modal", () => {
+        const removeEl = document.getElementById("uniqDynamicPopupX1");
+        if (removeEl) removeEl.remove();
+    });
 }
