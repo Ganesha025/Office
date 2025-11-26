@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Page</title>
+    <style>
+        .product-page {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .product-card {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            width: 200px;
+            padding: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .product-card img {
+            max-width: 100%;
+            height: auto;
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 10px;
+        }
+        .product-card h2 {
+            font-size: 18px;
+            margin: 10px 0;
+        }
+        .product-card p {
+            font-size: 14px;
+            color: #555;
+        }
+        .product-card span {
+            display: block;
+            font-size: 16px;
+            color: #000;
+            margin: 10px 0;
+        }
+        .add-to-cart-button {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .add-to-cart-button:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Our Products</h1>
+    <section class="product-page" id="product-container">
+    </section>
+
+    <script>
+        const products = [
+            {
+                id: 1,
+                title: "Amazing Product",
+                description: "This amazing product will change your life! It is designed to provide exceptional value and performance.",
+                price: 49.99,
+                image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRlndpwDalSNF8TzBG6T7kGv73l0IOReNJpKw&s"
+            },
+            {
+                id: 2,
+                title: "Super Gadget",
+                description: "A gadget that makes your daily tasks easier and more enjoyable.",
+                price: 29.99,
+                image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSAF-LhNPbY88qcvrLYL-juANrLz-X5JWJ1m5URwsUAEXzCTVACGtnGO0_PaS01aQ8pX74&usqp=CAU"
+            },
+            {
+                id: 3,
+                title: "Ultimate Widget",
+                description: "The ultimate widget for efficiency and style in one package.",
+                price: 59.99,
+                image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTgd1PJttN-CB9q6n6MdJHf3ppbi0FSBD873w&s"
+            },
+            {
+                id: 4,
+                title: "Smart Device",
+                description: "A smart device that connects seamlessly with your home technology.",
+                price: 99.99,
+                image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS4QaRqKWxfrGdQ9r5U5mWg-RWItNxzmphX-Q&s"
+            },
+            {
+                id: 5,
+                title: "Eco-Friendly Product",
+                description: "An environmentally friendly product that combines quality and sustainability.",
+                price: 39.99,
+                image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT4Taz9YTwiaybAfYXrutOMHK7WAEdvvfW76w&s"
+            }
+        ];
+
+        const container = document.getElementById('product-container');
+
+        products.forEach(product => {
+            const productCard = document.createElement('div');
+            productCard.classList.add('product-card');
+
+            productCard.innerHTML = `
+                <img src="${product.image}" alt="${product.title}">
+                <h2>${product.title}</h2>
+                <p>${product.description}</p>
+                <span>$${product.price.toFixed(2)}</span>
+                <button class="add-to-cart-button">Add to Cart</button>
+            `;
+
+            container.appendChild(productCard);
+        });
+    </script>
+
+</body>
+</html>

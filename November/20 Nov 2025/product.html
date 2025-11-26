@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SavageTech - Premium Electronics</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    
+    <style>
+        .product-description {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease, opacity 0.4s ease, padding 0.4s ease;
+            opacity: 0;
+            padding: 0;
+        }
+        
+        .product-description.expanded {
+            max-height: 300px;
+            opacity: 1;
+            padding: 16px 0 0 0;
+        }
+        
+        .cart-item {
+            transition: all 0.3s ease;
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(20px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .fade-in { animation: fadeIn 0.5s; }
+        
+        .hover-lift {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .hover-lift:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
+        }
+        
+        .img-bg {
+            background: linear-gradient(135deg, rgba(13, 148, 136, 0.9), rgba(15, 118, 110, 0.8)), 
+                        url('https://images.unsplash.com/photo-1550745165-9bc0b252726f?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80') center/cover;
+        }
+        
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            max-width: 350px;
+        }
+        
+        .toast {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            padding: 16px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            border-left: 4px solid #0d9488;
+        }
+        
+        .toast.show { transform: translateX(0); }
+        .toast.success { border-left-color: #10b981; }
+        .toast.error { border-left-color: #ef4444; }
+        .toast.warning { border-left-color: #f59e0b; }
+        .toast.info { border-left-color: #3b82f6; }
+        
+        .toast-icon {
+            margin-right: 12px;
+            font-size: 24px;
+        }
+        
+        .toast-content { flex: 1; }
+        
+        .toast-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: #1f2937;
+        }
+        
+        .toast-message {
+            color: #6b7280;
+            font-size: 14px;
+        }
+        
+        .toast-close {
+            background: none;
+            border: none;
+            color: #9ca3af;
+            cursor: pointer;
+            margin-left: 12px;
+            font-size: 18px;
+        }
+        
+        .toast-close:hover { color: #6b7280; }
+        
+        .quantity-input {
+            width: 60px;
+            text-align: center;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+            padding: 4px;
+        }
+        
+        .badge-pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        .product-gradient-1 { background: linear-gradient(135deg, #0d9488 0%, #14b8a6 100%); }
+        .product-gradient-2 { background: linear-gradient(135deg, #f97316 0%, #fb923c 100%); }
+        .product-gradient-3 { background: linear-gradient(135deg, #7e22ce 0%, #a855f7 100%); }
+        .product-gradient-4 { background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%); }
+        .product-gradient-5 { background: linear-gradient(135deg, #eab308 0%, #facc15 100%); }
+        .product-gradient-6 { background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%); }
+        
+        .search-input:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.2);
+        }nav a.visited {
+            color: white;border-bottom: 2px solid #f97316;
+            
+        }nav a:hover {
+            color: white;
+            border-bottom: 2px solid #f97316;
+
+        }nav a{
+            padding-bottom: 4px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border-bottom: 2px solid transparent;
+        }
+    </style>
+</head>
+<body class="bg-slate-50">
+    <div class="toast-container" id="toast-container"></div>
+
+    <header class="bg-slate-900 shadow-lg sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center">
+                <h1 class="text-2xl font-bold text-white">Savage<span class="text-teal-500">Tech</span></h1>
+            </div>
+            
+            <nav class="hidden md:flex space-x-8">
+                <a href="#home" class="text-slate-300 hover:text-white font-medium transition-colors">Home</a>
+                <a href="#products" class="text-slate-300 hover:text-white font-medium transition-colors">Products</a>
+                <a href="#about" class="text-slate-300 hover:text-white font-medium transition-colors">About</a>
+                <a href="#contact" class="text-slate-300 hover:text-white font-medium transition-colors">Contact</a>
+            </nav>
+            
+            <div class="flex items-center space-x-4">
+                <button id="cart-button" class="relative p-2 text-slate-300 hover:text-white transition-colors">
+                    <span class="material-icons text-2xl">shopping_cart</span>
+                    <span id="cart-count" class="absolute -top-1 -right-1 bg-orange-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center hidden badge-pulse">0</span>
+                </button>
+                
+                <button id="mobile-menu-button" class="md:hidden text-slate-300 hover:text-white transition-colors">
+                    <span class="material-icons text-2xl">menu</span>
+                </button>
+            </div>
+        </div>
+        
+        <div id="mobile-menu" class="md:hidden bg-slate-800 py-2 px-4 shadow-lg hidden">
+            <a href="#home" class="block py-2 text-slate-300 hover:text-white transition-colors">Home</a>
+            <a href="#products" class="block py-2 text-slate-300 hover:text-white transition-colors">Products</a>
+            <a href="#about" class="block py-2 text-slate-300 hover:text-white transition-colors">About</a>
+            <a href="#contact" class="block py-2 text-slate-300 hover:text-white transition-colors">Contact</a>
+        </div>
+    </header>
+
+    <section class="img-bg text-white py-20" id="home">
+        <div class="container mx-auto px-4 text-center">
+            <h1 class="text-4xl md:text-6xl font-bold mb-4" data-aos="fade-down">Premium Electronics</h1>
+            <p class="text-xl mb-8 max-w-2xl mx-auto" data-aos="fade-up" data-aos-delay="100">Discover the latest tech gadgets with cutting-edge features and exceptional performance.</p>
+            <button class="bg-white text-slate-900 font-bold py-3 px-8 rounded-lg shadow-lg hover:bg-slate-100 transition duration-300 hover-lift" data-aos="fade-up" data-aos-delay="200" onclick="document.getElementById('products').scrollIntoView({behavior: 'smooth'})">
+                Shop Now
+            </button>
+        </div>
+    </section>
+
+    <section class="py-12" id="products">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-bold text-center mb-4 text-slate-900">Featured Products</h2>
+            <p class="text-center text-slate-600 mb-8 max-w-2xl mx-auto">Explore our curated selection of premium electronics designed to enhance your digital lifestyle.</p>
+            
+            <div class="flex justify-center mb-8">
+                <input type="text" id="search-input" placeholder="Search products..." class="search-input px-4 py-2 w-full max-w-md rounded-lg border border-slate-300 focus:border-teal-500 transition-all">
+            </div>
+            
+            <div id="products-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"></div>
+        </div>
+    </section>
+
+    <div id="checkout-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden" style="animation: fadeIn 0.3s;">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-md mx-4">
+            <div class="p-6 border-b border-slate-200">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-xl font-bold text-slate-900">Your Cart</h3>
+                    <button id="close-modal" class="text-slate-500 hover:text-slate-700 transition-colors">
+                        <span class="material-icons">close</span>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="p-6 max-h-96 overflow-y-auto">
+                <div id="cart-items" class="space-y-4">
+                    <div id="empty-cart-message" class="text-center py-8 text-slate-500">
+                        <span class="material-icons text-4xl mb-2">shopping_cart</span>
+                        <p>Your cart is empty</p>
+                    </div>
+                </div>
+                
+                <div class="mt-6 pt-4 border-t border-slate-200">
+                    <div class="flex justify-between items-center text-lg font-bold text-slate-900">
+                        <span>Total:</span>
+                        <span id="cart-total">₹0</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="p-6 border-t border-slate-200 flex space-x-4">
+                <button id="continue-shopping" class="flex-1 py-3 bg-slate-200 text-slate-800 rounded-lg font-medium hover:bg-slate-300 transition duration-300">
+                    Continue Shopping
+                </button>
+                <button id="checkout-button" class="flex-1 py-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg font-medium hover:from-orange-600 hover:to-orange-700 transition duration-300">
+                    Checkout
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-slate-900 text-white py-12" id="contact">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div>
+                    <h3 class="text-xl font-bold mb-4">About SavageTech</h3>
+                    <p class="text-slate-300">We provide premium electronics with cutting-edge technology and exceptional customer service since 2010.</p>
+                </div>
+                
+                <div>
+                    <h3 class="text-xl font-bold mb-4">Contact Us</h3>
+                    <ul class="space-y-2 text-slate-300">
+                        <li class="flex items-center">
+                            <span class="material-icons mr-2 text-sm text-teal-500">location_on</span>
+                            Tech Park, Bangalore, Karnataka 560001
+                        </li>
+                        <li class="flex items-center">
+                            <span class="material-icons mr-2 text-sm text-teal-500">phone</span>
+                            +91 98765 43210
+                        </li>
+                        <li class="flex items-center">
+                            <span class="material-icons mr-2 text-sm text-teal-500">email</span>
+                            info@savagetech.in
+                        </li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h3 class="text-xl font-bold mb-4">Subscribe</h3>
+                    <p class="text-slate-300 mb-4">Stay updated with our latest products and offers.</p>
+                    <div class="flex">
+                        <input type="email" placeholder="Your email" class="px-4 py-2 w-full rounded-l-lg text-slate-800 focus:outline-none focus:ring-2 focus:ring-teal-500">
+                        <button class="bg-gradient-to-r from-teal-500 to-teal-600 text-white px-4 py-2 rounded-r-lg font-medium hover:from-teal-600 hover:to-teal-700 transition duration-300">
+                            Subscribe
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="border-t border-slate-700 mt-8 pt-8 text-center text-slate-400">
+                <p>&copy; 2023 SavageTech. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        AOS.init({ duration: 800, once: true });
+
+        const products = [
+            { id: 1, name: "UltraBook Pro", description: "Lightweight laptop with premium performance", price: 89999, gradient: "product-gradient-1", icon: "laptop_mac", fullDescription: "The UltraBook Pro features a 13.3-inch Retina display, Intel Core i7 processor, 16GB RAM, and 512GB SSD storage. Perfect for professionals on the go.", features: ["Up to 10 hours battery life", "Thunderbolt 4 ports", "Backlit Magic Keyboard"] },
+            { id: 2, name: "Phantom X", description: "Flagship smartphone with advanced camera", price: 64999, gradient: "product-gradient-2", icon: "smartphone", fullDescription: "The Phantom X features a 6.7-inch AMOLED display, Snapdragon 888 processor, 12GB RAM, and a triple camera system with 108MP main sensor.", features: ["5G connectivity", "120Hz refresh rate", "Wireless charging"] },
+            { id: 3, name: "SmartWatch Pro", description: "Advanced health and fitness tracking", price: 24999, gradient: "product-gradient-3", icon: "watch", fullDescription: "The SmartWatch Pro features an always-on Retina display, blood oxygen monitoring, ECG app, and water resistance up to 50 meters.", features: ["GPS + Cellular", "Sleep tracking", "7-day battery life"] },
+            { id: 4, name: "AudioMax Pro", description: "Wireless noise-canceling headphones", price: 19999, gradient: "product-gradient-4", icon: "headphones", fullDescription: "The AudioMax Pro features industry-leading noise cancellation, transparency mode, and spatial audio with dynamic head tracking.", features: ["30-hour battery life", "Customizable fit", "Voice assistant support"] },
+            { id: 5, name: "Tablet Pro", description: "Powerful tablet for creativity and productivity", price: 54999, gradient: "product-gradient-5", icon: "tablet_mac", fullDescription: "The Tablet Pro features a 11-inch Liquid Retina display, M1 chip, compatibility with Apple Pencil and Magic Keyboard.", features: ["All-day battery life", "5G connectivity", "Pro camera system"] },
+            { id: 6, name: "SoundSphere", description: "Premium wireless speaker with 360° sound", price: 13999, gradient: "product-gradient-6", icon: "speaker", fullDescription: "The SoundSphere delivers immersive 360° audio, deep bass, and seamless connectivity with voice assistant support.", features: ["12-hour playtime", "Water resistant", "Multi-room audio"] }
+        ];
+
+        let cart = [];
+        
+        const showToast = (msg, type = 'info', dur = 5000) => {
+            const id = 'toast-' + Date.now();
+            const icons = { success: 'check_circle', error: 'error', warning: 'warning', info: 'info' };
+            const colors = { success: 'text-green-500', error: 'text-red-500', warning: 'text-amber-500', info: 'text-blue-500' };
+            
+            const toast = $(`
+                <div class="toast ${type}" id="${id}">
+                    <span class="material-icons toast-icon ${colors[type]}">${icons[type]}</span>
+                    <div class="toast-content">
+                        <div class="toast-title">${type.charAt(0).toUpperCase() + type.slice(1)}</div>
+                        <div class="toast-message">${msg}</div>
+                    </div>
+                    <button class="toast-close"><span class="material-icons">close</span></button>
+                </div>
+            `);
+            
+            $('#toast-container').append(toast);
+            setTimeout(() => toast.addClass('show'), 10);
+            toast.find('.toast-close').on('click', () => removeToast(id));
+            if (dur > 0) setTimeout(() => removeToast(id), dur);
+        };
+        
+        const removeToast = id => {
+            const t = $(`#${id}`);
+            t.removeClass('show');
+            setTimeout(() => t.remove(), 300);
+        };
+        
+        const generateProducts = () => {
+            const c = $('#products-container');
+            products.forEach((p, i) => {
+                c.append(`
+                    <div class="bg-white rounded-xl shadow-md overflow-hidden hover-lift" data-aos="fade-up" data-aos-delay="${(i + 1) * 100}" data-product-name="${p.name.toLowerCase()}">
+                        <div class="h-48 ${p.gradient} flex items-center justify-center">
+                            <span class="material-icons text-white text-6xl">${p.icon}</span>
+                        </div>
+                        <div class="p-6">
+                            <h3 class="text-xl font-bold mb-2 text-slate-900">${p.name}</h3>
+                            <p class="text-slate-600 mb-4">${p.description}</p>
+                            <div class="flex justify-between items-center mb-4">
+                                <span class="text-2xl font-bold text-teal-600">₹${p.price.toLocaleString()}</span>
+                                <div class="flex space-x-2">
+                                    <button class="view-more-btn p-2 text-slate-500 hover:text-teal-600 rounded-full hover:bg-teal-50 transition-colors" data-target="desc-${p.id}">
+                                        <span class="material-icons">expand_more</span>
+                                    </button>
+                                    <button class="add-to-cart-btn p-2 text-slate-500 hover:text-orange-600 rounded-full hover:bg-orange-50 transition-colors" data-product="${p.id}">
+                                        <span class="material-icons">add_shopping_cart</span>
+                                    </button>
+                                </div>
+                            </div>
+                            <div id="desc-${p.id}" class="product-description text-slate-600">
+                                <p class="mb-2">${p.fullDescription}</p>
+                                <ul class="list-disc pl-5 space-y-1">
+                                    ${p.features.map(f => `<li>${f}</li>`).join('')}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                `);
+            });
+            initEvents();
+        };
+        
+        const initEvents = () => {
+            $('.view-more-btn').on('click', function() {
+                const tid = $(this).data('target');
+                const desc = $(`#${tid}`);
+                const icon = $(this).find('.material-icons');
+                
+                if (desc.hasClass('expanded')) {
+                    desc.removeClass('expanded');
+                    icon.text('expand_more');
+                } else {
+                    $('.product-description').removeClass('expanded');
+                    $('.view-more-btn').find('.material-icons').text('expand_more');
+                    desc.addClass('expanded');
+                    icon.text('expand_less');
+                }
+            });
+            
+            $('.add-to-cart-btn').on('click', function() {
+                const pid = parseInt($(this).data('product'));
+                const p = products.find(pr => pr.id === pid);
+                
+                if (!p) return showToast('Product not found!', 'error');
+                
+                const existing = cart.find(i => i.id === pid);
+                if (existing) {
+                    existing.quantity++;
+                    showToast(`${p.name} quantity updated`, 'success');
+                } else {
+                    cart.push({ id: p.id, name: p.name, price: p.price, quantity: 1 });
+                    showToast(`${p.name} added to cart`, 'success');
+                }
+                
+                updateCartUI();
+                $('#checkout-modal').removeClass('hidden').addClass('flex');
+            });
+            
+            $('#cart-button').on('click', () => $('#checkout-modal').removeClass('hidden').addClass('flex'));
+            $('#close-modal, #continue-shopping').on('click', () => $('#checkout-modal').removeClass('flex').addClass('hidden'));
+            
+            $('#checkout-button').on('click', () => {
+                if (cart.length === 0) return showToast('Your cart is empty!', 'warning');
+                const total = cart.reduce((s, i) => s + (i.price * i.quantity), 0);
+                showToast(`Thank you! Total: ₹${total.toLocaleString()}. Order processing...`, 'success', 8000);
+                cart = [];
+                updateCartUI();
+                $('#checkout-modal').removeClass('flex').addClass('hidden');
+            });
+            
+            $('#mobile-menu-button').on('click', () => $('#mobile-menu').slideToggle(300));
+            
+            $('#search-input').on('input', function() {
+                const q = $(this).val().toLowerCase();
+                $('.hover-lift').each(function() {
+                    const name = $(this).data('product-name');
+                    $(this).toggle(name.includes(q));
+                });
+            });
+        };
+        
+        const updateCartUI = () => {
+            const ci = $('#cart-items'), ct = $('#cart-total'), cc = $('#cart-count');
+            ci.empty();
+            let total = 0;
+            
+            if (cart.length === 0) {
+                ci.html(`
+                    <div class="text-center py-8 text-slate-500">
+                        <span class="material-icons text-4xl mb-2">shopping_cart</span>
+                        <p>Your cart is empty</p>
+                    </div>
+                `);
+            } else {
+                cart.forEach(i => {
+                    total += i.price * i.quantity;
+                    ci.append(`
+                        <div class="cart-item flex justify-between items-center bg-slate-50 p-3 rounded-lg">
+                            <div class="flex-1">
+                                <h4 class="font-medium text-slate-900">${i.name}</h4>
+                                <p class="text-slate-600 text-sm">₹${i.price.toLocaleString()}</p>
+                            </div>
+                            <div class="flex items-center space-x-3">
+                                <button class="qty-dec px-2 py-1 bg-slate-200 rounded hover:bg-slate-300" data-id="${i.id}">
+                                    <span class="material-icons text-sm">remove</span>
+                                </button>
+                                <span class="font-medium w-8 text-center">${i.quantity}</span>
+                                <button class="qty-inc px-2 py-1 bg-slate-200 rounded hover:bg-slate-300" data-id="${i.id}">
+                                    <span class="material-icons text-sm">add</span>
+                                </button>
+                                <button class="remove-item text-orange-600 hover:text-orange-700" data-product="${i.id}">
+                                    <span class="material-icons">delete</span>
+                                </button>
+                            </div>
+                        </div>
+                    `);
+                });
+            }
+            
+            ct.text('₹' + total.toLocaleString());
+            const totalQty = cart.reduce((s, i) => s + i.quantity, 0);
+            cc.text(totalQty).toggleClass('hidden', totalQty === 0);
+            
+            $('.remove-item').on('click', function() {
+                const pid = parseInt($(this).data('product'));
+                const item = cart.find(i => i.id === pid);
+                cart = cart.filter(i => i.id !== pid);
+                showToast(`${item.name} removed`, 'info');
+                updateCartUI();
+            });
+            
+            $('.qty-inc').on('click', function() {
+                const id = parseInt($(this).data('id'));
+                const item = cart.find(i => i.id === id);
+                if (item) {
+                    item.quantity++;
+                    updateCartUI();
+                }
+            });
+            
+            $('.qty-dec').on('click', function() {
+                const id = parseInt($(this).data('id'));
+                const item = cart.find(i => i.id === id);
+                if (item && item.quantity > 1) {
+                    item.quantity--;
+                    updateCartUI();
+                }
+            });
+        };     
+   $(document).ready(() => {
+    if (!location.hash) location.hash = "#products";
+    $('a[href="#products"]').trigger('click');
+    generateProducts();
+    $('#search-input').focus();
+    $('#search-input').on('change', function() {
+        const q = $(this).val().toLowerCase();
+        $('.hover-lift').each(function() {
+            const name = $(this).data('product-name');
+            $(this).toggle(name.includes(q));
+        });
+    }); 
+});
+    </script>
+</body>
+</html>

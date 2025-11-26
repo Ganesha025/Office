@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Travel</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+      <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=visibility" />
+      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{background:#f5f7fa;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;display:flex;flex-direction:column;justify-content:center;padding:50px 20px 30px;min-height:100vh}form{width:900px;max-width:100%;background:#fff;padding:40px;border-radius:20px;box-shadow:0 4px 6px rgba(0,0,0,.07),0 10px 20px rgba(0,0,0,.05);margin:0 auto}section{border:none;background:#fafbfc;padding:30px;margin:25px 0;border-radius:12px;border-left:4px solid #006aff}h2{margin-bottom:20px;font-size:20px;font-weight:600;color:#1a1a1a;letter-spacing:-.3px;text-decoration:none}form h1{margin-bottom:30px;border-bottom:none;padding-bottom:15px;border-radius:0;font-size:32px;font-weight:700;color:#1a1a1a;letter-spacing:-1px}.row{display:flex;gap:20px;flex-wrap:wrap}.row .g{flex:1;min-width:250px}.g{display:flex;flex-direction:column;margin-bottom:20px}label{font-size:14px;font-weight:500;color:#2c3e50;margin-bottom:8px;letter-spacing:.2px}input,.picker,textarea{padding:12px 16px;border:2px solid #e1e8ed;border-radius:8px;font-size:14px;transition:all .2s;background:#fff;color:#1a1a1a}input:focus,.picker:focus,textarea:focus{outline:none;border-color:#006aff;box-shadow:0 0 0 3px rgba(0,106,255,.1)}input::placeholder,textarea::placeholder{color:#a0aec0}.picker{cursor:pointer;display:flex;align-items:center;min-height:44px;position:relative}.picker:after{content:'▼';position:absolute;right:16px;font-size:10px;color:#64748b;transition:.2s}.picker:hover{border-color:#006aff;background:#f8fafc}.pWrap{position:relative}.pList{display:none;position:absolute;background:#fff;border:2px solid #e1e8ed;width:100%;z-index:999;border-radius:8px;margin-top:4px;box-shadow:0 10px 25px rgba(0,0,0,.1);max-height:240px;overflow-y:auto}.pList div{padding:12px 16px;cursor:pointer;font-size:14px;color:#2c3e50;transition:.15s}.pList div:hover{background:#f0f7ff;color:#006aff}.err{color:#ef4444;font-size:13px;margin-top:6px;font-weight:500}button{width:100%;padding:14px;font-size:16px;font-weight:600;border:none;border-radius:10px;background:#006aff;color:#fff;cursor:pointer;transition:all .2s;margin-top:10px;letter-spacing:.3px}button:hover:not(:disabled){background:#0052cc;transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,106,255,.3)}button:disabled{background:#cbd5e1;cursor:not-allowed;transform:none}textarea{min-height:100px;resize:vertical;font-family:inherit}header{background:#1a1a1a;color:#fff;width:100%;padding:20px 40px;border-radius:0;margin-bottom:0;position:sticky;top:0;z-index:1000;box-shadow:0 2px 8px rgba(0,0,0,.1)}::-webkit-scrollbar{width:8px}::-webkit-scrollbar-track{background:#f1f1f1}::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:4px}::-webkit-scrollbar-thumb:hover{background:#94a3b8}</style>
+    <style>
+        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #f5f7fa; margin: 0; padding: 20px; color: #333; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 0 20px rgba(0, 0, 0, 0.1); }
+        h1 { color: #2c3e50; text-align: center;border-bottom: 2px solid #3498db; padding-bottom: 10px; }
+        h2 { color: #3498db; margin-top: 30px; padding-bottom: 8px; border-bottom: 1px solid #eee; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; font-weight: 600; }
+        input, select, textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 5px; font-size: 16px; transition: border 0.3s; }
+        input:focus, select:focus, textarea:focus { border-color: #3498db; outline: none; }
+        .error { color: #e74c3c; font-size: 14px; margin-top: 5px; display: none; }
+        .checkbox-group { display: flex; align-items: center; margin-top: 20px; }
+        .checkbox-group input { width: auto; margin-right: 10px; }
+        button { background: #3498db; color: white; border: none; padding: 12px 25px; border-radius: 5px; cursor: pointer; font-size: 16px; font-weight: 600; transition: background 0.3s; margin-top: 20px; }
+        .password-section { display: none; margin-top: 30px; padding: 20px; background: #f8f9fa; border-radius: 5px; border-left: 4px solid #3498db; }
+        .password-link { color: #3498db; text-decoration: none; font-weight: 600; margin-top: 15px; display: inline-block; cursor: pointer; }
+        .password-link:hover { text-decoration: underline; }
+.material-symbols-outlined{
+    cursor: pointer;
+}
+        .required::after { content: " *"; color: #e74c3c; }
+    </style>
+</head>
+<body><div class="container p-4">    
+<h1 style="text-align: left; border-bottom: 5px solid black;">Employee Travel</h1>
+
+        <form id="travelExpenseForm">
+            <h2>Employee Details</h2>
+            
+            <div class="form-group">
+                <label for="employeeCode" class="required">Employee Code</label>
+                <input type="text" id="employeeCode" placeholder="EMP1234" class="val-emp-ids">
+                <div class="error" id="employeeCodeError">Employee Code must start with 'EMP' and be alphanumeric</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="department" class="required">Department</label>
+                <select id="department">
+                    <option value="">Choose Department</option>
+                    <option value="hr">Human Resources</option>
+                    <option value="it">Information Technology</option>
+                    <option value="finance">Finance</option>
+                    <option value="marketing">Marketing</option>
+                    <option value="operations">Operations</option>
+                </select>
+                <div class="error" id="departmentError">Please select a department</div>
+            </div>
+            
+            <h2>Travel Details</h2>
+            
+            <div class="form-group">
+                <label for="travelDate" class="required">Travel Date</label>
+                <input type="date" id="travelDate" class="newdataofjourney">
+                <div class="error" id="travelDateError">Travel date cannot be in the future or older than 30 days</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="travelPurpose" class="required">Travel Purpose</label>
+                <textarea id="travelPurpose" rows="4" class="val-address" placeholder="Describe the purpose of your travel (minimum 20 characters)"></textarea>
+                <div class="error" id="travelPurposeError">Travel purpose must be at least 20 characters and cannot contain only numbers</div>
+            </div>
+            
+            <h2>Travel Expense Breakdown</h2>
+            
+            <div class="form-group">
+                <label for="travelMode" class="required">Travel Mode</label>
+                <select id="travelMode">
+                    <option value="">Select Travel Mode</option>
+                    <option value="flight">Flight</option>
+                    <option value="train">Train</option>
+                    <option value="car">Car</option>
+                    <option value="bus">Bus</option>
+                </select>
+                <div class="error" id="travelModeError">Please select a travel mode</div>
+            </div>
+            
+            <div class="form-group" id="flightTicketGroup" style="display: none;">
+                <label for="flightTicket" class="required">Flight Ticket Number</label>
+                <input type="text" id="flightTicket" placeholder="TK-12345678" class="val-flightTicket">
+                <div class="error" id="flightTicketError">Flight ticket must start with 'TK-' followed by 8 digits</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="distance" class="required">Distance (KM)</label>
+                <input type="number" id="distance" min="1" class="val-km" placeholder="Enter distance in KM">
+                <div class="error" id="distanceError">Distance must be between 1 and 2000 KM</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="expenseAmount" class="required">Expense Amount (₹)</label>
+                <input type="number" id="expenseAmount" min="100" max="50000" class="val-amt" placeholder="Enter expense amount">
+                <div class="error" id="expenseAmountError">Expense amount must be between ₹100 and ₹50,000</div>
+            </div>
+            
+            <div class="form-group" id="billUploadGroup" style="display: none;">
+                <label for="billUpload" class="required">Upload Bill</label>
+                <input type="file" id="billUpload" class="val-file">
+                <div class="error" id="billUploadError">Bill upload is required for expenses over ₹10,000</div>
+            </div>
+            
+            <h2>Declaration</h2>
+            
+            <div class="checkbox-group">
+                <input type="checkbox" id="declaration">
+                <label for="declaration" class="required">I confirm the above details are accurate</label>
+            </div>
+            <div class="error" id="declarationError">Please confirm the details</div>
+            
+            <button type="submit" disabled id="submitBtn">Submit Form</button>
+        </form>
+        
+        <a class="password-link" id="changePasswordLink">Change Password</a>
+        
+        <div class="password-section" id="passwordSection">
+           <h2 style="display: flex; justify-content: space-between;">
+        Change Password 
+        <span id="togglePassword" class="material-symbols-outlined" onclick="togglePassword()">
+            visibility
+        </span>
+    </h2>
+
+<script>
+function togglePassword() {
+    var inputs = document.querySelectorAll('#passwordSection input[type="password"], #passwordSection input[type="text"]');
+    var toggleIcon = document.getElementById('togglePassword');
+    var isPassword = inputs[0].type === 'password';
+    
+    inputs.forEach(function(input) {
+        input.type = isPassword ? 'text' : 'password';
+    });
+    toggleIcon.textContent = isPassword ? 'visibility_off' : 'visibility';
+}
+</script>
+            <div class="form-group">
+                <label for="currentPassword" class="required">Current Password</label>
+                <input type="password" id="currentPassword" class="val-password">
+                
+                <div class="error" id="currentPasswordError">Current password is required</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="newPassword" class="required">New Password</label>
+                <input type="password" id="newPassword" class="val-password">
+                <div class="error" id="newPasswordError">New password is required</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="confirmPassword" class="required">Confirm New Password</label>
+                <input type="password" id="confirmPassword" class="val-password">
+                <div class="error" id="confirmPasswordError">Passwords do not match</div>
+            </div>
+            
+            <button type="button" id="updatePasswordBtn">Update Password</button>
+        </div>
+    </div>
+ 
+
+    <script>
+        $(document).ready(function() {
+            $('#employeeCode').focus();
+            //For Travel Mode Input Box
+            $('#travelMode').change(function() {
+                if ($(this).val() === 'flight') {
+                    $('#flightTicketGroup').slideDown();
+                } else {
+                    $('#flightTicketGroup').slideUp();
+                    $('#flightTicket').val('');
+                    $('#flightTicketError').hide();
+                }
+            });
+            //For Upload the Bill
+            $('#expenseAmount').on('input', function() {
+                const amount = parseInt($(this).val()) || 0;
+                if (amount > 10000) {
+                    $('#billUploadGroup').slideDown();
+                } else {
+                    $('#billUploadGroup').slideUp();
+                    $('#billUpload').val('');
+                    $('#billUploadError').hide();
+                }
+            });
+          let isOpen = false;
+
+$('#changePasswordLink').click(function() {
+    if (!isOpen) {
+        $('#passwordSection').slideDown();
+    } else {
+        $('#passwordSection').slideUp();
+    }
+    isOpen = !isOpen; // Toggle state
+});
+            //Submission
+            $('#travelExpenseForm').submit(function(e) {
+                e.preventDefault();
+    let isValid = true;
+    
+    const employeeCode = $('#employeeCode').val();
+    const empCodeRegex = /^EMP[a-zA-Z0-9]+$/;
+    if (!employeeCode || !empCodeRegex.test(employeeCode)) {
+        $('#employeeCodeError').show();
+        isValid = false;
+    } else {
+        $('#employeeCodeError').hide();
+    }
+    
+    const department = $('#department').val();
+    if (!department) {
+        $('#departmentError').show();
+        isValid = false;
+    } else {
+        $('#departmentError').hide();
+    }
+    
+    const travelDate = new Date($('#travelDate').val());
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(today.getDate() - 30);
+    
+    if (!$('#travelDate').val() || travelDate > today || travelDate < thirtyDaysAgo) {
+        $('#travelDateError').show();
+        isValid = false;
+    } else {
+        $('#travelDateError').hide();
+    }
+    
+    const travelPurpose = $('#travelPurpose').val();
+    const onlyNumbersRegex = /^[0-9\s]+$/;
+    if (!travelPurpose || travelPurpose.length < 20 || onlyNumbersRegex.test(travelPurpose)) {
+        $('#travelPurposeError').show();
+        isValid = false;
+    } else {
+        $('#travelPurposeError').hide();
+    }
+    
+     const travelMode = $('#travelMode').val();
+     if (!travelMode) {
+         $('#travelModeError').show();
+         isValid = false;
+     } else {
+         $('#travelModeError').hide();
+     }
+     
+     if (travelMode === 'flight') {
+         const flightTicket = $('#flightTicket').val();
+         const flightTicketRegex = /^TK-\d{8}$/;
+         if (!flightTicket || !flightTicketRegex.test(flightTicket)) {
+             $('#flightTicketError').show();
+             isValid = false;
+         } else {
+             $('#flightTicketError').hide();
+         }
+     }
+     
+     const distance = parseInt($('#distance').val());
+     if (!distance || distance < 1 || distance > 2000) {
+         $('#distanceError').show();
+         isValid = false;
+     } else {
+         $('#distanceError').hide();
+     }
+     
+     const expenseAmount = parseInt($('#expenseAmount').val());
+     if (!expenseAmount || expenseAmount < 100 || expenseAmount > 50000) {
+         $('#expenseAmountError').show();
+         isValid = false;
+     } else {
+         $('#expenseAmountError').hide();
+     }
+     
+     if (expenseAmount > 10000) {
+         const billUpload = $('#billUpload').val();
+         if (!billUpload) {
+             $('#billUploadError').show();
+             isValid = false;
+         } else {
+             $('#billUploadError').hide();
+         }
+     }
+     
+     if (!$('#declaration').is(':checked')) {
+         $('#declarationError').show();
+         isValid = false;
+     } else {
+         $('#declarationError').hide();
+     }
+     
+     if (isValid) {
+         spawnUniquePopup('Success','Form submitted successfully!');
+                    this.reset();
+        $('input').css('border-color','#e1e8ed');
+        $('textarea').css('border-color','#e1e8ed');
+                }
+            });
+//password section
+  $('#updatePasswordBtn').click(function() {
+    let isValid = true;
+    const current = $('#currentPassword').val();
+    const newPass = $('#newPassword').val();
+    const confirm = $('#confirmPassword').val();
+
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[^A-Za-z0-9]).{6,16}$/;
+
+    // Current password required
+    if (!current) {
+        $('#currentPasswordError').text('Current password is required').show();
+        isValid = false;
+    } else {
+        $('#currentPasswordError').hide();
+    }
+
+    // New password required & regex validation
+    if (!newPass) {
+        $('#newPasswordError').text('New password is required').show();
+        isValid = false;
+    } else if (current === newPass) {
+        $('#newPasswordError').text('New password cannot be the same as current password').show();
+        isValid = false;
+    } else if (!passwordRegex.test(newPass)) {
+        $('#newPasswordError').text('Password must be 6-16 chars, 1 upper, 1 lower, 1 special').show();
+        isValid = false;
+    } else {
+        $('#newPasswordError').hide();
+    }
+
+    // Confirm password
+    if (!confirm || newPass !== confirm) {
+        $('#confirmPasswordError').text('Passwords do not match').show();
+        isValid = false;
+    } else {
+        $('#confirmPasswordError').hide();
+    }
+
+    if (isValid) {
+        spawnUniquePopup('Success', 'Password changed successfully!');
+        // Reset fields and hide section
+        $('#currentPassword, #newPassword, #confirmPassword').val('');
+        $('#passwordSection').slideUp();
+    }
+});
+
+//checking all fileds are empty to enable the button
+            $(function(){
+    function checkForm(){
+        let emp=$('#employeeCode').val(),
+            dept=$('#department').val(),
+            date=$('#travelDate').val(),
+            purpose=$('#travelPurpose').val(),
+            mode=$('#travelMode').val(),
+            dist=$('#distance').val(),
+            exp=$('#expenseAmount').val(),
+            decl=$('#declaration').is(':checked');
+        let flightOk=true,billOk=true;
+        if(mode==='flight'){flightOk=$('#flightTicket').val()!=='';}
+        if(exp>10000){billOk=$('#billUpload').val()!=='';}
+        $('#submitBtn').prop('disabled',!(emp && dept && date && purpose && mode && dist && exp && decl && flightOk && billOk));
+    }
+    $('input, select, textarea,#declaration').on('input change',checkForm);
+});});
+    </script>
+    <script src="valid.js"></script>
+</body>
+</html>

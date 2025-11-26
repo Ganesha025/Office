@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vaccination Scheduling Portal</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="common.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #f8fafc; font-family: 'Inter', -apple-system, sans-serif; color: #1e293b; overflow-x: hidden; }
+        .main-grid { display: grid; grid-template-columns: 400px 1fr; min-height: 100vh; }
+        .sidebar { background: white; padding: 40px 30px; border-right: 1px solid #e2e8f0; position: relative; box-shadow: 2px 0 10px rgba(0,0,0,0.03); }
+        .logo-section { margin-bottom: 50px; }
+        .logo-section h1 { color: #3b82f6; font-size: 1.8rem; font-weight: 800; margin-bottom: 8px; }
+        .logo-section p { color: #64748b; font-size: 0.9rem; }
+        .nav-item { padding: 16px 20px; margin: 8px 0; border-radius: 12px; cursor: pointer; transition: all 0.3s; border: 1px solid transparent; display: flex; align-items: center; gap: 12px; }
+        .nav-item:hover { background: #f1f5f9; }
+        .nav-item.active { background: #3b82f6; border-color: #60a5fa; box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3); color: white; }
+        .nav-item .icon { font-size: 1.3rem; }
+        .nav-item .text { font-weight: 600; }
+        .content-area { padding: 40px 60px; overflow-y: auto; max-height: 100vh; background: #f8fafc; }
+        .content-header { margin-bottom: 40px; }
+        .content-header h2 { font-size: 2.2rem; font-weight: 700; color: #0f172a; margin-bottom: 8px; }
+        .content-header p { color: #64748b; font-size: 1rem; }
+        .form-section { background: white; border-radius: 20px; padding: 40px; border: 1px solid #e2e8f0; margin-bottom: 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.04); }
+        .form-section.hidden { display: none; }
+        .section-title { color: #3b82f6; font-size: 1.4rem; font-weight: 700; margin-bottom: 30px; display: flex; align-items: center; gap: 12px; }
+        .form-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 25px; margin-bottom: 25px; }
+        .form-group { position: relative; }
+        .form-group label { display: block; color: #475569; font-weight: 600; margin-bottom: 10px; font-size: 0.9rem; }
+        .form-control, .form-select { width: 100%; background: white; border: 2px solid #e2e8f0; border-radius: 10px; padding: 14px 18px; color: #1e293b; font-size: 1rem; transition: all 0.3s; }
+        .form-control:focus, .form-select:focus { border-color: #3b82f6; outline: none; box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15); }
+        .form-control:hover, .form-select:hover { border-color: #cbd5e1; }
+        .valid-field { border-color: #10b981 !important; }
+        .invalid-field { border-color: #ef4444 !important; }
+        .error-message { color: #ef4444; font-size: 0.8rem; margin-top: 6px; display: none; font-weight: 500; }
+        .radio-group, .checkbox-group { display: flex; gap: 15px; flex-wrap: wrap; }
+        input[type="radio"], input[type="checkbox"] { display: none; }
+        .radio-label, .checkbox-label { padding: 12px 24px; border: 2px solid #e2e8f0; border-radius: 10px; cursor: pointer; transition: all 0.3s; font-weight: 600; color: #64748b; background: white; }
+        .radio-label:hover, .checkbox-label:hover { border-color: #cbd5e1; background: #f8fafc; }
+        input[type="radio"]:checked + .radio-label, input[type="checkbox"]:checked + .checkbox-label { border-color: #3b82f6; background: #3b82f6; color: white; }
+        #coMorbiditiesSection { display: none; margin-top: 25px; padding: 25px; background: #f0fdf4; border-radius: 12px; border: 2px solid #10b981; }
+        .btn-group { display: flex; gap: 15px; margin-top: 40px; }
+        .btn { padding: 16px 32px; border-radius: 12px; font-weight: 700; font-size: 1rem; border: none; cursor: pointer; transition: all 0.3s; }
+        .btn-primary { background: #3b82f6; color: white; flex: 1; }
+        .btn-primary:hover { background: #2563eb; transform: translateY(-2px); box-shadow: 0 8px 30px rgba(59, 130, 246, 0.4); }
+        .btn-secondary { background: #475569; color: white; }
+        .btn-secondary:hover { background: #64748b; }
+        .progress-bar { display: flex; gap: 10px; margin-bottom: 40px; }
+        .progress-step { flex: 1; height: 4px; background: #334155; border-radius: 10px; transition: all 0.3s; }
+        .progress-step.active { background: #3b82f6; }
+        .toast { position: fixed; top: 30px; right: 30px; padding: 18px 24px; border-radius: 12px; color: white; opacity: 0; transform: translateX(400px); transition: all 0.4s; z-index: 9999; font-weight: 600; box-shadow: 0 10px 40px rgba(0,0,0,0.3); }
+        .toast.show { opacity: 1; transform: translateX(0); }
+        .toast.success { background: #10b981; }
+        .toast.error { background: #ef4444; }
+        @media (max-width: 1200px) {
+            .main-grid { grid-template-columns: 1fr; }
+            .sidebar { border-right: none; border-bottom: 1px solid #334155; }
+            .content-area { padding: 30px 20px; }
+            .form-row { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-grid">
+        <div class="sidebar">
+            <div class="logo-section">
+                <h1>💉 VaxPortal</h1>
+                <p>Government Hospital System</p>
+            </div>
+            <div class="nav-item active" data-section="personal">
+                <span class="icon">👤</span>
+                <span class="text">Personal Info</span>
+            </div>
+            <div class="nav-item" data-section="vaccination">
+                <span class="icon">💊</span>
+                <span class="text">Vaccination</span>
+            </div>
+            <div class="nav-item" data-section="review">
+                <span class="icon">✅</span>
+                <span class="text">Review</span>
+            </div>
+        </div>
+
+        <div class="content-area">
+            <div class="content-header">
+                <h2>Schedule Your Vaccination</h2>
+                <p>Complete the form to book your appointment</p>
+            </div>
+
+            <div class="progress-bar">
+                <div class="progress-step active"></div>
+                <div class="progress-step"></div>
+                <div class="progress-step"></div>
+            </div>
+
+            <form id="vaccinationForm">
+                <div class="form-section" id="section-personal">
+                    <div class="section-title">
+                        <span>👤</span>
+                        <span>Personal Information</span>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Full Name *</label>
+                            <input class="form-control val-username" id="fullName" required>
+                            <div class="error-message"></div>
+                        </div>
+                        <div class="form-group">
+                            <label>Age *</label>
+                            <input type="number" class="form-control val-age" id="age" required>
+                            <div class="error-message"></div>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Gender</label>
+                            <select class="form-control" id="gender" required>
+                                <option value="">Select Gender *</option>
+                                <option value="male">Male</option>
+                                <option value="female">Female</option>
+                                <option value="other">Other</option>
+                            </select>
+                            <div class="error-message"></div>
+                        </div>
+                        <div class="form-group">
+                            <label>Aadhaar Number *</label>
+                            <input type="text" class="form-control val-aadhar" id="aadhaar" maxlength="12" required>
+                            <div class="error-message"></div>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Mobile Number *</label>
+                            <input type="text" class="form-control val-mobile" id="mobile" maxlength="10" required>
+                            <div class="error-message"></div>
+                        </div>
+                        <div class="form-group">
+                            <label>Email *</label>
+                            <input type="email" class="form-control val-email" id="email" required>
+                            <div class="error-message"></div>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>State *</label>
+                            <select id="stateSelect" class="form-control" required>
+                                <option value="">Select State</option>
+                            </select>
+                            <div class="error-message"></div>
+                        </div>
+                        <div class="form-group">
+                            <label>District *</label>
+                            <select id="districtSelect" class="form-control" disabled required>
+                                <option value="">Select District</option>
+                            </select>
+                            <div class="error-message"></div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Address *</label>
+                        <textarea class="form-control val-address" id="address" rows="3" required></textarea>
+                        <div class="error-message"></div>
+                    </div>
+
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-primary" id="nextToVaccination">Next →</button>
+                    </div>
+                </div>
+
+                <div class="form-section hidden" id="section-vaccination">
+                    <div class="section-title">
+                        <span>💊</span>
+                        <span>Vaccination Details</span>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Vaccination Dose *</label>
+                            <select class="form-control" id="vaccineDose" required>
+                                <option value="">Select Dose</option>
+                                <option value="1st">1st Dose</option>
+                                <option value="2nd">2nd Dose</option>
+                                <option value="booster">Booster Dose</option>
+                            </select>
+                            <div class="error-message"></div>
+                        </div>
+                        <div class="form-group">
+                            <label>Vaccination Center * </label>
+                            <select class="form-control" id="vaccinationCenter" required>
+                                <option value="">Select Center</option>
+                            </select>
+                            <div class="error-message"></div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Date of Appointment *</label>
+                        <input type="date" class="form-control val-ended-date" id="appointmentDate" required>
+                        <div class="error-message"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Symptoms in last 14 days?</label>
+                        <div class="radio-group">
+                            <input type="radio" name="symptoms" id="symptomsYes" value="yes">
+                            <label for="symptomsYes" class="radio-label">Yes</label>
+                            <input type="radio" name="symptoms" id="symptomsNo" value="no" checked>
+                            <label for="symptomsNo" class="radio-label">No</label>
+                        </div>
+                    </div>
+
+                    <div id="coMorbiditiesSection">
+                        <label>Co-morbidities</label>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="diabetes" value="diabetes">
+                            <label for="diabetes" class="checkbox-label">Diabetes</label>
+                            <input type="checkbox" id="hypertension" value="hypertension">
+                            <label for="hypertension" class="checkbox-label">Hypertension</label>
+                            <input type="checkbox" id="heartDisease" value="heartDisease">
+                            <label for="heartDisease" class="checkbox-label">Heart Disease</label>
+                        </div>
+                    </div>
+
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-secondary" id="backToPersonal">← Back</button>
+                        <button type="button" class="btn btn-primary" id="nextToReview">Next →</button>
+                    </div>
+                </div>
+
+                <div class="form-section hidden" id="section-review">
+                    <div class="section-title">
+                        <span>✅</span>
+                        <span>Review & Submit</span>
+                    </div>
+                    <div style="text-align: center; padding: 40px 0;">
+                        <div style="font-size: 3rem; margin-bottom: 20px;">📋</div>
+                        <h3 style="color: #1e293b; margin-bottom: 12px;">Ready to Submit</h3>
+                        <p style="color: #64748b;">Please review your information and click submit to complete your vaccination scheduling.</p>
+                    </div>
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-secondary" id="backToVaccination">← Back</button>
+                        <button type="submit" class="btn btn-primary">Submit Application 🚀</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+<script src="format.js"></script>
+    <script>
+$(() => {
+    let currentSection = 'personal';
+    const showSection = (section) => {
+        $('.form-section').addClass('hidden');
+        $(`#section-${section}`).removeClass('hidden');
+        $('.nav-item').removeClass('active');
+        $(`.nav-item[data-section="${section}"]`).addClass('active');
+        $('.progress-step').removeClass('active');
+        const idx = ['personal', 'vaccination', 'review'].indexOf(section);
+        $('.progress-step').slice(0, idx + 1).addClass('active');
+        currentSection = section;
+    };
+
+    $('.nav-item').click(function() {
+        const section = $(this).data('section');
+        if (section !== 'review') showSection(section);
+    });
+
+    const showError = ($f, msg) => {
+        $f.addClass('invalid-field').removeClass('valid-field');
+        $f.siblings('.error-message').text(msg).show();
+    };
+
+    const hideError = $f => {
+        $f.removeClass('invalid-field').addClass('valid-field');
+        $f.siblings('.error-message').hide();
+    };
+
+    const validateField = $f => {
+        const id = $f.attr('id');
+        let v = $f.val().trim();
+        
+        if (!v) {
+            showError($f, "This field is required");
+            return false;
+        }
+
+        if (id === "age" && (v < 18 || v > 200)) {
+            showError($f, "Must be between 18–200");
+            return false;
+        }
+
+        if (id === "aadhaar" && !/^\d{12}$/.test(v)) {
+            showError($f, "12 digits required");
+            return false;
+        }
+
+        if (id === "mobile" && !/^\d{10}$/.test(v)) {
+            showError($f, "10 digits required");
+            return false;
+        }
+
+        if (id === "email" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) {
+            showError($f, "Invalid email");
+            return false;
+        }
+
+        hideError($f);
+        return true;
+    };
+
+    $("#fullName").on("input", function() {
+        this.value = this.value.replace(/[^A-Za-z\s]/g, "");
+    });
+
+    $("#age").on("input", function() {
+        this.value = this.value.replace(/\D/g, "").slice(0, 3);
+        if (+this.value > 200) this.value = "200";
+    });
+
+    $("#mobile").on("input", function() {
+        this.value = this.value.replace(/\D/g, "").slice(0, 10);
+    });
+
+    $("#aadhaar").on("input", function() {
+        this.value = this.value.replace(/\D/g, "").slice(0, 12);
+    });
+
+    southIndiaStatesAndDistricts.forEach(s => {
+        $("#stateSelect").append(`<option>${s.state}</option>`);
+    });
+
+    $("#stateSelect").change(() => {
+        let state = $("#stateSelect").val();
+        let dist = $("#districtSelect").empty().prop("disabled", !state);
+        dist.append(`<option value="">Select District</option>`);
+        let obj = southIndiaStatesAndDistricts.find(x => x.state === state);
+        obj?.districts.forEach(d => dist.append(`<option>${d}</option>`));
+    });
+
+    const centers = {
+        "1st": ["City Hospital", "CHC North", "Rural Clinic", "UPHC", "Medical College"],
+        "2nd": ["City Hospital", "CHC North", "Rural Clinic", "Medical College"],
+        "booster": ["City Hospital", "Medical College", "Special Center"]
+    };
+
+    $("#vaccineDose").change(function() {
+        let d = $(this).val();
+        let drop = $("#vaccinationCenter").empty().append('<option value="">Select Vaccination Center</option>');
+        centers[d]?.forEach(c => drop.append(`<option>${c}</option>`));
+    });
+
+    $('input[name="symptoms"]').change(() => {
+        let show = $("#symptomsYes").is(":checked");
+        $("#coMorbiditiesSection").toggle(show);
+        if (!show) $("#coMorbiditiesSection input[type=checkbox]").prop("checked", false);
+    });
+
+    $("#nextToVaccination").click(() => {
+        let ok = true;
+        $("#section-personal input[required], #section-personal select[required], #section-personal textarea[required]").each(function() {
+            if (!validateField($(this))) ok = false;
+        });
+        if (ok) showSection('vaccination');
+        else toast("Please fill all required fields", "error");
+    });
+
+    $("#nextToReview").click(() => {
+        let ok = true;
+        $("#section-vaccination input[required], #section-vaccination select[required]").each(function() {
+            if (!validateField($(this))) ok = false;
+        });
+        if (ok) showSection('review');
+        else toast("Please fill all required fields", "error");
+    });
+
+    $("#backToPersonal").click(() => showSection('personal'));
+    $("#backToVaccination").click(() => showSection('vaccination'));
+
+    $("#vaccinationForm").submit(function(e) {
+        e.preventDefault();
+        toast("✅ Vaccination scheduled successfully!");
+        $('input, select, textarea').removeClass('valid-field');
+        $('input, select, textarea').css('border-color', '#d1d5db');
+        setTimeout(() => {
+            $('#vaccinationForm')[0].reset();
+            showSection('personal');
+        }, 2000);
+    });
+});
+    </script>
+</body>
+</html>

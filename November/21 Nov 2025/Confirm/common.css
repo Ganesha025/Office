@@ -1,0 +1,56 @@
+*{outline: none;}
+       
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+input[type="number"] {
+    -moz-appearance: textfield;
+}
+input[type="search"]::-webkit-search-cancel-button,
+input[type="search"]::-webkit-search-decoration,
+input[type="search"]::-webkit-search-results-button,
+input[type="search"]::-webkit-search-results-decoration {
+    display: none;
+}
+input[type="search"] {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+}
+
+
+.toast {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 15px 20px;
+    border-radius: 8px;
+    color: white;
+    opacity: 0;
+    transform: translateX(400px);
+    transition: all 0.3s;
+    z-index: 9999;
+}
+.toast.show { opacity: 1; transform: translateX(0); }
+.toast.success { background: #10b981; }
+.toast.error { background: #ef4444; }
+
+input[type="date"].no-clear::-webkit-clear-button {
+    display: none;
+}
+input[type="date"].no-clear::-webkit-clear-button {
+    display: none;
+}
+input {
+    user-select: none; /* Disable text selection */
+    -webkit-user-select: none; /* For Safari */
+    -moz-user-select: none; /* For Firefox */
+    -ms-user-select: none; /* For IE/Edge */
+}
+
+input:disabled {
+    pointer-events: none; /* Optional: Prevent interactions with the input */
+}

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+</head>
+<body>
+<form id="myForm">
+  <input type="text" name="name" placeholder="Name"><br><br>
+  <input type="text" name="email" placeholder="Email"><br><br>
+  <textarea name="message" placeholder="Message"></textarea>
+</form>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+$(function(){
+    let history={}, redo={};
+    $('#myForm').find('input,textarea').each(function(){
+        let n=$(this).attr('name'); history[n]=[$(this).val()]; redo[n]=[];
+        $(this).on('input',()=>{let v=$(this).val(); if(v!==history[n][history[n].length-1]){history[n].push(v); redo[n]=[];}});
+    });
+    $(document).on('keydown', function(e){
+        if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='z'){
+            e.preventDefault();
+            $('#myForm').find('input,textarea').each(function(){
+                let n=$(this).attr('name');
+                if(history[n].length>1){redo[n].push(history[n].pop()); $(this).val(history[n][history[n].length-1]);}
+            });
+        }
+        if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='y'){
+            e.preventDefault();
+            $('#myForm').find('input,textarea').each(function(){
+                let n=$(this).attr('name');
+                if(redo[n].length>0){let v=redo[n].pop(); history[n].push(v); $(this).val(v);}
+            });
+        }
+    });
+});
+</script>
+
+</body>
+</html>

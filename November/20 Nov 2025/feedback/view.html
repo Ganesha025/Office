@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Feedback Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body class="bg-gray-100 p-6 min-h-screen">
+
+  <h1 class="text-2xl font-bold mb-6 text-center">Feedback Dashboard</h1>
+
+  <div id="feedbackList" class="space-y-4 max-w-3xl mx-auto">
+  </div>
+
+  <script>
+    $(function() {
+      const feedbacks = JSON.parse(localStorage.getItem('feedbacks') || '[]');
+      const list = $('#feedbackList');
+
+      if(feedbacks.length === 0) {
+        list.html('<p class="text-gray-500 text-center">No feedbacks yet.</p>');
+      } else {
+        feedbacks.reverse().forEach(fb => {
+          const item = $(`
+            <div class="bg-white p-4 rounded shadow border-l-4 border-blue-600">
+              <p class="font-semibold">${fb.name} <span class="text-gray-500 text-sm">(${fb.date})</span></p>
+              <p class="mt-2 text-gray-700">${fb.comments}</p>
+            </div>
+          `);
+          list.append(item);
+        });
+      }
+    });
+  </script>
+
+</body>
+</html>

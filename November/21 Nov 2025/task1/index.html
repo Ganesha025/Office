@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vaccination Scheduling Portal</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="../common.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .container {
+            max-width: 800px;
+            margin: 30px auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #0d6efd;
+        }
+        .header h1 {
+            color: #0d6efd;
+            font-weight: 700;
+        }
+        .header p {
+            color: #6c757d;
+            font-size: 1.1rem;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .hint-box {
+            position: absolute;
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            z-index: 100;
+            max-width: 250px;
+            font-size: 0.9rem;
+            display: none;
+        }
+        .valid-field {
+            border-color: #198754 !important;
+            box-shadow: 0 0 0 0.2rem rgba(25, 135, 84, 0.25) !important;
+        }
+        .invalid-field {
+            border-color: #dc3545 !important;
+            box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25) !important;
+        }
+        .error-message {
+            color: #dc3545;
+            font-size: 0.875rem;
+            margin-top: 5px;
+            display: none;
+        }
+        .highlight-field {
+            background-color: #e9f7fe;
+            border-color: #0d6efd !important;
+        }
+        .co-morbidities {
+            display: none;
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+        .submit-btn {
+            width: 100%;
+            padding: 12px;
+            font-size: 1.1rem;
+            margin-top: 20px;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #6c757d;
+            font-size: 0.9rem;
+        }/* Style for custom checkboxes */
+.form-check-input {
+    appearance: none; /* Remove default checkbox appearance */
+    width: 20px;
+    height: 20px;
+    border-radius: 5px; /* Rounded corners for checkboxes */
+    border: 2px solid #0d6efd;
+    position: relative;
+    cursor: pointer;
+    background-color: white;
+    transition: background-color 0.2s ease, border 0.2s ease;
+}
+
+.form-check-input:checked {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+}
+
+.form-check-input:checked::before {
+    content: "";
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 10px;
+    height: 10px;
+    background-color: white;
+    border-radius: 2px;
+}
+
+.form-check-label {
+    margin-left: 10px;
+    font-size: 1rem;
+    color: #333;
+    cursor: pointer;
+}
+
+/* Hide radio buttons for symptoms and replace with checkboxes */
+input[type="radio"] {
+    display: none; /* Hide radio buttons */
+}
+
+/* Adjust the label styling for the new checkboxes in the symptoms section */
+#coMorbiditiesSection .form-check {
+    margin-bottom: 10px;
+    font-size: 1rem;
+}
+
+#coMorbiditiesSection .form-check .form-check-input {
+    width: 18px;
+    height: 18px;
+    border-radius: 3px;
+    border: 2px solid #198754;
+    background-color: white;
+    transition: background-color 0.3s, border 0.3s;
+}
+
+#coMorbiditiesSection .form-check .form-check-input:checked {
+    background-color: #198754;
+    border-color: #198754;
+}
+
+#coMorbiditiesSection .form-check .form-check-input:checked::before {
+    content: "";
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 8px;
+    height: 8px;
+    background-color: white;
+    border-radius: 2px;
+}
+
+#coMorbiditiesSection .form-check .form-check-label {
+    margin-left: 12px;
+    font-size: 1rem;
+    color: #333;
+    cursor: pointer;
+}
+.co-morbidities {
+    display: none;
+    margin-top: 15px;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+input[type="radio"]:checked + label {
+    font-weight: bold;
+}
+
+input[type="radio"]:checked + label {
+    color: #0d6efd;
+}
+input[type="checkbox"]:hover,
+input[type="radio"]:hover {
+    border-color: #0d6efd;
+    background-color: #e9f7fe;
+}
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Vaccination Scheduling Portal</h1>
+            <p>Government Hospital - Record Maintenance System</p>
+        </div>
+        
+        <form id="vaccinationForm">
+            <!-- Personal Information Section -->
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Personal Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="fullName" class="form-label">Full Name</label>
+                                <input type="text" class="form-control" id="fullName" required>
+                                <div class="error-message" id="fullNameError">Please enter your full name</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="age" class="form-label">Age</label>
+                                <input type="number" class="form-control" id="age" min="1" required>
+                                <div class="error-message" id="ageError">You must be 18 years or older to register</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="gender" class="form-label">Gender</label>
+                                <select class="form-control" id="gender" required>
+                                    <option value="">Select Gender</option>
+                                    <option value="male">Male</option>
+                                    <option value="female">Female</option>
+                                    <option value="other">Other</option>
+                                    <option value="prefer-not-to-say">Prefer not to say</option>
+                                </select>
+                                <div class="error-message" id="genderError">Please select your gender</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="aadhaar" class="form-label">Aadhaar Number</label>
+                                <input type="number" class="form-control" id="aadhaar" maxlength="12" required>
+                                <div class="error-message" id="aadhaarError">Aadhaar number must be exactly 12 digits</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="mobile" class="form-label">Mobile Number</label>
+                                <input type="number" class="form-control" id="mobile" maxlength="10" required>
+                                <div class="error-message" id="mobileError">Mobile number must be exactly 10 digits</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="email" class="form-label">Email</label>
+                                <input type="email" class="form-control" id="email" required>
+                                <div class="error-message" id="emailError">Please enter a valid email address</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="address" class="form-label">Address</label>
+                        <textarea class="form-control" id="address" rows="2" required></textarea>
+                        <div class="error-message" id="addressError">Please enter your address</div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                                      <div>
+    <label class="block text-sm font-medium text-gray-700 mb-2">State</label>
+    <select name="state" id="stateSelect" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+    <option value="">Select State</option>
+    </select>
+</div>
+                        </div>
+                        <div class="col-md-6">
+                         <div class="mb-4">
+    <label for="districtSelect" class="block text-sm font-medium text-gray-700 mb-2">District</label>
+   <select id="districtSelect" name="district" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" disabled>
+     <option value="">Select District</option>
+    </select>
+</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">Vaccination Details</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="vaccineDose" class="form-label">Vaccination Dose</label>
+                                <select class="form-control" id="vaccineDose" required>
+                                    <option value="">Select Dose</option>
+                                    <option value="1st">1st Dose</option>
+                                    <option value="2nd">2nd Dose</option>
+                                    <option value="booster">Booster Dose</option>
+                                </select>
+                                <div class="error-message" id="vaccineDoseError">Please select a vaccination dose</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="vaccinationCenter" class="form-label">Vaccination Center</label>
+                                <select class="form-control" id="vaccinationCenter" required>
+                                    <option value="">Select Vaccination Center</option>
+                                </select>
+                                <div class="error-message" id="vaccinationCenterError">Please select a vaccination center</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="appointmentDate" class="form-label">Date of Appointment</label>
+                        <input type="date" class="form-control" id="appointmentDate" required>
+                        <div class="error-message" id="appointmentDateError">Please select an appointment date</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Symptoms in last 14 days?</label>
+                        <div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="symptoms" id="symptomsYes" value="yes">
+                                <label class="form-check-label" for="symptomsYes">Yes</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="symptoms" id="symptomsNo" value="no" checked>
+                                <label class="form-check-label" for="symptomsNo">No</label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="co-morbidities" id="coMorbiditiesSection">
+                        <label class="form-label">Co-morbidities (Select all that apply)</label>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="diabetes" value="diabetes">
+                                    <label class="form-check-label" for="diabetes">Diabetes</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="hypertension" value="hypertension">
+                                    <label class="form-check-label" for="hypertension">Hypertension</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="heartDisease" value="heartDisease">
+                                    <label class="form-check-label" for="heartDisease">Heart Disease</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="lungDisease" value="lungDisease">
+                                    <label class="form-check-label" for="lungDisease">Lung Disease</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="kidneyDisease" value="kidneyDisease">
+                                    <label class="form-check-label" for="kidneyDisease">Kidney Disease</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="immunodeficiency" value="immunodeficiency">
+                                    <label class="form-check-label" for="immunodeficiency">Immunodeficiency</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <button type="submit" class="btn btn-primary submit-btn">Schedule Vaccination</button>
+        </form>
+        
+        <div class="footer">
+            <p>© 2023 Government Hospital Vaccination Portal. All rights reserved.</p>
+        </div>
+    </div>
+<script src="../southIndiaStatesAndDistricts.js"></script>
+    <script>
+      $(document).ready(function() {
+        $('#fullName').focus();
+         $('#fullName').on('input', function() {
+        // Replace any non-alphabet or non-space character
+        this.value = this.value.replace(/[^a-zA-Z\s]/g, '');
+    });
+        $('#age').on('input', function() {
+        const ageInput = $(this);
+        let value = ageInput.val();
+
+        // Allow only numeric input and restrict to max 3 digits
+        if (!/^\d+$/.test(value)) {
+            ageInput.val(value.replace(/\D/g, ''));  // Remove non-numeric characters
+        }
+
+        // If value exceeds 3 digits, slice it to 3 digits
+        if (value.length > 3) {
+            ageInput.val(value.slice(0, 3)); // Limit to 3 digits
+        }
+
+        if (parseInt(value) > 200) {
+            ageInput.val('200');
+        }
+        const errorMessage = $('#ageError');
+        if (parseInt(value) > 200) {
+            ageInput.addClass('invalid-field').removeClass('valid-field');
+            errorMessage.show();
+        } else {
+            ageInput.removeClass('invalid-field').addClass('valid-field');
+            errorMessage.hide();
+        }
+    });
+        const populateStates = () => {
+        const stateSelect = $("#stateSelect");
+        southIndiaStatesAndDistricts.forEach(stateObj => 
+            stateSelect.append($("<option>").val(stateObj.state).text(stateObj.state))
+        );
+    };
+
+    const updateDistricts = () => {
+        const stateSelect = $("#stateSelect");
+        const districtSelect = $("#districtSelect");
+        const selectedState = stateSelect.val();
+        const stateObj = southIndiaStatesAndDistricts.find(state => state.state === selectedState);
+
+        districtSelect.empty().append('<option value="">Select District</option>');
+        districtSelect.prop('disabled', !selectedState);
+
+        stateObj?.districts.forEach(district => 
+            districtSelect.append($("<option>").val(district).text(district))
+        );
+    };
+    populateStates();
+    $("#stateSelect").on("change", updateDistricts);
+
+    let hintBox = $('<div class="hint-box"></div>').appendTo('body');
+    const fieldHints = {
+        fullName: "Enter your full name as per official documents",
+        age: "You must be 18 years or older to register for vaccination",
+        gender: "Select your gender from the dropdown",
+        aadhaar: "Enter exactly 12-digit Aadhaar number without spaces",
+        mobile: "Enter 10-digit mobile number without country code",
+        email: "Enter a valid email address for communication",
+        address: "Enter your complete residential address",
+        state: "Enter your state of residence",
+        district: "Enter your district of residence",
+        vaccineDose: "Select the dose you wish to schedule",
+        vaccinationCenter: "Vaccination centers will be shown based on your dose selection",
+        appointmentDate: "Select your preferred appointment date"
+    };
+
+    const vaccinationCenters = {
+        "1st": ["City Hospital - Central Wing", "Community Health Center - North", "Rural Clinic - East District", "Urban Primary Health Center", "Government Medical College Hospital"],
+        "2nd": ["City Hospital - Central Wing", "Community Health Center - North", "Rural Clinic - East District", "Government Medical College Hospital"],
+        "booster": ["City Hospital - Central Wing", "Government Medical College Hospital", "Special Vaccination Center - Downtown"]
+    };
+
+    $('input, select, textarea').mouseenter(function() {
+        $(this).addClass('highlight-field');
+    }).mouseleave(function() {
+        $(this).removeClass('highlight-field');
+    });
+
+    $('input, select, textarea').mousemove(function(e) {
+        const fieldId = $(this).attr('id');
+        if (fieldHints[fieldId]) {
+            hintBox.text(fieldHints[fieldId]).show().css({ top: e.pageY + 10, left: e.pageX + 10 });
+        }
+    }).mouseleave(function() {
+        hintBox.hide();
+    });
+
+    $('input, select, textarea').on('input focusout', function() {
+        validateField($(this));
+    });
+
+    $('input[name="symptoms"]').change(function() {
+        $('#coMorbiditiesSection').toggle($('#symptomsYes').is(':checked'));
+        if (!$('#symptomsYes').is(':checked')) $('.co-morbidities input[type="checkbox"]').prop('checked', false);
+    });
+
+    $('#vaccineDose').change(function() {
+        const selectedDose = $(this).val();
+        const centerDropdown = $('#vaccinationCenter').empty().append('<option value="">Select Vaccination Center</option>');
+        if (vaccinationCenters[selectedDose]) {
+            vaccinationCenters[selectedDose].forEach(center => centerDropdown.append(`<option value="${center}">${center}</option>`));
+        }
+    });
+
+    $('#vaccinationForm').submit(function(e) {
+        e.preventDefault();
+        if (validateForm()) {
+            alert('Vaccination scheduled successfully!');
+            this.reset();
+            $('#coMorbiditiesSection').hide();
+        } else {
+            alert('Please fix the errors before submitting.');
+        }
+    });
+
+    function validateField($field) {
+        const fieldId = $field.attr('id');
+        const value = $field.val();
+        let isValid = true;
+
+        if (!value) {
+            $field.addClass('invalid-field').removeClass('valid-field').siblings('.error-message').show();
+            isValid = false;
+        } else {
+            $field.removeClass('invalid-field').addClass('valid-field').siblings('.error-message').hide();
+        }
+
+        if (fieldId === 'age' && (isNaN(value) || value < 18)) {
+            isValid = false;
+            showError($field, 'Invalid age. Must be 18 or older.');
+        }
+
+        if (fieldId === 'aadhaar' && !/^\d{12}$/.test(value)) {
+            isValid = false;
+            showError($field, 'Invalid Aadhaar. Must be 12 digits.');
+        }
+
+        if (fieldId === 'mobile' && !/^\d{10}$/.test(value)) {
+            isValid = false;
+            showError($field, 'Invalid mobile number. Must be 10 digits.');
+        }
+
+        if (fieldId === 'email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+            isValid = false;
+            showError($field, 'Invalid email address.');
+        }
+
+        return isValid;
+    }
+
+    function showError($field, message) {
+        $field.addClass('invalid-field').removeClass('valid-field').siblings('.error-message').text(message).show();
+    }
+$('#mobile').on('input', function() {
+    const mobileInput = $(this);
+    let value = mobileInput.val();
+
+    // Allow only numeric input and restrict to max 10 digits
+    if (!/^\d+$/.test(value)) {
+        mobileInput.val(value.replace(/\D/g, ''));  // Remove non-numeric characters
+    }
+
+    // If value exceeds 10 digits, slice it to 10 digits
+    if (value.length > 10) {
+        mobileInput.val(value.slice(0, 10));  // Limit to 10 digits
+    }
+
+    // Optional: Display error message if the mobile input exceeds 10 digits
+    const errorMessage = $('#mobileError');
+    if (value.length > 10) {
+        mobileInput.addClass('invalid-field').removeClass('valid-field');
+        errorMessage.show();
+    } else {
+        mobileInput.removeClass('invalid-field').addClass('valid-field');
+        errorMessage.hide();
+    }
+});
+
+    function validateForm() {
+        let isValid = true;
+        $('input[required], select[required], textarea[required]').each(function() {
+            if (!validateField($(this))) isValid = false;
+        });
+        return isValid;
+    }
+});
+
+    </script>
+</body>
+</html>
