@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Send Salary Email</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .container {
+      max-width: 500px;
+      margin: auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 6px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    input, button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background: #1a73e8;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #135cc6;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h2>Send Salary Email</h2>
+
+    <form id="salaryForm">
+      <input type="text" id="employee_name" placeholder="Employee Name" required />
+      <input type="email" id="email" placeholder="Employee Email" required />
+      <input type="text" id="designation" placeholder="Designation" required />
+      <input type="text" id="salary_month" placeholder="Salary Month (e.g., January 2025)" required />
+      <input type="number" id="basic_salary" placeholder="Basic Salary" required />
+      <input type="number" id="allowances" placeholder="Allowances" required />
+      <input type="number" id="deductions" placeholder="Deductions" required />
+      <input type="number" id="net_salary" placeholder="Net Salary" required />
+      <input type="text" id="salary_ref" placeholder="Salary Ref #" required />
+
+      <button type="submit">Send Email</button>
+    </form>
+
+    <p id="msg" style="color: green; padding-top: 10px;"></p>
+  </div>
+
+  <!-- EmailJS SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+
+  <script>
+    // Initialize EmailJS
+    (function() {
+        
+      emailjs.init("PMWiXTG8JeA_JBELJ"); // <-- replace with YOUR PUBLIC KEY
+    })();
+
+    document.getElementById("salaryForm").addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      let templateParams = {
+        employee_name: document.getElementById("employee_name").value,
+        email: document.getElementById("email").value,
+        designation: document.getElementById("designation").value,
+        salary_month: document.getElementById("salary_month").value,
+        basic_salary: document.getElementById("basic_salary").value,
+        allowances: document.getElementById("allowances").value,
+        deductions: document.getElementById("deductions").value,
+        net_salary: document.getElementById("net_salary").value,
+        salary_ref: document.getElementById("salary_ref").value
+      };
+
+      emailjs
+        .send("service_1qu35rb", "template_bcwj85q", templateParams)
+        .then(
+          function () {
+            document.getElementById("msg").innerText = "Salary email sent successfully!";
+          },
+          function (error) {
+            document.getElementById("msg").style.color = "red";
+            document.getElementById("msg").innerText = "Failed to send email. Error: " + error.text;
+          }
+        );
+    });
+  </script>
+</body>
+</html>
