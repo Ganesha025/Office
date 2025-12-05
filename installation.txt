@@ -1,0 +1,7 @@
+1. flutter pub add flutter_local_notifications
+2. flutter pub add objectbox flutter pub add --dev build_runner
+3. flutter pub add permission_handler
+4. flutter pub add path_provider
+5. flutter pub add open_filex
+6. flutter pub add pdf dart pub add pdf
+7. 
