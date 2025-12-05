@@ -72,7 +72,7 @@ $conn->close();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZenTech SQL</title>
+    <title>ZenSQL</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -88,6 +88,12 @@ $conn->close();
         textarea,#suggestions{scrollbar-width:none;-ms-overflow-style:none;overflow:auto}
         textarea::-webkit-scrollbar,#suggestions::-webkit-scrollbar{display:none}
         .rotate-180{transform:rotate(180deg)}
+        .editor-container{position:relative}
+        #queryInput{background:transparent;position:relative;z-index:2;color:transparent;caret-color:#1e293b;resize:none}
+        .dark #queryInput{caret-color:#e2e8f0}
+        #highlight{position:absolute;top:0;left:0;padding:1rem;white-space:pre-wrap;word-wrap:break-word;pointer-events:none;z-index:1;font-family:monospace;font-size:0.875rem;line-height:1.25rem;overflow:hidden}
+        .sql-keyword{color:#dc2626;font-weight:600}
+        .dark .sql-keyword{color:#f87171}
     </style>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
@@ -125,6 +131,26 @@ $conn->close();
 
         let currentSuggestions = [];
         let selectedIndex = -1;
+
+        function highlightSQL(text) {
+            const pattern = new RegExp('\\b(' + sqlKeywords.join('|') + ')\\b', 'gi');
+            return text.replace(/[<>&]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]))
+                       .replace(pattern, '<span class="sql-keyword">$1</span>');
+        }
+
+        function syncScroll() {
+            const input = document.getElementById('queryInput');
+            const highlight = document.getElementById('highlight');
+            highlight.scrollTop = input.scrollTop;
+            highlight.scrollLeft = input.scrollLeft;
+        }
+
+        function updateHighlight() {
+            const input = document.getElementById('queryInput');
+            const highlight = document.getElementById('highlight');
+            const text = input.value + '\n';
+            highlight.innerHTML = highlightSQL(text);
+        }
 
         function getCaretCoordinates(element) {
             const div = document.createElement('div');
@@ -192,6 +218,7 @@ $conn->close();
             input.value = before + suggestion + after;
             const newPos = before.length + suggestion.length;
             input.setSelectionRange(newPos, newPos);
+            updateHighlight();
             hideSuggestions();
             input.focus();
         }
@@ -249,9 +276,13 @@ $conn->close();
             initSuggestions();
             const $input = $('#queryInput');
             
+            updateHighlight();
+            
             $input.on('input', function(e) {
+                updateHighlight();
                 showSuggestions(this, this.selectionStart);
             });
+            $input.on('scroll', syncScroll);
             $input.on('keydown', handleKeyDown);
             $input.on('click', function(e) {
                 showSuggestions(this, this.selectionStart);
@@ -275,7 +306,7 @@ $conn->close();
 <body class="bg-blue-50 dark:bg-slate-900 min-h-screen p-4 sm:p-6 transition-colors duration-150">
 <div class="max-w-7xl mx-auto">
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-        <h1 class="text-2xl sm:text-3xl font-bold text-sky-600 dark:text-sky-400">ZenTech SQL</h1>
+        <h1 class="text-2xl sm:text-3xl font-bold text-sky-600 dark:text-sky-400">ZenSQL</h1>
         <button onclick="toggleDarkMode()" class="px-4 py-2 rounded-lg bg-sky-100 dark:bg-slate-700 text-sky-700 dark:text-sky-400 hover:bg-sky-200 dark:hover:bg-slate-600 transition-all duration-150 shadow-sm flex items-center gap-2">
             <span class="material-icons text-lg dark:hidden">dark_mode</span>
             <span class="material-icons text-lg hidden dark:inline">light_mode</span>
@@ -285,11 +316,14 @@ $conn->close();
     </div>
     <form method="post" action="" id="queryForm">
         <div class="relative">
-            <textarea id="queryInput" placeholder="Enter your SQL query here..." name="query" class="bg-white dark:bg-slate-800 border border-sky-200 dark:border-sky-700 rounded-lg mb-4 w-full p-4 text-gray-900 dark:text-gray-100 font-mono text-sm transition-all duration-150 focus:border-sky-500 dark:focus:border-sky-500 focus:ring-2 focus:ring-sky-200 dark:focus:ring-sky-800" rows="10"><?php
+            <div class="editor-container bg-white dark:bg-slate-800 border border-sky-200 dark:border-sky-700 rounded-lg mb-4 relative">
+                <div id="highlight" class="text-gray-900 dark:text-gray-100 font-mono text-sm"></div>
+                <textarea id="queryInput" placeholder="Enter your SQL query here..." name="query" class="w-full p-4 font-mono text-sm" rows="10" spellcheck="false"><?php
     if (isset($_POST['query'])) {
         echo htmlspecialchars($_POST['query']);
     }
 ?></textarea>
+            </div>
             <div id="suggestions" class="hidden fixed z-50 bg-white dark:bg-slate-800 border border-sky-200 dark:border-sky-700 rounded-lg shadow-lg max-h-60 overflow-y-auto text-sm text-gray-900 dark:text-gray-100 transition-all duration-150"></div>
         </div>
         <button type="submit" class="bg-sky-600 dark:bg-sky-700 text-white px-6 py-2 rounded-lg hover:bg-sky-700 dark:hover:bg-sky-600 transition-all duration-150 shadow-md hover:shadow-lg flex items-center gap-2 hover:scale-105">
