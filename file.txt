@@ -1,0 +1,458 @@
+5)CREATE TABLE Customers (
+    customer_id INT AUTO_INCREMENT PRIMARY KEY,
+    customer_name VARCHAR(100) NOT NULL
+);
+
+-- Products Table
+CREATE TABLE Products (
+    product_id INT AUTO_INCREMENT PRIMARY KEY,
+    product_name VARCHAR(100),
+    price DECIMAL(10,2)
+);
+
+-- Orders Table
+CREATE TABLE Orders (
+    order_id INT AUTO_INCREMENT PRIMARY KEY,
+    customer_id INT,
+    order_date DATE,
+    FOREIGN KEY (customer_id) REFERENCES Customers(customer_id)
+);
+
+-- OrderDetails Table
+CREATE TABLE OrderDetails (
+    orderdetail_id INT AUTO_INCREMENT PRIMARY KEY,
+    order_id INT,
+    product_id INT,
+    quantity INT,
+    FOREIGN KEY (order_id) REFERENCES Orders(order_id),
+    FOREIGN KEY (product_id) REFERENCES Products(product_id)
+);
+
+
+
+-- Insert Customers
+INSERT INTO Customers (customer_name) VALUES
+('Arun Kumar'),
+('Priya Sharma'),
+('John David');
+
+-- Insert Products
+INSERT INTO Products (product_name, price) VALUES
+('Laptop', 55000.00),
+('Mouse', 500.00),
+('Keyboard', 1500.00),
+('Monitor', 8000.00);
+
+-- Insert Orders
+INSERT INTO Orders (customer_id, order_date) VALUES
+(1, '2024-10-01'),
+(2, '2024-10-05'),
+(1, '2024-10-10'),
+(3, '2024-10-15');
+
+-- Insert Order Details
+INSERT INTO OrderDetails (order_id, product_id, quantity) VALUES
+(1, 1, 1),  
+(1, 2, 2), 
+(2, 3, 1),  
+(2, 2, 1),  
+(3, 4, 2),  
+(4, 2, 3);  
+
+
+SELECT 
+    c.customer_name,
+    SUM(od.quantity) AS total_products_purchased,
+    SUM(od.quantity * p.price) AS total_amount_spent
+FROM Customers c
+JOIN Orders o ON c.customer_id = o.customer_id
+JOIN OrderDetails od ON o.order_id = od.order_id
+JOIN Products p ON od.product_id = p.product_id
+GROUP BY c.customer_id, c.customer_name
+ORDER BY total_amount_spent DESC;
+------------------------------------
+inv
+8)CREATE TABLE products(
+   product_id INT AUTO_INCREMENT PRIMARY KEY,
+   product_name VARCHAR(25)NOT NULL
+ );
+ CREATE TABLE Inventory (
+    inventory_id INT AUTO_INCREMENT PRIMARY KEY,
+    product_id INT,
+    quantity INT,
+    price DECIMAL(10,2),
+    FOREIGN KEY (product_id) REFERENCES Products(product_id)
+);
+INSERT INTO Products (product_name) VALUES
+('Laptop'),
+('Mouse'),
+('Keyboard'),
+('Monitor');
+
+INSERT INTO Inventory (product_id, quantity, price) VALUES
+(1, 10, 55000.00),  
+(1, 5, 56000.00),  
+(2, 50, 500.00),   
+(2, 30, 520.00),    
+(3, 20, 1500.00),   
+(4, 8, 8000.00),    
+(4, 12, 7800.00);
+SELECT 
+    p.product_name,
+    SUM(i.quantity) AS total_quantity,
+    AVG(i.price) AS average_price
+FROM Products p
+JOIN Inventory i ON p.product_id = i.product_id
+GROUP BY p.product_id, p.product_name
+ORDER BY total_quantity DESC;
+-----------------
+7)CREATE TABLE Users (
+    user_id INT PRIMARY KEY AUTO_INCREMENT,
+    username VARCHAR(100) NOT NULL
+);
+CREATE TABLE Posts (
+    post_id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT,
+    content TEXT,
+    FOREIGN KEY (user_id) REFERENCES Users(user_id)
+);
+CREATE TABLE Comments (
+    comment_id INT PRIMARY KEY AUTO_INCREMENT,
+    post_id INT,
+    user_id INT,
+    comment TEXT,
+    FOREIGN KEY (post_id) REFERENCES Posts(post_id),
+    FOREIGN KEY (user_id) REFERENCES Users(user_id)
+);
+INSERT INTO Users (username)
+VALUES 
+('Alice'),
+('Bob'),
+('Charlie');
+INSERT INTO Posts (user_id, content)
+VALUES
+(1, 'Alice first post'),
+(1, 'Alice second post'),
+(2, 'Bob first post'),
+(3, 'Charlie first post'),
+(3, 'Charlie second post');
+INSERT INTO Comments (post_id, user_id, comment)
+VALUES
+(1, 1, 'Alice comments on her own post'),
+(1, 2, 'Bob comments'),
+(2, 1, 'Alice again'),
+(3, 3, 'Charlie comments on his own post'),
+(4, 3, 'Charlie again'),
+(5, 3, 'Charlie again again');
+SELECT 
+    u.username,
+    COUNT(DISTINCT p.post_id) AS total_posts,
+    COUNT(c.comment_id) AS comments_on_own_posts
+FROM Users u
+LEFT JOIN Posts p 
+    ON u.user_id = p.user_id
+LEFT JOIN Comments c 
+    ON c.user_id = u.user_id        -- comment made by the user
+    AND c.post_id IN (              -- only comments ON THEIR OWN POSTS
+        SELECT post_id FROM Posts WHERE user_id = u.user_id
+    )
+GROUP BY u.user_id, u.username
+ORDER BY total_posts DESC;
+
+
+-------------------
+4)CREATE TABLE Students (
+    student_id INT PRIMARY KEY AUTO_INCREMENT,
+    student_name VARCHAR(100) NOT NULL
+);
+CREATE TABLE Grades (
+    grade_id INT PRIMARY KEY AUTO_INCREMENT,
+    student_id INT,
+    course_name VARCHAR(100),
+    grade DECIMAL(5,2),
+    FOREIGN KEY (student_id) REFERENCES Students(student_id)
+);
+INSERT INTO Students (student_name)
+VALUES 
+('Arun'),
+('Priya'),
+('Rahul'),
+('Sneha');
+INSERT INTO Grades (student_id, course_name, grade)
+VALUES
+(1, 'Math', 85.5),
+(1, 'Science', 78.0),
+(2, 'Math', 92.0),
+(2, 'English', 88.5),
+(2, 'History', 90.0),
+(3, 'Science', 70.5),
+(4, 'Math', 95.0),
+(4, 'Science', 89.0),
+(4, 'English', 93.0);
+SELECT 
+    s.student_name,
+    AVG(g.grade) AS average_grade,
+    COUNT(g.course_name) AS total_courses
+FROM Students s
+LEFT JOIN Grades g ON s.student_id = g.student_id
+GROUP BY s.student_id, s.student_name
+ORDER BY average_grade DESC;
+------------------------
+10)CREATE TABLE employees(
+  employee_id INT AUTO_INCREMENT PRIMARY KEY,
+  employees_name VARCHAR(25) NOT NULL,
+  job_title VARCHAR(50) NOT NULL
+  );
+ CREATE TABLE salaries(
+   salary_id INT AUTO_INCREMENT PRIMARY KEY,
+   employee_id INT,
+   salary INT
+   FOREIGN KEY(employee_id)REFERENCES employees(employee_id)
+   );
+   INSERT INTO(employee_name,job_title)VALUES
+   ('Arun Kumar', 'Developer'),
+('Priya Sharma', 'Manager'),
+('Rahul Verma', 'Developer'),
+('Sneha Singh', 'Designer'),
+('Vijay Kumar', 'Manager');
+INSERT INTO Salaries (employee_id, salary) VALUES
+(1, 55000.00),
+(1, 60000.00),
+(2, 75000.00),
+(3, 52000.00),
+(3, 58000.00),
+(4, 45000.00),
+(5, 78000.00),
+(5, 82000.00);
+SELECT 
+    e.employee_name,
+    e.job_title,
+    jt.average_salary,
+    jt.max_salary
+FROM Employees e
+JOIN (
+    SELECT 
+        emp.job_title,
+        AVG(sal.salary) AS average_salary,
+        MAX(sal.salary) AS max_salary
+    FROM Employees emp
+    JOIN Salaries sal ON emp.employee_id = sal.employee_id
+    GROUP BY emp.job_title
+) jt ON e.job_title = jt.job_title
+ORDER BY e.job_title ASC, e.employee_name ASC;
+-----------------------------------------------
+1)
+DROP TABLE IF EXISTS Orders;
+DROP TABLE IF EXISTS Products;
+DROP TABLE IF EXISTS Customers;
+
+
+CREATE TABLE Customers (
+  customer_id INT AUTO_INCREMENT PRIMARY KEY,
+  customer_name VARCHAR(100) NOT NULL,
+  email VARCHAR(100),
+  city VARCHAR(50)
+);
+
+
+CREATE TABLE Products (
+  product_id INT AUTO_INCREMENT PRIMARY KEY,
+  product_name VARCHAR(100) NOT NULL,
+  price DECIMAL(10,2) NOT NULL
+);
+
+
+CREATE TABLE Orders (
+  order_id INT AUTO_INCREMENT PRIMARY KEY,
+  customer_id INT NOT NULL,
+  product_id INT NOT NULL,
+  quantity INT NOT NULL DEFAULT 1,
+  order_date DATE,
+  FOREIGN KEY (customer_id) REFERENCES Customers(customer_id),
+  FOREIGN KEY (product_id) REFERENCES Products(product_id)
+);
+
+
+INSERT INTO Customers (customer_name, email, city) VALUES
+('Alice', 'alice@gmail.com', 'Mumbai'),
+('Bob', 'bob@gmail.com', 'Chennai'),
+('Charlie', 'charlie@gmail.com', 'Delhi'),
+('David', 'david@gmail.com', 'Pune');
+
+
+INSERT INTO Products (product_name, price) VALUES
+('Laptop', 55000),
+('Headphones', 1500),
+('Smartphone', 25000),
+('Keyboard', 1200);
+
+INSERT INTO Orders (customer_id, product_id, quantity, order_date) VALUES
+(1, 1, 1, '2025-01-10'),  
+(1, 4, 2, '2025-01-15'), 
+(2, 2, 1, '2025-02-01'),   
+(2, 3, 1, '2025-02-03'),   
+(3, 1, 1, '2025-03-10'),   
+(4, 2, 3, '2025-03-12');  
+
+
+SELECT 
+  c.customer_id,
+  c.customer_name,
+  c.email,
+  c.city,
+  COALESCE(SUM(p.price * o.quantity), 0) AS total_spent
+FROM Customers c
+LEFT JOIN Orders o ON c.customer_id = o.customer_id
+LEFT JOIN Products p ON o.product_id = p.product_id
+GROUP BY c.customer_id, c.customer_name, c.email, c.city
+ORDER BY total_spent DESC;
+-------------------------------
+2)DROP TABLE IF EXISTS Employees;
+DROP TABLE IF EXISTS Departments;
+
+CREATE TABLE Departments (
+    dept_id INT PRIMARY KEY,
+    dept_name VARCHAR(100)
+);
+INSERT INTO Departments VALUES
+(1, 'Human Resources'),
+(2, 'Finance'),
+(3, 'Engineering'),
+(4, 'Marketing');
+CREATE TABLE Employees (
+    emp_id INT PRIMARY KEY,
+    emp_name VARCHAR(100),
+    dept_id INT,
+    FOREIGN KEY (dept_id) REFERENCES Departments(dept_id)
+);
+INSERT INTO Employees VALUES
+(101, 'Ravi', 3),
+(102, 'Priya', 1),
+(103, 'Karan', 3),
+(104, 'Divya', 2),
+(105, 'Suresh', 3),
+(106, 'Meera', 4);
+SELECT 
+    e.emp_name,
+    d.dept_name,
+    dept_count.total_employees
+FROM 
+    Employees e
+JOIN 
+    Departments d ON e.dept_id = d.dept_id
+JOIN (
+    SELECT 
+        dept_id,
+        COUNT(*) AS total_employees
+    FROM 
+        Employees
+    GROUP BY 
+        dept_id
+) AS dept_count ON d.dept_id = dept_count.dept_id
+ORDER BY 
+    d.dept_name ASC;
+----------------------------
+3)DROP TABLE IF EXISTS BookLoans;
+DROP TABLE IF EXISTS Books;
+DROP TABLE IF EXISTS Authors;
+CREATE TABLE Authors (
+    author_id INT AUTO_INCREMENT PRIMARY KEY,
+    author_name VARCHAR(100) NOT NULL
+);
+INSERT INTO Authors (author_name) VALUES
+('J.K. Rowling'),
+('George R.R. Martin'),
+('Agatha Christie'),
+('Chetan Bhagat');
+CREATE TABLE Books (
+    book_id INT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(200) NOT NULL,
+    author_id INT,
+    FOREIGN KEY (author_id) REFERENCES Authors(author_id)
+);
+INSERT INTO Books (title, author_id) VALUES
+('Harry Potter and the Philosopher\'s Stone', 1),
+('A Game of Thrones', 2),
+('Murder on the Orient Express', 3),
+('2 States', 4);
+CREATE TABLE BookLoans (
+    loan_id INT AUTO_INCREMENT PRIMARY KEY,
+    book_id INT,
+    loan_date DATE,
+    return_date DATE,
+    FOREIGN KEY (book_id) REFERENCES Books(book_id)
+);
+INSERT INTO BookLoans (book_id, loan_date, return_date) VALUES
+(1, '2025-01-05', '2025-01-15'),
+(1, '2025-02-10', '2025-02-20'),
+(2, '2025-03-01', '2025-03-12'),
+(2, '2025-03-15', '2025-03-25'),
+(2, '2025-04-05', '2025-04-18'),
+(3, '2025-02-20', '2025-02-28');
+SELECT 
+    b.title AS book_title,
+    a.author_name,
+    COUNT(bl.book_id) AS times_borrowed
+FROM 
+    Books b
+JOIN 
+    Authors a ON b.author_id = a.author_id
+LEFT JOIN 
+    BookLoans bl ON b.book_id = bl.book_id
+GROUP BY 
+    b.book_id, b.title, a.author_name
+ORDER BY 
+    times_borrowed DESC;
+--------------------------------------------
+6)DROP TABLE IF EXISTS Bookings;
+DROP TABLE IF EXISTS Rooms;
+DROP TABLE IF EXISTS Customers;
+CREATE TABLE Customers (
+    customer_id INT AUTO_INCREMENT PRIMARY KEY,
+    customer_name VARCHAR(100) NOT NULL,
+    email VARCHAR(100)
+);
+INSERT INTO Customers (customer_name, email) VALUES
+('Abirami', 'abi@gmail.com'),
+('John', 'john@gmail.com'),
+('Karthik', 'karthik@gmail.com'),
+('Priya', 'priya@gmail.com');
+CREATE TABLE Rooms (
+    room_id INT AUTO_INCREMENT PRIMARY KEY,
+    room_type VARCHAR(50),
+    price DECIMAL(10,2)
+);
+INSERT INTO Rooms (room_type, price) VALUES
+('Single', 1200.00),
+('Double', 2000.00),
+('Deluxe', 3500.00),
+('Suite', 5000.00);
+CREATE TABLE Bookings (
+    booking_id INT AUTO_INCREMENT PRIMARY KEY,
+    customer_id INT,
+    room_id INT,
+    booking_date DATE,
+    FOREIGN KEY (customer_id) REFERENCES Customers(customer_id),
+    FOREIGN KEY (room_id) REFERENCES Rooms(room_id)
+);
+INSERT INTO Bookings (customer_id, room_id, booking_date) VALUES
+(1, 3, '2025-01-10'),  
+(1, 4, '2025-02-12'), 
+(2, 1, '2025-01-15'),  
+(2, 1, '2025-02-05'),  
+(3, 2, '2025-03-01'),  
+(4, 4, '2025-03-20');  
+SELECT 
+    c.customer_name,
+    COUNT(b.booking_id) AS total_bookings,
+    AVG(r.price) AS average_price
+FROM 
+    Customers c
+LEFT JOIN 
+    Bookings b ON c.customer_id = b.customer_id
+LEFT JOIN 
+    Rooms r ON b.room_id = r.room_id
+GROUP BY 
+    c.customer_id, c.customer_name
+ORDER BY 
+    average_price DESC;
