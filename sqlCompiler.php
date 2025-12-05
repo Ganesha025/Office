@@ -88,7 +88,7 @@ $conn->close();
         input[type="search"]::-webkit-search-cancel-button,input[type="search"]::-webkit-search-decoration,input[type="search"]::-webkit-search-results-button,input[type="search"]::-webkit-search-results-decoration{display:none}
         textarea,#suggestions{scrollbar-width:none;-ms-overflow-style:none;overflow:auto}
         textarea::-webkit-scrollbar,#suggestions::-webkit-scrollbar{display:none}
-        .rotate-180{transform:rotate(0deg)}
+        .rotate-180{transform:rotate(90deg)}
         .editor-container{position:relative}
         #queryInput{background:transparent;position:relative;z-index:2;color:transparent;caret-color:#1e293b;resize:none}
         .dark #queryInput{caret-color:#e2e8f0}
@@ -99,25 +99,34 @@ $conn->close();
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script>
-        const sqlKeywords = [
-            'SELECT', 'FROM', 'WHERE', 'INSERT', 'UPDATE', 'DELETE', 'CREATE', 'ALTER', 'DROP', 
-            'TABLE', 'DATABASE', 'INDEX', 'VIEW', 'TRIGGER', 'PROCEDURE', 'FUNCTION', 'INTO', 
-            'VALUES', 'SET', 'JOIN', 'INNER', 'LEFT', 'RIGHT', 'FULL', 'OUTER', 'CROSS', 'ON', 
-            'AND', 'OR', 'NOT', 'IN', 'BETWEEN', 'LIKE', 'IS', 'NULL', 'AS', 'DISTINCT', 'ALL', 
-            'ORDER', 'BY', 'ASC', 'DESC', 'GROUP', 'HAVING', 'LIMIT', 'OFFSET', 'UNION', 'INTERSECT', 
-            'EXCEPT', 'EXISTS', 'CASE', 'WHEN', 'THEN', 'ELSE', 'END', 'PRIMARY', 'KEY', 'FOREIGN', 
-            'REFERENCES', 'UNIQUE', 'CHECK', 'DEFAULT', 'AUTO_INCREMENT', 'NOT NULL', 'CONSTRAINT', 
-            'ADD', 'MODIFY', 'COLUMN', 'RENAME', 'TRUNCATE', 'CASCADE', 'RESTRICT', 'GRANT', 'REVOKE', 
-            'COMMIT', 'ROLLBACK', 'SAVEPOINT', 'TRANSACTION', 'BEGIN', 'START', 'COUNT', 'SUM', 'AVG', 
-            'MIN', 'MAX', 'CONCAT', 'SUBSTRING', 'UPPER', 'LOWER', 'TRIM', 'LENGTH', 'COALESCE', 
-            'CAST', 'CONVERT', 'DATE', 'TIME', 'DATETIME', 'TIMESTAMP', 'YEAR', 'MONTH', 'DAY', 
-            'HOUR', 'MINUTE', 'SECOND', 'NOW', 'CURDATE', 'CURTIME', 'INT', 'VARCHAR', 'TEXT', 
-            'CHAR', 'DECIMAL', 'FLOAT', 'DOUBLE', 'BOOLEAN', 'BLOB', 'ENUM', 'IF', 'IFNULL', 
-            'NULLIF', 'REPLACE', 'SHOW', 'DESCRIBE', 'DESC', 'EXPLAIN', 'USE', 'WITH', 'RECURSIVE',
-            'PARTITION', 'OVER', 'ROW_NUMBER', 'RANK', 'DENSE_RANK', 'LEAD', 'LAG', 'FIRST_VALUE',
-            'LAST_VALUE', 'NTILE', 'WINDOW', 'ROWS', 'RANGE', 'PRECEDING', 'FOLLOWING', 'UNBOUNDED',
-            'CURRENT', 'ROWS BETWEEN', 'RANGE BETWEEN'
-        ];
+  const sqlKeywords = [
+    'SELECT', 'FROM', 'WHERE', 'INSERT', 'UPDATE', 'DELETE', 'CREATE', 'ALTER', 'DROP',
+    'TABLE', 'DATABASE', 'INDEX', 'VIEW', 'TRIGGER', 'PROCEDURE', 'FUNCTION', 'INTO',
+    'VALUES', 'SET', 'JOIN', 'INNER', 'LEFT', 'RIGHT', 'FULL', 'OUTER', 'CROSS', 'NATURAL', 'ON',
+    'AND', 'OR', 'NOT', 'IN', 'BETWEEN', 'LIKE', 'IS', 'NULL', 'AS', 'DISTINCT', 'ALL',
+    'ORDER', 'BY', 'ASC', 'DESC', 'GROUP', 'HAVING', 'LIMIT', 'OFFSET', 'UNION', 'INTERSECT',
+    'EXCEPT', 'EXISTS', 'CASE', 'WHEN', 'THEN', 'ELSE', 'END', 'PRIMARY', 'KEY', 'FOREIGN',
+    'REFERENCES', 'UNIQUE', 'CHECK', 'DEFAULT', 'AUTO_INCREMENT', 'NOT NULL', 'CONSTRAINT',
+    'ADD', 'MODIFY', 'COLUMN', 'RENAME', 'TRUNCATE', 'CASCADE', 'RESTRICT', 'GRANT', 'REVOKE',
+    'COMMIT', 'ROLLBACK', 'SAVEPOINT', 'TRANSACTION', 'BEGIN', 'START', 'MERGE', 'CALL', 'DECLARE',
+    'LOOP', 'WHILE', 'REPEAT', 'EXIT', 'CONTINUE', 'CURSOR', 'OPEN', 'FETCH', 'CLOSE',
+    'FOR', 'IF', 'ELSEIF', 'ELSE', 'USING', 'MATCH', 'ON DELETE', 'ON UPDATE', 'ARRAY',
+    'TEMPORARY', 'TEMP', 'IDENTITY', 'GENERATED', 'ALWAYS', 'WITH', 'RECURSIVE', 'PARTITION', 'OVER',
+    'ROWS', 'RANGE', 'PRECEDING', 'FOLLOWING', 'UNBOUNDED', 'ROWS BETWEEN', 'RANGE BETWEEN',
+    'COUNT', 'SUM', 'AVG', 'MIN', 'MAX', 'CONCAT', 'SUBSTRING', 'UPPER', 'LOWER', 'TRIM',
+    'LENGTH', 'COALESCE', 'CAST', 'CONVERT', 'IFNULL', 'NULLIF', 'NVL', 'REPLACE', 'ASCII',
+    'CHARINDEX', 'REVERSE', 'REPLICATE', 'POWER', 'CEIL', 'FLOOR', 'ROUND', 'TRUNCATE',
+    'RADIANS', 'DEGREES', 'EXTRACT', 'POSITION', 'DATE', 'TIME', 'DATETIME', 'TIMESTAMP',
+    'YEAR', 'MONTH', 'DAY', 'HOUR', 'MINUTE', 'SECOND', 'NOW', 'CURDATE', 'CURTIME',
+    'CURRENT_DATE', 'CURRENT_TIME', 'CURRENT_TIMESTAMP', 'LOCALTIME', 'LOCALTIMESTAMP',
+    'VARIANCE', 'STDDEV', 'MEDIAN', 'NTILE', 'ROW_NUMBER', 'RANK', 'DENSE_RANK', 'FIRST_VALUE',
+    'LAST_VALUE', 'PERCENT_RANK', 'CUME_DIST', 'WINDOW','INT', 'INTEGER', 'VARCHAR', 'TEXT', 'CHAR', 'NCHAR', 'DECIMAL', 'FLOAT', 'DOUBLE',
+    'BOOLEAN', 'BLOB', 'ENUM', 'NUMERIC', 'VARYING', 'REAL', 'SMALLINT', 'BIGINT', 'DATEONLY',
+    'TIMEONLY', 'TIMESTAMPTZ', 'JSONB','JSON', 'JSON_OBJECT', 'JSON_ARRAY', 'JSON_VALUE', 'JSON_QUERY',
+    'XML', 'XMLAGG', 'XMLFOREST', 'XMLPARSE', 'XMLSERIALIZE','SESSION_USER', 'CURRENT_USER', 'SYSTEM_USER', 'USER', 'TRUE', 'FALSE', 'IFNULL', 'NVL',
+    'SHOW', 'DESCRIBE', 'DESC', 'EXPLAIN', 'USE', 'OVERLAPS', 'IDENTITY', 'GENERATED', 'ALWAYS',
+    'REPLACE', 'TEMP', 'TEMPORARY', 'LEADING', 'TRAILING', 'CONTINUE', 'EXIT', 'DECLARE'
+];
 
         const schema = <?php echo json_encode($schema); ?>;
         let allSuggestions = [];
