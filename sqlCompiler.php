@@ -100,6 +100,7 @@ $conn->close();
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script>
   const sqlKeywords = [
+    // DML & DDL
     'SELECT', 'FROM', 'WHERE', 'INSERT', 'UPDATE', 'DELETE', 'CREATE', 'ALTER', 'DROP',
     'TABLE', 'DATABASE', 'INDEX', 'VIEW', 'TRIGGER', 'PROCEDURE', 'FUNCTION', 'INTO',
     'VALUES', 'SET', 'JOIN', 'INNER', 'LEFT', 'RIGHT', 'FULL', 'OUTER', 'CROSS', 'NATURAL', 'ON',
@@ -347,63 +348,74 @@ class="text-2xl sm text-blue-600 dark:text-blue-400 relative inline-block transi
         </button>
     </div>
 </div>
+<form method="post" action="" id="queryForm">
+  <div class="relative">
+    <div class="editor-container bg-white dark:bg-slate-800 border border-blue-200 dark:border-blue-700 rounded-lg mb-4 relative overflow-hidden flex">
+      <!-- Line Numbers -->
+      <div id="lineNumbers" 
+           class="w-12 text-right pr-2 pt-4 text-gray-400 dark:text-gray-500 font-mono text-sm select-none 
+                  bg-transparent dark:bg-slate-900 dark:border-blue-700">
+      </div>
 
-    <form method="post" action="" id="queryForm">
-    <div class="relative">
-        <div class="editor-container bg-white dark:bg-slate-800 border border-blue-200 dark:border-blue-700 rounded-lg mb-4 relative overflow-hidden">
-
-            <div id="lineNumbers" 
-     class="absolute left-0 top-0 w-12 text-right pr-2 pt-4 text-gray-400 dark:text-gray-500 
-            font-mono text-sm select-none h-full overflow-hidden whitespace-pre-wrap">
-</div>
-
-            <div id="highlight" class="text-gray-900 dark:text-gray-100 font-mono text-sm pl-14"></div>
-
-            <textarea id="queryInput" placeholder="Enter query here..." 
-                name="query"
-                class="w-full p-4 pl-14 font-mono text-sm bg-transparent outline-none resize-none"
-                rows="10" spellcheck="false"
-                oninput="updateLineNumbers();"
-                onscroll="syncScroll();"><?php
-                    if (isset($_POST['query'])) {
-                        echo htmlspecialchars($_POST['query']);
-                    }
-                ?></textarea>
-        </div>
-
-        <div id="suggestions" 
-             class="hidden fixed z-50 bg-white dark:bg-slate-800 border border-blue-200 dark:border-blue-700 rounded-lg shadow-lg max-h-60 overflow-y-auto text-sm text-gray-900 dark:text-gray-100 transition-all duration-150">
-        </div>
+      <!-- Textarea Container -->
+      <div class="relative flex-1">
+        <div id="highlight" class="text-gray-900 dark:text-gray-100 font-mono text-sm pl-4 absolute top-0 left-0 w-full h-full pointer-events-none whitespace-pre-wrap break-words"></div>
+        <textarea id="queryInput" placeholder="Enter query here..." 
+                  name="query"
+                  class="w-full h-full p-4 pl-4 font-mono text-sm bg-transparent outline-none resize-none overflow-auto"
+                  rows="10" spellcheck="false"><?php
+                      if (isset($_POST['query'])) {
+                          echo htmlspecialchars($_POST['query']);
+                      }
+                  ?></textarea>
+      </div>
     </div>
 
-    <button type="submit" 
-        class="bg-blue-600 dark:bg-blue-700 text-white px-6 py-2 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-all duration-150 shadow-md hover:shadow-lg flex items-center gap-2 hover:scale-105">
-        <span class="material-icons text-lg">play_arrow</span>
-        Execute
-    </button>
+    <div id="suggestions" 
+         class="hidden fixed z-50 bg-white dark:bg-slate-800 border border-blue-200 dark:border-blue-700 rounded-lg shadow-lg max-h-60 overflow-y-auto text-sm text-gray-900 dark:text-gray-100 transition-all duration-150">
+    </div>
+  </div>
+
+  <button type="submit" 
+      class="bg-blue-600 dark:bg-blue-700 text-white px-6 py-2 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-all duration-150 shadow-md hover:shadow-lg flex items-center gap-2 hover:scale-105">
+      <span class="material-icons text-lg">play_arrow</span>
+      Execute
+  </button>
 </form>
 
-
 <script>
+const textarea = document.getElementById("queryInput");
+const lineNumbers = document.getElementById("lineNumbers");
+const highlight = document.getElementById("highlight");
+
 function updateLineNumbers() {
-    const textarea = document.getElementById("queryInput");
-    const lineNumbers = document.getElementById("lineNumbers");
-
     const lines = textarea.value.split("\n").length;
-    let nums = "";
-    for (let i = 1; i <= lines; i++) nums += i + "\n";
-
-    lineNumbers.textContent = nums;
+    lineNumbers.innerHTML = Array.from({length: lines}, (_, i) => i + 1).join("<br>");
 }
 
 function syncScroll() {
-    const textarea = document.getElementById("queryInput");
-    const lineNumbers = document.getElementById("lineNumbers");
-
     lineNumbers.scrollTop = textarea.scrollTop;
+    highlight.scrollTop = textarea.scrollTop;
 }
 
-document.addEventListener("DOMContentLoaded", updateLineNumbers);
+function updateHighlight() {
+    const text = textarea.value
+        .replace(/[<>&]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]))
+        .replace(/\b(SELECT|FROM|WHERE|INSERT|UPDATE|DELETE|CREATE|ALTER|DROP|TABLE|JOIN|AND|OR|NOT)\b/gi, '<span class="text-red-500 font-bold">$1</span>');
+    highlight.innerHTML = text + "\n";
+}
+
+// Initialize
+textarea.addEventListener("input", () => {
+    updateLineNumbers();
+    updateHighlight();
+});
+textarea.addEventListener("scroll", syncScroll);
+window.addEventListener("resize", updateLineNumbers);
+
+// Initial render
+updateLineNumbers();
+updateHighlight();
 </script>
 
     <div class="mt-6">
