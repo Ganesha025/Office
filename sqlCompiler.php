@@ -20,24 +20,24 @@ if (isset($_POST['query'])) {
         if ($conn->multi_query($query)) {
             do {
                 if ($result = $conn->store_result()) {
-                    $result_html .= "<div class='overflow-x-auto mb-4'><table class='min-w-full bg-white dark:bg-slate-800 border border-sky-200 dark:border-sky-700'>";
-                    $result_html .= "<thead class='bg-sky-600 dark:bg-sky-800 text-white'>";
+                    $result_html .= "<div class='overflow-x-auto mb-4'><table class='min-w-full bg-white dark:bg-slate-800 border border-blue-200 dark:border-blue-700'>";
+                    $result_html .= "<thead class='bg-blue-600 dark:bg-blue-800 text-white'>";
                     $result_html .= "<tr>";
                     while ($field = $result->fetch_field()) {
-                        $result_html .= "<th class='px-4 py-2 text-left text-sm font-medium border border-sky-300 dark:border-sky-600'>{$field->name}</th>";
+                        $result_html .= "<th class='px-4 py-2 text-left text-sm font-medium border border-blue-300 dark:border-blue-600'>{$field->name}</th>";
                     }
                     $result_html .= "</tr></thead><tbody>";
                     while ($row = $result->fetch_assoc()) {
-                        $result_html .= "<tr class='hover:bg-sky-50 dark:hover:bg-slate-700 transition-colors duration-150'>";
+                        $result_html .= "<tr class='hover:bg-blue-50 dark:hover:bg-slate-700 transition-colors duration-150'>";
                         foreach ($row as $cell) {
-                            $result_html .= "<td class='px-4 py-2 border border-sky-200 dark:border-sky-700 text-sm text-gray-900 dark:text-gray-100'>{$cell}</td>";
+                            $result_html .= "<td class='px-4 py-2 border border-blue-200 dark:border-blue-700 text-sm text-gray-900 dark:text-gray-100'>{$cell}</td>";
                         }
                         $result_html .= "</tr>";
                     }
                     $result_html .= "</tbody></table></div>";
                     $result->free();
                 } else {
-                    $result_html .= "<div class='p-3 mb-4 bg-sky-50 dark:bg-sky-900 text-sky-700 dark:text-sky-100 border border-sky-200 dark:border-sky-700 rounded-lg'>Query executed successfully. Affected rows: " . $conn->affected_rows . "</div>";
+                    $result_html .= "<div class='p-3 mb-4 bg-blue-50 dark:bg-blue-900 text-blue-700 dark:text-blue-100 border border-blue-200 dark:border-blue-700 rounded-lg'>Query executed successfully. Affected rows: " . $conn->affected_rows . "</div>";
                 }
             } while ($conn->more_results() && $conn->next_result());
         } else {
@@ -74,6 +74,7 @@ $conn->close();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ZenSQL</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" href="https://reactnative.dev/img/header_logo.svg">
     <script>
         tailwind.config = {
             darkMode: 'class'
@@ -87,7 +88,7 @@ $conn->close();
         input[type="search"]::-webkit-search-cancel-button,input[type="search"]::-webkit-search-decoration,input[type="search"]::-webkit-search-results-button,input[type="search"]::-webkit-search-results-decoration{display:none}
         textarea,#suggestions{scrollbar-width:none;-ms-overflow-style:none;overflow:auto}
         textarea::-webkit-scrollbar,#suggestions::-webkit-scrollbar{display:none}
-        .rotate-180{transform:rotate(180deg)}
+        .rotate-180{transform:rotate(0deg)}
         .editor-container{position:relative}
         #queryInput{background:transparent;position:relative;z-index:2;color:transparent;caret-color:#1e293b;resize:none}
         .dark #queryInput{caret-color:#e2e8f0}
@@ -197,7 +198,7 @@ $conn->close();
             currentSuggestions.forEach((sugg, idx) => {
                 const div = document.createElement('div');
                 div.textContent = sugg;
-                div.className = 'px-4 py-2 cursor-pointer hover:bg-sky-500 hover:text-white transition-all duration-150';
+                div.className = 'px-4 py-2 cursor-pointer hover:bg-blue-500 hover:text-white transition-all duration-150';
                 div.onclick = () => insertSuggestion(input, sugg, currentWord.length);
                 dropdown.appendChild(div);
             });
@@ -257,10 +258,10 @@ $conn->close();
             const items = dropdown.children;
             for (let i = 0; i < items.length; i++) {
                 if (i === selectedIndex) {
-                    items[i].classList.add('bg-sky-500', 'text-white');
+                    items[i].classList.add('bg-blue-500', 'text-white');
                     items[i].scrollIntoView({ block: 'nearest' });
                 } else {
-                    items[i].classList.remove('bg-sky-500', 'text-white');
+                    items[i].classList.remove('bg-blue-500', 'text-white');
                 }
             }
         }
@@ -299,38 +300,103 @@ $conn->close();
             const table = document.getElementById('table-' + index);
             const icon = document.getElementById('expand-icon-' + index);
             table.classList.toggle('hidden');
-            icon.classList.toggle('rotate-180');
+            icon.classList.toggle('rotate-0');
         }
     </script>
 </head>
 <body class="bg-blue-50 dark:bg-slate-900 min-h-screen p-4 sm:p-6 transition-colors duration-150">
 <div class="max-w-7xl mx-auto">
-    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-        <h1 class="text-2xl sm:text-3xl font-bold text-sky-600 dark:text-sky-400">ZenSQL</h1>
-        <button onclick="toggleDarkMode()" class="px-4 py-2 rounded-lg bg-sky-100 dark:bg-slate-700 text-sky-700 dark:text-sky-400 hover:bg-sky-200 dark:hover:bg-slate-600 transition-all duration-150 shadow-sm flex items-center gap-2">
+ <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 w-full">
+  <a href="javascript:location.reload()"
+   class="text-2xl sm:text-3xl font-bold text-blue-600 dark:text-blue-400 relative inline-block transition-all duration-300 hover:scale-110 hover:text-blue-500 dark:hover:text-blue-300
+          after:content-[''] after:absolute after:left-0 after:bottom-0 after:w-full after:h-0.5 after:bg-blue-500 dark:after:bg-blue-300 after:scale-x-0 after:origin-right after:transition-transform after:duration-300 hover:after:scale-x-100 hover:after:origin-left
+          hover:drop-shadow-[0_0_12px_rgba(59,130,246,0.8)] dark:hover:drop-shadow-[0_0_12px_rgba(96,165,250,0.8)]">
+    ZenSQL
+</a>
+
+    <div class="flex items-center gap-4">
+       <a href="https://ganesa14.github.io/Portfolios/" 
+   target="_blank"
+class="text-2xl sm text-blue-600 dark:text-blue-400 relative inline-block transition-all duration-300 hover:scale-110 hover:text-blue-500 dark:hover:text-blue-300
+          after:content-[''] after:absolute after:left-0 after:bottom-0 after:w-full after:h-0.5 after:bg-blue-500 dark:after:bg-blue-300 after:scale-x-0 after:origin-right after:transition-transform after:duration-300 hover:after:scale-x-100 hover:after:origin-left
+          hover:drop-shadow-[0_0_12px_rgba(59,130,246,0.8)] dark:hover:drop-shadow-[0_0_12px_rgba(96,165,250,0.8)]">
+
+    Contact us
+
+    <span class="absolute left-0 bottom-0 h-[2px] w-full scale-x-0 origin-right bg-blue-500 dark:bg-blue-300 
+                 transition-transform duration-300 ease-out hover:scale-x-100 hover:origin-left"></span>
+</a>
+
+        <button onclick="toggleDarkMode()" 
+            class="px-4 py-2 rounded-lg bg-blue-100 dark:bg-slate-700 text-blue-700 
+                   dark:text-blue-400 hover:bg-blue-200 dark:hover:bg-slate-600 
+                   transition-all duration-150 shadow-sm flex items-center gap-2">
             <span class="material-icons text-lg dark:hidden">dark_mode</span>
             <span class="material-icons text-lg hidden dark:inline">light_mode</span>
             <span class="dark:hidden">Dark</span>
             <span class="hidden dark:inline">Light</span>
         </button>
     </div>
+</div>
+
     <form method="post" action="" id="queryForm">
-        <div class="relative">
-            <div class="editor-container bg-white dark:bg-slate-800 border border-sky-200 dark:border-sky-700 rounded-lg mb-4 relative">
-                <div id="highlight" class="text-gray-900 dark:text-gray-100 font-mono text-sm"></div>
-                <textarea id="queryInput" placeholder="Enter your SQL query here..." name="query" class="w-full p-4 font-mono text-sm" rows="10" spellcheck="false"><?php
-    if (isset($_POST['query'])) {
-        echo htmlspecialchars($_POST['query']);
-    }
-?></textarea>
-            </div>
-            <div id="suggestions" class="hidden fixed z-50 bg-white dark:bg-slate-800 border border-sky-200 dark:border-sky-700 rounded-lg shadow-lg max-h-60 overflow-y-auto text-sm text-gray-900 dark:text-gray-100 transition-all duration-150"></div>
+    <div class="relative">
+        <div class="editor-container bg-white dark:bg-slate-800 border border-blue-200 dark:border-blue-700 rounded-lg mb-4 relative overflow-hidden">
+
+            <div id="lineNumbers" 
+     class="absolute left-0 top-0 w-12 text-right pr-2 pt-4 text-gray-400 dark:text-gray-500 
+            font-mono text-sm select-none h-full overflow-hidden whitespace-pre-wrap">
+</div>
+
+            <div id="highlight" class="text-gray-900 dark:text-gray-100 font-mono text-sm pl-14"></div>
+
+            <textarea id="queryInput" placeholder="Enter query here..." 
+                name="query"
+                class="w-full p-4 pl-14 font-mono text-sm bg-transparent outline-none resize-none"
+                rows="10" spellcheck="false"
+                oninput="updateLineNumbers();"
+                onscroll="syncScroll();"><?php
+                    if (isset($_POST['query'])) {
+                        echo htmlspecialchars($_POST['query']);
+                    }
+                ?></textarea>
         </div>
-        <button type="submit" class="bg-sky-600 dark:bg-sky-700 text-white px-6 py-2 rounded-lg hover:bg-sky-700 dark:hover:bg-sky-600 transition-all duration-150 shadow-md hover:shadow-lg flex items-center gap-2 hover:scale-105">
-            <span class="material-icons text-lg">play_arrow</span>
-            Execute Query
-        </button>
-    </form>
+
+        <div id="suggestions" 
+             class="hidden fixed z-50 bg-white dark:bg-slate-800 border border-blue-200 dark:border-blue-700 rounded-lg shadow-lg max-h-60 overflow-y-auto text-sm text-gray-900 dark:text-gray-100 transition-all duration-150">
+        </div>
+    </div>
+
+    <button type="submit" 
+        class="bg-blue-600 dark:bg-blue-700 text-white px-6 py-2 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-all duration-150 shadow-md hover:shadow-lg flex items-center gap-2 hover:scale-105">
+        <span class="material-icons text-lg">play_arrow</span>
+        Execute
+    </button>
+</form>
+
+
+<script>
+function updateLineNumbers() {
+    const textarea = document.getElementById("queryInput");
+    const lineNumbers = document.getElementById("lineNumbers");
+
+    const lines = textarea.value.split("\n").length;
+    let nums = "";
+    for (let i = 1; i <= lines; i++) nums += i + "\n";
+
+    lineNumbers.textContent = nums;
+}
+
+function syncScroll() {
+    const textarea = document.getElementById("queryInput");
+    const lineNumbers = document.getElementById("lineNumbers");
+
+    lineNumbers.scrollTop = textarea.scrollTop;
+}
+
+document.addEventListener("DOMContentLoaded", updateLineNumbers);
+</script>
+
     <div class="mt-6">
         <?php if ($error_msg): ?>
             <div class="p-3 mb-4 bg-red-50 dark:bg-red-900/50 text-red-700 dark:text-red-200 border border-red-200 dark:border-red-700 rounded-lg flex items-start gap-2 transition-all duration-150">
@@ -342,30 +408,30 @@ $conn->close();
             <?php echo $result_html; ?>
         <?php endif; ?>
     </div>
-    <h2 class="text-xl sm:text-2xl font-semibold text-sky-900 dark:text-sky-300 mt-8 mb-4 flex items-center gap-2">
+    <h2 class="text-xl sm:text-2xl font-semibold text-blue-900 dark:text-blue-300 mt-8 mb-4 flex items-center gap-2">
         <span class="material-icons">storage</span>
-        Database Tables
+        Your Tables
     </h2>
     <div class="grid grid-cols-1 gap-4">
         <?php
         foreach ($tables as $index => $table):
             $conn = new mysqli($servername, $username, $password, $dbname);
             $table_result = $conn->query("SELECT * FROM `$table` LIMIT 50"); ?>
-            <div class="bg-white dark:bg-slate-800 border border-sky-200 dark:border-sky-700 rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-all duration-150">
-                <button onclick="toggleTable(<?php echo $index; ?>)" class="w-full text-left px-4 py-3 font-semibold text-sky-900 dark:text-sky-300 hover:bg-sky-50 dark:hover:bg-slate-700 transition-all duration-150 flex justify-between items-center">
+            <div class="bg-white dark:bg-slate-800 border border-blue-200 dark:border-blue-700 rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-all duration-150">
+                <button onclick="toggleTable(<?php echo $index; ?>)" class="w-full text-left px-4 py-3 font-semibold text-blue-900 dark:text-blue-300 hover:bg-blue-50 dark:hover:bg-slate-700 transition-all duration-150 flex justify-between items-center">
                     <span class="flex items-center gap-2">
                         <span class="material-icons text-lg">table_chart</span>
                         <?php echo $table; ?>
                     </span>
-                    <span class="material-icons text-sky-600 dark:text-sky-400 transition-transform duration-200" id="expand-icon-<?php echo $index; ?>">expand_more</span>
+                    <span class="material-icons text-blue-600 dark:text-blue-400 transition-transform duration-200 -rotate-180" id="expand-icon-<?php echo $index; ?>">expand_more</span>
                 </button>
                 <div id="table-<?php echo $index; ?>" class="overflow-x-auto transition-all duration-200">
                     <?php if ($table_result && $table_result->num_rows > 0): ?>
                         <table class="min-w-full">
-                            <thead class="bg-sky-600 dark:bg-sky-800 text-white">
+                            <thead class="bg-blue-600 dark:bg-blue-800 text-white">
                             <tr>
                                 <?php while ($field = $table_result->fetch_field()): ?>
-                                    <th class='px-4 py-2 text-left text-sm font-medium border border-sky-300 dark:border-sky-600 whitespace-nowrap'><?php echo $field->name ?></th>
+                                    <th class='px-4 py-2 text-left text-sm font-medium border border-blue-300 dark:border-blue-600 whitespace-nowrap'><?php echo $field->name ?></th>
                                 <?php endwhile; ?>
                             </tr>
                             </thead>
@@ -373,16 +439,16 @@ $conn->close();
                             <?php
                             $table_result->data_seek(0);
                             while ($row = $table_result->fetch_assoc()):
-                                echo "<tr class='hover:bg-sky-50 dark:hover:bg-slate-700 transition-colors duration-150'>";
+                                echo "<tr class='hover:bg-blue-50 dark:hover:bg-slate-700 transition-colors duration-150'>";
                                 foreach ($row as $cell) {
-                                    echo "<td class='px-4 py-2 border border-sky-200 dark:border-sky-700 text-sm text-gray-900 dark:text-gray-100'>{$cell}</td>";
+                                    echo "<td class='px-4 py-2 border border-blue-200 dark:border-blue-700 text-sm text-gray-900 dark:text-gray-100'>{$cell}</td>";
                                 }
                                 echo "</tr>";
                             endwhile; ?>
                             </tbody>
                         </table>
                     <?php else: ?>
-                        <p class="p-4 text-sky-500 dark:text-sky-400 flex items-center gap-2">
+                        <p class="p-4 text-blue-500 dark:text-blue-400 flex items-center gap-2">
                             <span class="material-icons">info</span>
                             Table is empty.
                         </p>
