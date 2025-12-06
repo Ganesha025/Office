@@ -105,7 +105,7 @@ FROM Products p
 JOIN Inventory i ON p.product_id = i.product_id
 GROUP BY p.product_id, p.product_name
 ORDER BY total_quantity DESC;
------------------
+-------------------------------------------------------------------------------------
 7)CREATE TABLE Users (
     user_id INT PRIMARY KEY AUTO_INCREMENT,
     username VARCHAR(100) NOT NULL
@@ -161,42 +161,7 @@ ORDER BY total_posts DESC;
 
 
 -------------------
-4)CREATE TABLE Students (
-    student_id INT PRIMARY KEY AUTO_INCREMENT,
-    student_name VARCHAR(100) NOT NULL
-);
-CREATE TABLE Grades (
-    grade_id INT PRIMARY KEY AUTO_INCREMENT,
-    student_id INT,
-    course_name VARCHAR(100),
-    grade DECIMAL(5,2),
-    FOREIGN KEY (student_id) REFERENCES Students(student_id)
-);
-INSERT INTO Students (student_name)
-VALUES 
-('Arun'),
-('Priya'),
-('Rahul'),
-('Sneha');
-INSERT INTO Grades (student_id, course_name, grade)
-VALUES
-(1, 'Math', 85.5),
-(1, 'Science', 78.0),
-(2, 'Math', 92.0),
-(2, 'English', 88.5),
-(2, 'History', 90.0),
-(3, 'Science', 70.5),
-(4, 'Math', 95.0),
-(4, 'Science', 89.0),
-(4, 'English', 93.0);
-SELECT 
-    s.student_name,
-    AVG(g.grade) AS average_grade,
-    COUNT(g.course_name) AS total_courses
-FROM Students s
-LEFT JOIN Grades g ON s.student_id = g.student_id
-GROUP BY s.student_id, s.student_name
-ORDER BY average_grade DESC;
+
 ------------------------
 10)CREATE TABLE employees(
   employee_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -351,108 +316,569 @@ JOIN (
 ) AS dept_count ON d.dept_id = dept_count.dept_id
 ORDER BY 
     d.dept_name ASC;
-----------------------------
-3)DROP TABLE IF EXISTS BookLoans;
-DROP TABLE IF EXISTS Books;
-DROP TABLE IF EXISTS Authors;
-CREATE TABLE Authors (
-    author_id INT AUTO_INCREMENT PRIMARY KEY,
-    author_name VARCHAR(100) NOT NULL
-);
-INSERT INTO Authors (author_name) VALUES
-('J.K. Rowling'),
-('George R.R. Martin'),
-('Agatha Christie'),
-('Chetan Bhagat');
-CREATE TABLE Books (
-    book_id INT AUTO_INCREMENT PRIMARY KEY,
-    title VARCHAR(200) NOT NULL,
-    author_id INT,
-    FOREIGN KEY (author_id) REFERENCES Authors(author_id)
-);
-INSERT INTO Books (title, author_id) VALUES
-('Harry Potter and the Philosopher\'s Stone', 1),
-('A Game of Thrones', 2),
-('Murder on the Orient Express', 3),
-('2 States', 4);
-CREATE TABLE BookLoans (
-    loan_id INT AUTO_INCREMENT PRIMARY KEY,
-    book_id INT,
-    loan_date DATE,
-    return_date DATE,
-    FOREIGN KEY (book_id) REFERENCES Books(book_id)
-);
-INSERT INTO BookLoans (book_id, loan_date, return_date) VALUES
-(1, '2025-01-05', '2025-01-15'),
-(1, '2025-02-10', '2025-02-20'),
-(2, '2025-03-01', '2025-03-12'),
-(2, '2025-03-15', '2025-03-25'),
-(2, '2025-04-05', '2025-04-18'),
-(3, '2025-02-20', '2025-02-28');
-SELECT 
-    b.title AS book_title,
-    a.author_name,
-    COUNT(bl.book_id) AS times_borrowed
-FROM 
-    Books b
-JOIN 
-    Authors a ON b.author_id = a.author_id
-LEFT JOIN 
-    BookLoans bl ON b.book_id = bl.book_id
-GROUP BY 
-    b.book_id, b.title, a.author_name
-ORDER BY 
-    times_borrowed DESC;
+------------
 --------------------------------------------
-6)DROP TABLE IF EXISTS Bookings;
-DROP TABLE IF EXISTS Rooms;
-DROP TABLE IF EXISTS Customers;
-CREATE TABLE Customers (
-    customer_id INT AUTO_INCREMENT PRIMARY KEY,
-    customer_name VARCHAR(100) NOT NULL,
-    email VARCHAR(100)
-);
-INSERT INTO Customers (customer_name, email) VALUES
-('Abirami', 'abi@gmail.com'),
-('John', 'john@gmail.com'),
-('Karthik', 'karthik@gmail.com'),
-('Priya', 'priya@gmail.com');
-CREATE TABLE Rooms (
-    room_id INT AUTO_INCREMENT PRIMARY KEY,
-    room_type VARCHAR(50),
-    price DECIMAL(10,2)
-);
-INSERT INTO Rooms (room_type, price) VALUES
-('Single', 1200.00),
-('Double', 2000.00),
-('Deluxe', 3500.00),
-('Suite', 5000.00);
-CREATE TABLE Bookings (
-    booking_id INT AUTO_INCREMENT PRIMARY KEY,
-    customer_id INT,
-    room_id INT,
-    booking_date DATE,
-    FOREIGN KEY (customer_id) REFERENCES Customers(customer_id),
-    FOREIGN KEY (room_id) REFERENCES Rooms(room_id)
-);
-INSERT INTO Bookings (customer_id, room_id, booking_date) VALUES
-(1, 3, '2025-01-10'),  
-(1, 4, '2025-02-12'), 
-(2, 1, '2025-01-15'),  
-(2, 1, '2025-02-05'),  
-(3, 2, '2025-03-01'),  
-(4, 4, '2025-03-20');  
+------------------
+3)own:
+CREATE TABLE customers(
+  customer_id INT AUTO_INCREMENT PRIMARY KEY,
+  customer_name VARCHAR(50)NOT NULL
+  );
+CREATE TABLE products(
+   product_id INT AUTO_INCREMENT PRIMARY KEY,
+   product_price INT ,
+   product_name VARCHAR(50) NOT NULL);
+CREATE TABLE orders(
+    order_id INT AUTO_INCREMENT PRIMARY KEY,
+     customer_id INT,
+    FOREIGN KEY (customer_id )REFERENCES customers(customer_id));
+CREATE TABLE orderdetails(
+     orderdetails_id INT AUTO_INCREMENT PRIMARY KEY,
+     order_id INT,
+     product_id INT,
+     quantity INT,
+     FOREIGN KEY (order_id) REFERENCES orders(order_id),
+     FOREIGN KEY (product_id) REFERENCES products(product_id));
+     
+     INSERT INTO customers  (customer_name)VALUES
+     ('abi'),('maha'),('lino');
+     INSERT INTO products(product_price,product_name)VALUES
+     ('40545','laptop'),
+  ('3434','charger'),
+  ('3433','pencil');
+     INSERT INTO orders(customer_id)VALUES
+     ('1'),('1'),('2'),('3');
+     INSERT INTO orderdetails (order_id,product_id,quantity)VALUES
+    (1, 1, 1),  
+    (1, 3, 2),  
+    (2, 2, 1), 
+    (3, 1, 1), 
+    (4, 3, 5); 
+    SELECT customers.customer_name,
+    SUM(orderdetails.quantity) AS TotalProducts,
+    SUM(orderdetails.quantity * products.product_price) AS TotalAmountSpent
+    FROM Customers 
+    JOIN Orders  ON customers.customer_id = orders.customer_id
+      JOIN orderdetails  ON orders.order_id = orderdetails.order_id
+    JOIN Products  ON orderdetails.product_id = products.product_id
+    GROUP BY customers.customer_name
+   ORDER BY TotalAmountSpent DESC;
+    
+----------------------------------------
+6)CREATE TABLE customers(
+  customer_name VARCHAR(50)NOT NULL,
+  customer_id INT AUTO_INCREMENT PRIMARY KEY);
+ CREATE TABLE rooms(
+   room_id INT AUTO_INCREMENT PRIMARY KEY,
+   room_type VARCHAR (50),
+   price INT);
+ CREATE TABLE bookings(
+   booking_id INT AUTO_INCREMENT PRIMARY KEY,
+   customer_id INT ,
+   room_id INT,
+  FOREIGN KEY (customer_id)REFERENCES customers(customer_id),
+  FOREIGN KEY (room_id) REFERENCES  rooms(room_id));
+  
+ INSERT INTO customers(customer_name)VALUES
+ ('Abi'),('div'),('kavitha');
+ INSERT INTO rooms(room_type,price) VALUES
+ ('single',2000),
+ ('double',4000),
+ ('single',1000);
+ INSERT INTO bookings(customer_id,room_id)VALUES
+ (1, 1),  
+(1, 3), 
+(2, 2),
+(2, 2),  
+(3, 1);  
+SELECT customers.customer_name,COUNT(bookings.booking_id) AS Totalbookcount ,
+AVG(rooms.price) AS averageroomprice
+FROM customers
+JOIN bookings on customers.customer_id=bookings.customer_id
+JOIN rooms ON bookings.room_id=rooms.room_id
+GROUP BY customers.customer_name
+ORDER BY averageroomprice DESC;
+   -----------------------------------------------------
+9)CREATE TABLE customers(
+  customer_id INT AUTO_INCREMENT PRIMARY KEY,
+  customer_name VARCHAR(50)NOT NULL);
+ CREATE TABLE products(
+   product_id INT AUTO_INCREMENT PRIMARY KEY,
+   product_name VARCHAR(50) NOT NULL,
+   product_price INT);
+ CREATE TABLE sales(
+   sales_id INT AUTO_INCREMENT PRIMARY KEY,
+   product_id INT,
+   customer_id INT,
+   units_sold INT,
+   FOREIGN KEY (customer_id) REFERENCES customers(customer_id),
+   FOREIGN KEY(product_id) REFERENCES products(product_id));
+ INSERT customers(customer_name)VALUES
+ ('abi'),('divya'),('lino');
+ INSERT products(product_name,product_price)VALUES
+ ('chair',30),('soap',90),('table','100');
+ INSERT sales (product_id,customer_id,units_sold)VALUES
+(1, 1, 3),
+(2, 2, 5), 
+(3, 3, 10),
+(1, 3, 2), 
+(2, 1, 1);
+ SELECT products.product_name,SUM(sales.units_sold)AS Totalunitssold,
+ SUM(sales.units_sold*product_price)AS TotalRevenue
+ FROM products
+ JOIN sales ON products.product_id=sales.product_id
+ GROUP BY products.product_name
+ ORDER BY TotalRevenue DESC;
+   ---------------------------------------
+4)CREATE TABLE students(
+  student_name VARCHAR(50)NOT NULL,
+  student_id INT AUTO_INCREMENT PRIMARY KEY);
+CREATE TABLE grades(
+  grade_id INT AUTO_INCREMENT PRIMARY KEY,
+  student_id INT,
+  grade INT,
+  FOREIGN KEY (student_id) REFERENCES Students(student_id));
+  
+ INSERT INTO students(student_name)VALUES
+ ('maha'),('lino'),('darsie'),('angel');
+ INSERT INTO grades(student_id,grade)VALUES
+(1, 85), (1, 90), (1, 70),  
+(2, 88), (2, 92),           
+(3, 60), (3, 65), (3, 70),(4,78),(4,34);  
 SELECT 
-    c.customer_name,
-    COUNT(b.booking_id) AS total_bookings,
-    AVG(r.price) AS average_price
-FROM 
-    Customers c
-LEFT JOIN 
-    Bookings b ON c.customer_id = b.customer_id
-LEFT JOIN 
-    Rooms r ON b.room_id = r.room_id
-GROUP BY 
-    c.customer_id, c.customer_name
-ORDER BY 
-    average_price DESC;
+    students.student_name,
+    AVG(grades.grade) AS AverageGrade,
+    COUNT(grades.grade_id) AS TotalCourses
+FROM Students 
+JOIN Grades ON students.student_id = grades.student_id
+GROUP BY students.student_name
+ORDER BY AverageGrade DESC;
+-------------------------------------------
+Below are **SQL coding–based real-time scenario questions and answers** specifically designed for a **Junior Programmer Analyst Trainee role in Enova**.
+Each scenario includes **tables, inserts, required queries, and explanations** — exactly how companies expect in technical rounds.
+
+---
+
+## ✅ **Scenario 1: Login Authentication**
+
+**Tables:** `users`
+
+```sql
+CREATE TABLE users (
+    user_id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) UNIQUE,
+    password VARCHAR(255),
+    role VARCHAR(20)
+);
+
+INSERT INTO users(username, password, role) VALUES
+('admin', 'admin123', 'ADMIN'),
+('abirami', 'abi123', 'USER');
+```
+
+### **Task**
+
+Retrieve record only if correct username & password given.
+
+```sql
+SELECT * 
+FROM users
+WHERE username='abirami' AND password='abi123';
+```
+
+✔ Used in PHP login system
+✔ Returns only valid user → login success
+
+---
+
+## ✅ **Scenario 2: Employee Salary Increment**
+
+**Tables:** `employees`
+
+```sql
+CREATE TABLE employees(
+    emp_id INT PRIMARY KEY,
+    emp_name VARCHAR(50),
+    department VARCHAR(50),
+    salary INT
+);
+
+INSERT INTO employees VALUES
+(101, 'John', 'IT', 30000),
+(102, 'Sara', 'HR', 25000),
+(103, 'Mike', 'IT', 32000);
+```
+
+### **Task**
+
+Increase salary by 10% for IT department employees.
+
+```sql
+UPDATE employees
+SET salary = salary * 1.10
+WHERE department = 'IT';
+```
+
+✔ Real-time payroll update query
+
+---
+
+## ✅ **Scenario 3: Customer Orders & Total Purchase**
+
+**Tables:** `customers`, `orders`
+
+```sql
+CREATE TABLE customers (
+    customer_id INT PRIMARY KEY,
+    customer_name VARCHAR(50)
+);
+
+CREATE TABLE orders (
+    order_id INT PRIMARY KEY,
+    customer_id INT,
+    amount DECIMAL(10,2),
+    order_date DATE,
+    FOREIGN KEY(customer_id) REFERENCES customers(customer_id)
+);
+
+INSERT INTO customers VALUES
+(1, 'Ram'), (2, 'Latha');
+
+INSERT INTO orders VALUES
+(101, 1, 500.00, '2025-12-06'),
+(102, 1, 700.00, '2025-12-06'),
+(103, 2, 300.00, '2025-12-06');
+```
+
+### **Task**
+
+Show each customer with total purchase amount.
+
+```sql
+SELECT c.customer_name,
+       SUM(o.amount) AS total_purchase
+FROM customers c
+LEFT JOIN orders o ON c.customer_id = o.customer_id
+GROUP BY c.customer_name;
+```
+
+✔ Shows customers even if **no orders** → LEFT JOIN
+
+---
+
+## ✅ **Scenario 4: Students Performance**
+
+**Tables:** `students`, `grades`
+
+```sql
+CREATE TABLE students(
+  student_id INT PRIMARY KEY,
+  student_name VARCHAR(50)
+);
+
+CREATE TABLE grades(
+  grade_id INT PRIMARY KEY,
+  student_id INT,
+  subject VARCHAR(50),
+  marks INT,
+  FOREIGN KEY(student_id) REFERENCES students(student_id)
+);
+
+INSERT INTO students VALUES (1,'Arun'),(2,'Priya'),(3,'Mani');
+
+INSERT INTO grades VALUES
+(1,1,'Maths',90),(2,1,'Science',80),
+(3,2,'Maths',70),(4,2,'Science',75);
+```
+
+### **Task**
+
+Show students with **average marks** arranged by highest score.
+
+```sql
+SELECT s.student_name,
+       AVG(g.marks) AS average_marks,
+       COUNT(g.subject) AS subjects_taken
+FROM students s
+LEFT JOIN grades g ON s.student_id = g.student_id
+GROUP BY s.student_name
+ORDER BY average_marks DESC;
+```
+
+✔ Used in performance analytics dashboards
+
+---
+
+## ✅ **Scenario 5: Show Upcoming Bookings**
+
+**Tables:** `bookings`
+
+```sql
+CREATE TABLE bookings(
+    booking_id INT PRIMARY KEY,
+    customer_name VARCHAR(50),
+    date_of_booking DATE
+);
+
+INSERT INTO bookings VALUES
+(1,'Arun','2025-12-10'),
+(2,'Jeeva','2025-12-05'),
+(3,'Kiran','2025-12-08');
+```
+
+### **Task**
+
+Retrieve bookings for future dates (current date = 2025-12-06)
+
+```sql
+SELECT * FROM bookings
+WHERE date_of_booking > CURRENT_DATE;
+```
+
+✔ Real-time filtering by date
+
+---
+
+## Do you want more?
+
+I can also provide:
+
+✔ Full **PHP + SQL project** code for login, CRUD, validation
+✔ More real-time scenarios used in Enova test:
+
+* Inventory stock updates
+* Banking transactions
+* Pagination query
+* Duplicate entry checks
+* Error handling in SQL
+* Stored procedures & triggers (basic level)
+
+---
+
+Would you like the next set of **10 more advanced scenarios** including **joins, subqueries, window functions, constraints, performance optimization** — all with full explanation?
+---------------------------
+Absolutely! Here are **more SQL-based real-time coding questions and answers** designed for a **Junior Programmer Analyst Trainee role**. These include JOINs, Subqueries, GROUP BY, HAVING, and CRUD operations — commonly asked in interviews and assessments.
+
+---
+
+# 📌 **More SQL Real-Time Scenario Questions & Answers**
+
+---
+
+## 🔹 **Scenario 6: Employees with Highest Salary in Each Department**
+
+**Table:** `employees`
+
+```sql
+SELECT department, emp_name, salary
+FROM employees e
+WHERE salary = (
+    SELECT MAX(salary)
+    FROM employees
+    WHERE department = e.department
+);
+```
+
+✔ Uses a **subquery**
+✔ Displays top-earning employee per department
+
+---
+
+## 🔹 **Scenario 7: Display Products That Have Never Been Ordered**
+
+**Tables:** `products`, `orders`
+
+```sql
+SELECT p.product_name
+FROM products p
+LEFT JOIN orders o
+ON p.product_id = o.product_id
+WHERE o.product_id IS NULL;
+```
+
+✔ Used to find items that are unsold → Business insights
+
+---
+
+## 🔹 **Scenario 8: Count Number of Orders per Day**
+
+```sql
+SELECT order_date, COUNT(*) AS total_orders
+FROM orders
+GROUP BY order_date
+ORDER BY total_orders DESC;
+```
+
+✔ Useful for business sales analytics
+
+---
+
+## 🔹 **Scenario 9: Find Duplicate Records**
+
+```sql
+SELECT email, COUNT(*)
+FROM customers
+GROUP BY email
+HAVING COUNT(*) > 1;
+```
+
+✔ Helps detect duplicate emails in user registration
+
+---
+
+## 🔹 **Scenario 10: Delete All Employees With No Department Assigned**
+
+```sql
+DELETE FROM employees
+WHERE department IS NULL;
+```
+
+⚠ Risky action → always take backup
+✔ Used during data cleanup
+
+---
+
+## 🔹 **Scenario 11: Change Column Value Based on Condition**
+
+Increase salary by ₹2000 only for employees with salary < ₹30000
+
+```sql
+UPDATE employees
+SET salary = salary + 2000
+WHERE salary < 30000;
+```
+
+✔ Conditional business update
+
+---
+
+## 🔹 **Scenario 12: Retrieve Top 5 Most Expensive Products**
+
+```sql
+SELECT product_name, price
+FROM products
+ORDER BY price DESC
+LIMIT 5;
+```
+
+✔ Ranking; shows premium products
+
+---
+
+## 🔹 **Scenario 13: Find Customers With No Phone Number**
+
+```sql
+SELECT customer_name
+FROM customers
+WHERE phone IS NULL OR phone = '';
+```
+
+✔ Used for CRM and marketing data completion
+
+---
+
+## 🔹 **Scenario 14: Show Last 3 Registered Users**
+
+```sql
+SELECT username
+FROM users
+ORDER BY user_id DESC
+LIMIT 3;
+```
+
+✔ Recent user sign-ups
+
+---
+
+## 🔹 **Scenario 15: Retrieve Order Details With Customer Name**
+
+**JOIN Example**
+
+```sql
+SELECT c.customer_name, o.order_id, o.amount
+FROM customers c
+JOIN orders o
+ON c.customer_id = o.customer_id;
+```
+
+✔ Used in billing dashboards
+
+---
+
+# ⭐ Bonus Real-Time Queries
+
+| Problem                                                 | Query                                                                |
+| ------------------------------------------------------- | -------------------------------------------------------------------- |
+| Find average salary per department                      | `SELECT department, AVG(salary) FROM employees GROUP BY department;` |
+| List products low in stock (<10 qty)                    | `SELECT product_name FROM products WHERE quantity < 10;`             |
+| Retrieve employees sorted by both department and salary | `ORDER BY department ASC, salary DESC;`                              |
+| Show the first 10 rows of a table                       | `SELECT * FROM tablename LIMIT 10;`                                  |
+
+---
+
+### Next: Want Queries with Full DB Table Creation and Test Data?
+
+I can provide the next set including:
+
+✔ Banking Transactions
+✔ Library Management System
+✔ Hospital Patient Records
+✔ E-commerce Order Tracking
+✔ College Attendance System
+
+Would you like **15 more advanced SQL scenarios** with PHP integration examples also (INSERT, LOGIN, UPDATE, DELETE forms)?
+-------------------
+REFRESH:
+<?php
+session_start(); // Start session to store message
+
+if(isset($_POST['submit'])){
+    $name = htmlspecialchars($_POST['name']); // Prevent XSS
+
+    if(!empty($name)){
+        $_SESSION['message'] = "Hello, " . $name . "!";
+    } else {
+        $_SESSION['message'] = "Please enter your name.";
+    }
+
+    // Redirect to same page to clear POST data
+    header("Location: ".$_SERVER['PHP_SELF']);
+    exit();
+}
+
+// Display message if exists
+if(isset($_SESSION['message'])){
+    echo "<h2>" . $_SESSION['message'] . "</h2>";
+    unset($_SESSION['message']); // Clear message after displaying
+}
+?>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PHP Form Example</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 50px;
+        }
+        input, button {
+            padding: 8px;
+            margin: 5px 0;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Enter Your Name</h1>
+<form method="POST" action="">
+    <input type="text" name="name" placeholder="Enter Name"><br>
+    <button type="submit" name="submit">Submit</button>
+</form>
+
+</body>
+</html>
+
+
+ 
+ 
