@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>3D Skill Globe Earth</title>
+<style>
+  body {
+    margin: 0;
+    overflow: hidden;
+  }
+  canvas {
+    display: block;
+  }
+</style>
+</head>
+<body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+const skills = [
+  "HTML", "CSS", "Tailwind", "React", "React Native", "NativeScript", 
+  "Flutter", "Electron JS", "TypeScript", "Firebase", "GitHub", "Linux", 
+  "JSON", "Bootstrap", "PHP", "MySQL", "Three JS", "Node JS", "JavaScript", 
+  "Python", "AES 256", "Native Modules"
+];
+
+// Scene, camera, renderer
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(50, window.innerWidth/window.innerHeight, 0.1, 1000);
+camera.position.set(0, 30, 50); // x, y, z
+camera.lookAt(0, 0, 0);       // look at the center of the globe
+
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+document.body.appendChild(renderer.domElement);
+
+// Controls
+const controls = new THREE.OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.dampingFactor = 0.05;
+controls.enableZoom = true;
+
+// Group for text
+const textGroup = new THREE.Group();
+scene.add(textGroup);
+textGroup.rotation.y = 0.3;
+textGroup.rotation.x = 0.1;
+// Create wireframe globe
+function createGlobeWireframe(radius, latSegments, lonSegments, material) {
+  const globeGroup = new THREE.Group();
+
+  // Latitude lines
+  for (let i = 0; i <= latSegments; i++) {
+    const lat = (i / latSegments) * Math.PI - Math.PI / 2;
+    const latPoints = [];
+    for (let j = 0; j <= 64; j++) {
+      const lon = (j / 64) * 2 * Math.PI;
+      const x = radius * Math.cos(lat) * Math.cos(lon);
+      const y = radius * Math.sin(lat);
+      const z = radius * Math.cos(lat) * Math.sin(lon);
+      latPoints.push(new THREE.Vector3(x, y, z));
+    }
+    const latGeometry = new THREE.BufferGeometry().setFromPoints(latPoints);
+    globeGroup.add(new THREE.Line(latGeometry, material));
+  }
+
+  // Longitude lines
+  for (let i = 0; i <= lonSegments; i++) {
+    const lon = (i / lonSegments) * 2 * Math.PI;
+    const lonPoints = [];
+    for (let j = 0; j <= 64; j++) {
+      const lat = (j / 64) * Math.PI - Math.PI / 2;
+      const x = radius * Math.cos(lat) * Math.cos(lon);
+      const y = radius * Math.sin(lat);
+      const z = radius * Math.cos(lat) * Math.sin(lon);
+      lonPoints.push(new THREE.Vector3(x, y, z));
+    }
+    const lonGeometry = new THREE.BufferGeometry().setFromPoints(lonPoints);
+    globeGroup.add(new THREE.Line(lonGeometry, material));
+  }
+
+  return globeGroup;
+}
+
+const globeMaterial = new THREE.LineBasicMaterial({ color: 0x6366f1, opacity: 0.6, transparent: true });
+const globe = createGlobeWireframe(20, 12, 12, globeMaterial);
+scene.add(globe);
+globe.rotation.y = 0.3;
+globe.rotation.x = 0.1;
+// Load font and create text around globe
+const fontLoader = new THREE.FontLoader();
+fontLoader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function(font) {
+  const textMaterial = new THREE.MeshBasicMaterial({ color: 0x6366f1, transparent: true, opacity: 1 });
+  const radius = 20;
+  const count = skills.length;
+
+  for (let i = 0; i < count; i++) {
+    const phi = Math.acos(-1 + (2 * i) / count);
+    const theta = Math.sqrt(count * Math.PI) * phi;
+
+    const x = radius * Math.cos(theta) * Math.sin(phi);
+    const y = radius * Math.sin(theta) * Math.sin(phi);
+    const z = radius * Math.cos(phi);
+
+    const textGeometry = new THREE.TextGeometry(skills[i], {
+      font: font,
+      size: 2,
+      height: 0.5
+    });
+
+    const textMesh = new THREE.Mesh(textGeometry, textMaterial);
+    textMesh.position.set(x, y, z);
+    textMesh.lookAt(0, 0, 0);
+    textGroup.add(textMesh);
+  }
+});
+
+// Animation loop
+function animate() {
+  requestAnimationFrame(animate);
+  textGroup.rotation.y += 0.001;
+  controls.update();
+  renderer.render(scene, camera);
+}
+animate();
+
+// Handle resize
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth/window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+</script>
+</body>
+</html>

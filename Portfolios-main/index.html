@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Savage King</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="style.css">
+<style>
+</style>
+</head>
+<body class="light">
+<canvas id="bg"></canvas>
+<nav class="fixed w-full z-50 border-b">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="flex justify-between items-center h-16">
+<div class="text-2xl font-bold bg-gradient-to-r from-indigo-500 to-purple-600 bg-clip-text text-transparent pulse-hover" id="nav-brand"></div>
+<div class="hidden md:flex space-x-8" id="desktop-nav">
+
+</div>
+<button class="theme-toggle" id="theme-btn" title="Toggle Theme"><i class="fas fa-moon"></i></button>
+</div>
+</div>
+<div id="mobile-menu" class="hidden md:hidden border-t">
+<div class="px-4 py-3 space-y-3" id="mobile-nav"></div>
+</div>
+</nav>
+<section id="home" class="section visible min-h-screen flex items-center justify-center px-4">
+<div class="text-center">
+<div class="w-48 h-48 mx-auto mb-8 rounded-full overflow-hidden border-4 border-indigo-500 shadow-2xl shadow-indigo-500/50 float pulse-hover">
+<img id="profile-img" alt="Profile" class="w-full h-full object-cover">
+</div>
+<h1 class="text-5xl md:text-7xl font-bold mb-4 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text text-transparent" id="hero-name"></h1>
+<p class="text-xl md:text-2xl mb-8" id="hero-title"></p>
+<a href="#contact" class="inline-block px-8 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-full btn-glow text-white">
+<i class="fas fa-envelope mr-2"></i>Get In Touch
+</a>
+</div>
+</section>
+<section id="about" class="section min-h-screen flex items-center px-4 py-20">
+<div class="max-w-4xl mx-auto w-full">
+<h2 class="text-4xl md:text-5xl font-bold mb-12 text-center bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
+<i class="fas fa-user icon-hover mr-3"></i>About Me
+</h2>
+<div class="card gradient-border rounded-2xl p-8 md:p-12 border" id="about-content"></div>
+</div>
+</section>
+<section id="focus" class="section min-h-screen flex items-center px-4 py-20">
+<div class="max-w-6xl mx-auto w-full">
+<h2 class="text-4xl md:text-5xl font-bold mb-12 text-center bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
+<i class="fas fa-bullseye icon-hover mr-3"></i>Focus Domains
+</h2>
+<div class="grid md:grid-cols-3 gap-8" id="focus-grid"></div>
+</div>
+</section>
+<section id="skills" class="section min-h-screen flex items-center px-4 py-20">
+<div class="max-w-4xl mx-auto w-full">
+<h2 class="text-4xl md:text-5xl font-bold mb-12 text-center bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
+<i class="fas fa-code icon-hover mr-3"></i>Skills
+</h2>
+<div class="card gradient-border rounded-2xl p-8 md:p-12 border space-y-8" id="skills-container"></div>
+</div>
+</section>
+<section id="journey" class="section min-h-screen flex items-center px-4 py-20">
+<div class="max-w-6xl mx-auto w-full">
+<h2 class="text-4xl md:text-5xl font-bold mb-12 text-center bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
+<i class="fas fa-route icon-hover mr-3"></i>My Journey
+</h2>
+<div class="relative" id="journey-container" style="min-height:800px">
+<div class="journey-path" id="journey-path"></div>
+</div>
+</div>
+</section>
+<section id="projects" class="section min-h-screen flex items-center px-4 py-20">
+<div class="max-w-6xl mx-auto w-full">
+<h2 class="text-4xl md:text-5xl font-bold mb-12 text-center bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
+<i class="fas fa-laptop-code icon-hover mr-3"></i>Projects
+</h2>
+<div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8" id="projects-grid"></div>
+</div>
+</section>
+
+
+
+
+<section class="w-full px-4 py-6">
+  <div class="relative w-full max-w-5xl mx-auto min-h-[400px] overflow-hidden">
+    <iframe
+      src="./typing/test.html"
+      class="absolute inset-0 w-full h-full border-0"
+      loading="lazy"
+      title="Responsive iframe"
+      sandbox="allow-scripts allow-same-origin"
+    ></iframe>
+  </div>
+</section>
+
+
+<h1 class="text-4xl md:text-5xl font-bold mb-12 text-center bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent"><i class="fas fa-trophy "></i>
+Achievements</h1>
+
+<section class="w-full px-4 py-6">
+  <div class="relative w-full max-w-5xl mx-auto min-h-[800px] overflow-hidden rounded-xl shadow-lg">
+    <iframe
+      src="./images/image.html"
+      class="absolute inset-0 w-full h-full border-0"
+      loading="lazy"
+      title="Responsive iframe"
+      sandbox="allow-scripts allow-same-origin"
+    ></iframe>
+  </div>
+</section>
+
+
+
+<br /><br /><br /><br />
+
+<h1 class="text-4xl md:text-5xl font-bold mb-12 text-center bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent"><i class="fas fa-trophy "></i>
+Certificates</h1>
+
+<section class="w-full px-4 py-6">
+  <div class="relative w-full max-w-5xl mx-auto min-h-[800px] overflow-hidden rounded-xl shadow-lg">
+    <iframe
+      src="./certify/certificate.html"
+      class="absolute inset-0 w-full h-full border-0"
+      loading="lazy"
+      title="Responsive iframe"
+      sandbox="allow-scripts allow-same-origin"
+    ></iframe>
+  </div>
+</section>
+
+<br /><br /><br /><br />
+
+<h2 class="text-4xl md:text-5xl font-bold mb-12 text-center bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
+  <i class="fas fa-gamepad mr-3"></i>Games
+</h2>
+
+<section class="flex flex-wrap justify-center gap-6">
+  <!-- Run Game -->
+  <a href="games/cyber.html" 
+     class="flex items-center gap-3 px-6 py-4 rounded-xl shadow-lg text-white 
+            bg-gradient-to-r from-green-400 to-teal-500 
+            dark:from-green-600 dark:to-teal-700
+            hover:scale-105 transition-transform">
+    <i class="fas fa-running text-2xl"></i>
+    <span class="text-lg font-semibold">Run</span>
+    <i class="fa-solid fa-chevron-right"></i>
+  </a>
+
+  <a href="games/shoot.html" 
+     class="flex items-center gap-3 px-6 py-4 rounded-xl shadow-lg text-white 
+            bg-gradient-to-r from-red-400 to-pink-500 
+            dark:from-red-600 dark:to-pink-700
+            hover:scale-105 transition-transform">
+    <i class="fas fa-bullseye text-2xl"></i>
+    <span class="text-lg font-semibold">Shoot</span>
+    <i class="fa-solid fa-chevron-right"></i>
+  </a>
+</section>
+
+
+
+
+<section id="contact" class="section min-h-screen flex items-center px-4 py-20">
+  
+<div class="max-w-4xl mx-auto w-full">
+<h2 class="text-4xl md:text-5xl font-bold mb-12 text-center bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
+<i class="fas fa-paper-plane icon-hover mr-3"></i>Get In Touch
+</h2>
+<div class="card gradient-border rounded-2xl p-8 md:p-12 border">
+<form class="space-y-6">
+<div>
+<label class="block text-sm font-semibold mb-2"><i class="fas fa-user mr-2"></i>Name</label>
+<input type="text" class="input w-full px-4 py-3 rounded-lg focus:outline-none transition" placeholder="Your Name">
+</div>
+<div>
+<label class="block text-sm font-semibold mb-2"><i class="fas fa-envelope mr-2"></i>Email</label>
+<input type="email" class="input w-full px-4 py-3 rounded-lg focus:outline-none transition" placeholder="your@email.com">
+</div>
+<div>
+<label class="block text-sm font-semibold mb-2"><i class="fas fa-message mr-2"></i>Message</label>
+<textarea rows="5" class="input w-full px-4 py-3 rounded-lg focus:outline-none transition" placeholder="Your message..."></textarea>
+</div>
+<button type="submit" class="w-full py-3 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-lg font-semibold btn-glow text-white">
+<i class="fas fa-paper-plane mr-2"></i>Send Message
+</button>
+</form>
+<div class="mt-8 pt-8 border-t flex justify-center gap-6 text-2xl" id="social-links"></div>
+</div>
+</div>
+</section>
+
+<footer class="border-t border-gray-700 py-8 text-center">
+  <p id="footer-text" class="text-sm text-gray-400 mb-2"></p>
+  <p class="text-lg font-medium text-200">
+    Developed By 
+    <a href="developer.html" class="text-indigo-500 font-semibold hover:text-pink-500 hover:drop-shadow-[0_0_6px_#ec4899] transition-all duration-300">
+      Savage King
+    </a>
+  </p>
+</footer>
+<script src="./main.js"></script>
+</body>
+</html>

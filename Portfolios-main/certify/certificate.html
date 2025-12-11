@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Auto Certificate Shooter</title>
+<link rel="stylesheet" href="styles.css">
+<style>
+
+  *{box-sizing:border-box}
+  body,html{height:100%;margin:0;overflow:hidden;display:flex;justify-content:center;align-items:center;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;position:relative}
+  .gun{width:clamp(50px,10vw,70px);height:clamp(50px,10vw,70px);background:linear-gradient(135deg,#fc0 0%,#f90 100%);border-radius:50%;position:fixed;z-index:10;left:50%;top:50%;transform:translate(-50%,-50%);box-shadow:0 0 30px rgba(255,204,0,.6),inset 0 -3px 10px rgba(0,0,0,.3);border:3px solid #fd3}
+  .gun::after{content:'🎯';font-size:clamp(24px,5vw,32px);position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)}
+  .certificate{width:clamp(100px,20vw,140px);height:clamp(65px,13vw,90px);background:linear-gradient(135deg,#fff 0%,#f0f0f0 100%);border-radius:clamp(8px,1.5vw,12px);position:fixed;display:flex;flex-direction:column;justify-content:center;align-items:center;font-weight:bold;font-size:clamp(10px,2vw,14px);color:#333;box-shadow:0 8px 20px rgba(0,0,0,.4);opacity:0;border:2px solid #ddd;transition:all 1s cubic-bezier(.34,1.56,.64,1);padding:clamp(4px,1vw,8px);cursor:pointer}
+  .certificate:hover{transform:translate(-50%,-50%) scale(1.1)!important;box-shadow:0 12px 30px rgba(255,204,0,.6);border-color:#fc0}
+  .certificate img{width:90%;height:70%;border-radius:clamp(6px,1vw,8px);object-fit:cover;pointer-events:none}
+  .certificate .name{margin-top:clamp(2px,.5vw,3px);font-size:clamp(9px,1.5vw,12px);text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;pointer-events:none}
+  .launched{opacity:1!important}
+  @keyframes pulse{0%,100%{transform:translate(-50%,-50%) scale(1)}50%{transform:translate(-50%,-50%) scale(1.15)}}
+  .gun.shooting{animation:pulse .3s ease}
+  .fullscreen-modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.95);z-index:1000;justify-content:center;align-items:center;animation:fadeIn .3s ease}
+  .fullscreen-modal.active{display:flex}
+  @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+  .fullscreen-content{max-width:90vw;max-height:90vh;position:relative;animation:zoomIn .3s ease}
+  @keyframes zoomIn{from{transform:scale(.8);opacity:0}to{transform:scale(1);opacity:1}}
+  .fullscreen-content img{max-width:100%;max-height:90vh;object-fit:contain;border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,.8)}
+  .close-btn{position:absolute;top:-50px;right:0;background:rgba(255,255,255,.2);border:2px solid #fff;color:#fff;font-size:32px;width:50px;height:50px;border-radius:50%;cursor:pointer;display:flex;justify-content:center;align-items:center;transition:all .3s ease;font-weight:300;line-height:1}
+  .close-btn:hover{background:rgba(255,255,255,.3);transform:rotate(90deg)}
+  .fullscreen-title{position:absolute;bottom:-50px;left:0;right:0;color:#fff;text-align:center;font-size:24px;font-weight:bold}
+  @media(max-width:768px){
+    .certificate{width:clamp(80px,25vw,120px);height:clamp(52px,16vw,78px)}
+    .close-btn{top:10px;right:10px;font-size:24px;width:40px;height:40px}
+    .fullscreen-title{bottom:10px;font-size:18px}
+  }
+  @media(max-width:480px){
+    .gun{width:50px;height:50px}
+    .gun::after{font-size:24px}
+    .fullscreen-content{max-width:95vw;max-height:95vh}
+  }
+  @media(max-height:500px)and(orientation:landscape){
+    .certificate{width:clamp(70px,15vw,100px);height:clamp(45px,10vw,65px)}
+    .close-btn{top:5px;right:5px}
+    .fullscreen-title{bottom:5px;font-size:16px}
+  }
+</style>
+</head>
+<body>
+<div id="gun" class="gun"></div>
+<div id="fullscreenModal" class="fullscreen-modal">
+  <div class="fullscreen-content">
+    <div class="close-btn" id="closeBtn">×</div>
+    <img id="fullscreenImg" src="" alt="">
+    <div class="fullscreen-title" id="fullscreenTitle"></div>
+  </div>
+</div>
+<script>
+const certs=[{name:"Certificate 1",img:"./Aspire.jpg"},{name:"Certificate 2",img:"./ICAT.jpg"},{name:"Certificate 3",img:"./ICT.jpg"},{name:"Certificate 4",img:"./MDB.jpg"},{name:"Certificate 5",img:"./Aspire.jpg"},{name:"Certificate 6",img:"./ICAT.jpg"},{name:"Certificate 7",img:"./ICT.jpg"},{name:"Certificate 8",img:"./MDB.jpg"}],
+certEls=[],
+gun=document.getElementById('gun'),
+modal=document.getElementById('fullscreenModal'),
+img=document.getElementById('fullscreenImg'),
+title=document.getElementById('fullscreenTitle'),
+btn=document.getElementById('closeBtn'),
+getR=()=>Math.max(Math.min(innerWidth,innerHeight)*.35,150),
+getC=()=>({x:innerWidth/2,y:innerHeight/2}),
+open=c=>{img.src=c.img;title.textContent=c.name;modal.classList.add('active');document.body.style.overflow='hidden'},
+close=()=>{modal.classList.remove('active');document.body.style.overflow='hidden'};
+let idx=0,aniT,resT;
+const launch=()=>{
+  if(idx>=certEls.length){aniT=setTimeout(reset,3e3);return}
+  gun.classList.add('shooting');
+  setTimeout(()=>gun.classList.remove('shooting'),300);
+  const c=certEls[idx],{x,y}=getC(),r=getR(),a=(idx/certEls.length)*Math.PI*2-Math.PI/2,cx=r*Math.cos(a),cy=r*Math.sin(a),rot=(a*180/Math.PI)+Math.random()*20-10;
+  c.style.left=x+cx+'px';
+  c.style.top=y+cy+'px';
+  c.style.transform=`translate(-50%,-50%) scale(1) rotate(${rot}deg)`;
+  c.classList.add('launched');
+  idx++;
+  aniT=setTimeout(launch,800)
+},
+reset=()=>{
+  clearTimeout(aniT);
+  const {x,y}=getC();
+  certEls.forEach(c=>{c.classList.remove('launched');c.style.left=x+'px';c.style.top=y+'px';c.style.transform='translate(-50%,-50%)';c.style.opacity='0'});
+  idx=0;
+  aniT=setTimeout(launch,500)
+};
+certs.forEach((c,i)=>{
+  const d=document.createElement('div'),{x,y}=getC();
+  d.className='certificate';
+  d.style.left=x+'px';
+  d.style.top=y+'px';
+  d.style.transform='translate(-50%,-50%)';
+  const im=document.createElement('img'),n=document.createElement('div');
+  im.src=c.img;
+  im.alt=c.name;
+  n.className='name';
+  d.appendChild(im);
+  d.appendChild(n);
+  d.addEventListener('click',()=>open(c));
+  document.body.appendChild(d);
+  certEls.push(d)
+});
+addEventListener('resize',()=>{clearTimeout(resT);resT=setTimeout(()=>{const {x,y}=getC(),r=getR();certEls.forEach((c,i)=>{if(i<idx&&c.classList.contains('launched')){const a=(i/certEls.length)*Math.PI*2-Math.PI/2,cx=r*Math.cos(a),cy=r*Math.sin(a),rot=(a*180/Math.PI)+Math.random()*20-10;c.style.left=x+cx+'px';c.style.top=y+cy+'px';c.style.transform=`translate(-50%,-50%) scale(1) rotate(${rot}deg)`}})},100)});
+addEventListener('beforeunload',()=>{clearTimeout(aniT);clearTimeout(resT)});
+btn.addEventListener('click',close);
+modal.addEventListener('click',e=>e.target===modal&&close());
+addEventListener('keydown',e=>e.key==='Escape'&&modal.classList.contains('active')&&close());
+setTimeout(launch,500)
+</script>
+</body>
+</html>

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Zigzag/Circle Thread Slider</title>
+<link rel="stylesheet" href=style.css>
+<script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+<div class="w-full max-w-sm sm:max-w-md md:max-w-lg flex flex-col gap-6 sm:gap-8 items-center">
+<div class="relative w-full aspect-[3/4] sm:aspect-[2/3] md:aspect-[3/5] max-h-[70vh] overflow-visible" id="container">
+<svg class="absolute inset-0 w-full h-full z-0" id="zigzag">
+<defs>
+<linearGradient id="grad" x1="0%" y1="0%" x2="0%" y2="100%">
+<stop offset="0%" stop-color="#6366f1"/>
+<stop offset="100%" stop-color="#ec4899"/>
+</linearGradient>
+</defs>
+<path id="path" stroke="url(#grad)" stroke-width="4" fill="none" stroke-linecap="round" stroke-dasharray="10,5"/>
+<circle id="dot-start" r="6" fill="#6366f1" opacity="0.8"/>
+<circle id="dot-end" r="6" fill="#ec4899" opacity="0.8"/>
+</svg>
+<div class="absolute w-full text-center text-yellow-400 font-bold text-shadow z-10 text-sm sm:text-base" id="start-text"></div>
+<div class="absolute w-full text-center text-yellow-400 font-bold text-shadow z-10 text-sm sm:text-base" id="end-text"></div>
+<div id="slider" class="relative w-full h-full"></div>
+</div>
+<div class="flex gap-4 sm:gap-6 md:gap-8 z-50">
+<button class="relative w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-full border-none cursor-pointer overflow-hidden shadow-2xl transition-all duration-400 hover:scale-110 active:scale-95 group" id="toggle-zigzag">
+<div class="absolute inset-0 transition-opacity duration-400"></div>
+<div class="absolute inset-0 bg-gradient-to-br from-pink-500 to-amber-500 opacity-0 group-hover:opacity-100 transition-opacity duration-400"></div>
+<span class="relative z-10 text-white text-2xl sm:text-3xl md:text-4xl font-bold">⚡</span>
+</button>
+<button class="relative w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-full border-none cursor-pointer overflow-hidden shadow-2xl transition-all duration-400 hover:scale-110 active:scale-95 group" id="toggle-circle">
+<div class="absolute inset-0 transition-opacity duration-400"></div>
+<div class="absolute inset-0 bg-gradient-to-br from-pink-500 to-amber-500 opacity-0 group-hover:opacity-100 transition-opacity duration-400"></div>
+<span class="relative z-10 text-white text-2xl sm:text-3xl md:text-4xl font-bold">⭕</span>
+</button>
+</div>
+</div>
+<style>
+.slide{position:absolute;text-align:center;transition:all .6s ease;z-index:20;cursor:grab;user-select:none}
+.slide img{width:90px;height:90px;object-fit:cover;border-radius:50%;border:2px solid transparent;box-shadow:0 4px 12px rgba(0,0,0,.3);transition:all .6s ease}
+.slide.active img{transform:scale(1.3);border-color:#ec4899;border-width:3px;box-shadow:0 8px 20px rgba(236,72,153,.6)}
+.description{color:#fff;margin-top:.5rem;font-weight:700;text-shadow:0 2px 4px rgba(0,0,0,.6);font-size:.9rem}
+@media(min-width:640px){
+.slide img{width:110px;height:110px}
+.description{font-size:1rem;margin-top:.6rem}
+}
+@media(min-width:768px){
+.slide img{width:130px;height:130px;border-width:3px}
+.slide.active img{border-width:4px}
+.description{font-size:1.1rem;margin-top:.7rem}
+}
+</style>
+<script>
+const d=[{img:'./exhibition.jpg',desc:'Exhibition'},{img:'./Hackathon 1.jpg',desc:'Team'},{img:'./Hackathon 2.jpg',desc:'Presentation'},{img:'./Iv photo.jpg',desc:'Industrial Visit'},{img:'./BCA.jpg',desc:'BCA'}],sl=document.getElementById('slider'),p=document.getElementById('path'),st=document.getElementById('start-text'),et=document.getElementById('end-text'),cn=document.getElementById('container'),n=d.length;let i=0,y=0,z=!0,c=!1,w=0,h=0;const sz=()=>{const r=cn.getBoundingClientRect();w=r.width;h=r.height};sz();window.addEventListener('resize',()=>{sz();u()});d.forEach((s,j)=>{const e=document.createElement('div');e.className='slide';e.innerHTML=`<img src="${s.img}" alt="${s.desc}"><div class="description">${s.desc}</div>`;sl.appendChild(e);e.addEventListener('click',()=>{i=j;u();r()})});const s=document.querySelectorAll('.slide'),g=pts=>{if(!pts.length)return'';if(pts.length===1)return`M ${pts[0].x} ${pts[0].y}`;let path=`M ${pts[0].x} ${pts[0].y}`;for(let k=1;k<pts.length;k++){const pv=pts[k-1],cr=pts[k],t=.4,pp=k>1?pts[k-2]:pv,nn=k<pts.length-1?pts[k+1]:cr,c1x=pv.x+(cr.x-pp.x)*t,c1y=pv.y+(cr.y-pp.y)*t,c2x=cr.x-(nn.x-pv.x)*t,c2y=cr.y-(nn.y-pv.y)*t;path+=` C ${c1x} ${c1y}, ${c2x} ${c2y}, ${cr.x} ${cr.y}`}return path},u=()=>{const pts=[],sz=s[0]?.querySelector('img')?.offsetWidth||90;if(c){p.style.display='block';st.style.display='none';et.style.display='none';const cx=w/2,cy=h/2,rd=Math.min(w,h)*.38,a=(2*Math.PI)/n;s.forEach((e,j)=>{const ang=a*j-Math.PI/2,x=cx+rd*Math.cos(ang)-sz/2,yp=cy+rd*Math.sin(ang)-sz/2;e.style.left=`${x}px`;e.style.top=`${yp}px`;e.classList.remove('active');pts.push({x:x+sz/2,y:yp+sz/2})});s[i].classList.add('active')}else{p.style.display='block';st.style.display='block';et.style.display='block';const g=h/(n-1.5),amp=w*.22;s.forEach((e,j)=>{const tp=(j-i)*g+h*.2,lp=w/2-sz/2+((z?j%2===0:j%2!==0)?-amp:amp);e.style.top=`${tp}px`;e.style.left=`${lp}px`;e.classList.remove('active');pts.push({x:lp+sz/2,y:tp+sz/2})});s[i].classList.add('active');st.style.top=`${pts[0].y-50}px`;et.style.top=`${pts[pts.length-1].y+50}px`}return pts},a=()=>{const pts=[];s.forEach(e=>{const r=e.getBoundingClientRect(),pr=sl.getBoundingClientRect();pts.push({x:r.left+r.width/2-pr.left,y:r.top+r.height/2-pr.top})});p.setAttribute('d',g(pts));requestAnimationFrame(a)};document.getElementById('toggle-zigzag').addEventListener('click',()=>{z=!z;if(!c)u()});document.getElementById('toggle-circle').addEventListener('click',()=>{c=!c;u()});const nx=()=>{i=(i+1)%n;u()},pv=()=>{i=(i-1+n)%n;u()};let auto=setInterval(nx,3500);const r=()=>{clearInterval(auto);auto=setInterval(nx,3500)};sl.addEventListener('touchstart',e=>{y=e.touches[0].clientY});sl.addEventListener('touchend',e=>{const ey=e.changedTouches[0].clientY;if(ey-y>50)pv();else if(y-ey>50)nx();r()});u();a();
+</script>
+</body>
+</html>

@@ -1,0 +1,260 @@
+/* Reset and Base Styles */
+* {
+  box-sizing: border-box;
+}
+
+* {
+  scrollbar-width: none;      /* Firefox */
+}
+
+*::-webkit-scrollbar {
+  display: none;              /* Chrome, Safari, Edge */
+}
+
+body,
+html {
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  position: relative;
+}
+
+/* Gun/Shooter Element */
+.gun {
+  width: clamp(50px, 10vw, 70px);
+  height: clamp(50px, 10vw, 70px);
+  background: linear-gradient(135deg, #fc0 0%, #f90 100%);
+  border-radius: 50%;
+  position: fixed;
+  z-index: 10;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 30px rgba(255, 204, 0, 0.6), inset 0 -3px 10px rgba(0, 0, 0, 0.3);
+  border: 3px solid #fd3;
+}
+
+.gun::after {
+  content: '🎯';
+  font-size: clamp(24px, 5vw, 32px);
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.gun.shooting {
+  animation: pulse 0.3s ease;
+}
+
+/* Certificate Cards */
+.certificate {
+  width: clamp(100px, 20vw, 140px);
+  height: clamp(65px, 13vw, 90px);
+  background: linear-gradient(135deg, #fff 0%, #f0f0f0 100%);
+  border-radius: clamp(8px, 1.5vw, 12px);
+  position: fixed;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+  font-size: clamp(10px, 2vw, 14px);
+  color: #333;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+  opacity: 0;
+  border: 2px solid #ddd;
+  transition: all 1s cubic-bezier(0.34, 1.56, 0.64, 1);
+  padding: clamp(4px, 1vw, 8px);
+  cursor: pointer;
+}
+
+.certificate:hover {
+  transform: translate(-50%, -50%) scale(1.1) !important;
+  box-shadow: 0 12px 30px rgba(255, 204, 0, 0.6);
+  border-color: #fc0;
+}
+
+.certificate img {
+  width: 90%;
+  height: 70%;
+  border-radius: clamp(6px, 1vw, 8px);
+  object-fit: cover;
+  pointer-events: none;
+}
+
+.certificate .name {
+  margin-top: clamp(2px, 0.5vw, 3px);
+  font-size: clamp(9px, 1.5vw, 12px);
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  pointer-events: none;
+}
+
+.certificate.launched {
+  opacity: 1 !important;
+}
+
+/* Fullscreen Modal */
+.fullscreen-modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.95);
+  z-index: 1000;
+  justify-content: center;
+  align-items: center;
+  animation: fadeIn 0.3s ease;
+}
+
+.fullscreen-modal.active {
+  display: flex;
+}
+
+.fullscreen-content {
+  max-width: 90vw;
+  max-height: 90vh;
+  position: relative;
+  animation: zoomIn 0.3s ease;
+}
+
+.fullscreen-content img {
+  max-width: 100%;
+  max-height: 90vh;
+  object-fit: contain;
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+}
+
+.fullscreen-title {
+  position: absolute;
+  bottom: -50px;
+  left: 0;
+  right: 0;
+  color: #fff;
+  text-align: center;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.close-btn {
+  position: absolute;
+  top: -50px;
+  right: 0;
+  background: rgba(255, 255, 255, 0.2);
+  border: 2px solid #fff;
+  color: #fff;
+  font-size: 32px;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: all 0.3s ease;
+  font-weight: 300;
+  line-height: 1;
+}
+
+.close-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: rotate(90deg);
+}
+
+/* Animations */
+@keyframes pulse {
+  0%,
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.15);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes zoomIn {
+  from {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Responsive Design - Tablet */
+@media (max-width: 768px) {
+  .certificate {
+    width: clamp(80px, 25vw, 120px);
+    height: clamp(52px, 16vw, 78px);
+  }
+
+  .close-btn {
+    top: 10px;
+    right: 10px;
+    font-size: 24px;
+    width: 40px;
+    height: 40px;
+  }
+
+  .fullscreen-title {
+    bottom: 10px;
+    font-size: 18px;
+  }
+}
+
+/* Responsive Design - Mobile */
+@media (max-width: 480px) {
+  .gun {
+    width: 50px;
+    height: 50px;
+  }
+
+  .gun::after {
+    font-size: 24px;
+  }
+
+  .fullscreen-content {
+    max-width: 95vw;
+    max-height: 95vh;
+  }
+}
+
+/* Responsive Design - Landscape Mode */
+@media (max-height: 500px) and (orientation: landscape) {
+  .certificate {
+    width: clamp(70px, 15vw, 100px);
+    height: clamp(45px, 10vw, 65px);
+  }
+
+  .close-btn {
+    top: 5px;
+    right: 5px;
+  }
+
+  .fullscreen-title {
+    bottom: 5px;
+    font-size: 16px;
+  }
+}

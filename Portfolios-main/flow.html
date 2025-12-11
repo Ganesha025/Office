@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Workflow</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://unpkg.com/aos@2.3.4/dist/aos.css" rel="stylesheet">
+<script src="https://unpkg.com/feather-icons"></script>
+</head>
+<body class="bg-gray-900 text-white font-sans">
+
+<section class="py-16 px-4 md:px-16">
+  <div class="text-center mb-12" data-aos="fade-down">
+    <h2 class="text-4xl font-bold mb-2">My Workflow</h2>
+    <p class="inline-flex items-center bg-gray-800 text-sm px-3 py-1 rounded-full">
+      <span class="mr-2">🤝</span> How I solve problems
+    </p>
+  </div>
+
+  <div id="workflow-cards" class="grid grid-cols-1 md:grid-cols-4 gap-6"></div>
+</section>
+
+<script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
+<script>
+[ {icon:"search",title:"Analyze Problem",desc:"Deeply analyze to find root causes.",color:"text-blue-500",aos:"fade-up"}, {icon:"lightbulb",title:"Explore Solutions",desc:"Research & brainstorm efficient approaches.",color:"text-purple-500",aos:"fade-up"}, {icon:"tool",title:"Plan & Develop",desc:"Plan structure & write clean scalable code.",color:"text-green-500",aos:"fade-up"}, {icon:"check-circle",title:"Test & Deliver",desc:"Test thoroughly & deliver with docs.",color:"text-yellow-400",aos:"fade-up"}]
+.forEach(i=>{
+  const c=document.createElement("div");
+  c.className="bg-gray-800 p-6 rounded-xl shadow-lg flex flex-col items-start hover:scale-105 transform transition duration-300";
+  c.setAttribute("data-aos",i.aos);
+  c.innerHTML=`<div class="mb-4 text-3xl ${i.color}"><i data-feather="${i.icon}"></i></div>
+  <h3 class="text-xl font-bold mb-2">${i.title}</h3>
+  <p class="text-gray-300 text-sm">${i.desc}</p>`;
+  document.getElementById("workflow-cards").appendChild(c);
+});
+
+feather.replace();AOS.init();
+</script>
+
+</body>
+</html>

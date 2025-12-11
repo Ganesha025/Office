@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cyber Runner</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{
+    background:radial-gradient(circle at center,#0a0014,#000);
+    overflow:hidden;
+    font-family:'Segoe UI',sans-serif;
+    color:#fff;
+  }
+  canvas{
+    display:block;
+    margin:20px auto;
+    background:linear-gradient(90deg,#0a0014,#1b0032);
+    border:2px solid #a200ff;
+    box-shadow:0 0 40px #a200ff88;
+    border-radius:10px;
+  }
+  #scoreBox{
+    position:fixed;top:10px;left:15px;
+    font-size:clamp(16px,3vw,22px);
+    font-weight:bold;
+    color:#00ffff;
+    text-shadow:0 0 10px #00ffff;
+  }
+  #levelBox{
+    position:fixed;top:10px;right:15px;
+    font-size:clamp(16px,3vw,22px);
+    font-weight:bold;
+    color:#ff00c8;
+    text-shadow:0 0 10px #ff00c8;
+  }
+  #gameOver{
+    position:fixed;top:50%;left:50%;
+    transform:translate(-50%,-50%);
+    text-align:center;
+    display:none;
+    color:#ff00c8;
+    text-shadow:0 0 20px #ff00c8;
+  }
+  #gameOver h2{
+    font-size:clamp(24px,5vw,36px);
+    margin-bottom:15px;
+  }
+  #restartBtn{
+    padding:10px 25px;
+    border:none;
+    background:linear-gradient(90deg,#a200ff,#00ffff);
+    color:white;font-weight:bold;
+    border-radius:8px;
+    cursor:pointer;
+    transition:.3s;
+    font-size:clamp(14px,3vw,18px);
+  }
+  #restartBtn:hover{
+    transform:scale(1.1);
+    box-shadow:0 0 15px #00ffff;
+  }
+</style>
+</head>
+<body>
+<canvas id="gameCanvas"></canvas>
+<div id="scoreBox">Score: 0</div>
+<div id="levelBox">Level: Easy</div>
+<div id="gameOver">
+  <h2>GAME OVER</h2>
+  <button id="restartBtn">Restart</button>
+</div>
+
+<script>
+const canvas=document.getElementById('gameCanvas');
+const ctx=canvas.getContext('2d');
+let cw,ch;
+function resizeCanvas(){
+  cw=window.innerWidth*0.9;
+  ch=window.innerHeight*0.55;
+  canvas.width=cw;canvas.height=ch;
+}
+resizeCanvas();
+window.addEventListener('resize',resizeCanvas);
+
+let player={x:cw*0.1,y:0,width:cw*0.05,height:cw*0.05,color:'#00ffff',dy:0,jumpForce:ch*0.028,gravity:ch*0.002,grounded:false};
+let obstacles=[],frame=0,speed=cw*0.006,score=0,level="Easy",gameOver=false;
+let spawnRate=100; // lower = more obstacles
+
+const scoreBox=document.getElementById('scoreBox');
+const levelBox=document.getElementById('levelBox');
+const gameOverDiv=document.getElementById('gameOver');
+const restartBtn=document.getElementById('restartBtn');
+
+document.addEventListener('keydown',e=>{
+  if((e.code==='Space'||e.code==='ArrowUp')&&player.grounded&&!gameOver){
+    player.dy=-player.jumpForce;player.grounded=false;
+  }
+});
+document.addEventListener('touchstart',()=>{
+  if(player.grounded&&!gameOver){
+    player.dy=-player.jumpForce;player.grounded=false;
+  }
+});
+
+function drawPlayer(){
+  ctx.fillStyle=player.color;
+  ctx.shadowColor='#00ffff';
+  ctx.shadowBlur=20;
+  ctx.fillRect(player.x,player.y,player.width,player.height);
+  ctx.shadowBlur=0;
+}
+function drawObstacles(){
+  ctx.shadowColor='#ff00ff';
+  ctx.shadowBlur=20;
+  obstacles.forEach(o=>{
+    ctx.fillStyle=o.color;
+    ctx.fillRect(o.x,o.y,o.width,o.height);
+  });
+  ctx.shadowBlur=0;
+}
+function spawnObstacle(){
+  const h=ch*(Math.random()*0.1+0.08);
+  obstacles.push({
+    x:cw,
+    y:ch-h-ch*0.05,
+    width:cw*(Math.random()*0.04+0.03),
+    height:h,
+    color:'#ff00ff'
+  });
+}
+function updateDifficulty(){
+  if(score<15){level="Easy";speed=cw*0.006;spawnRate=100;}
+  else if(score<30){level="Medium";speed=cw*0.0075;spawnRate=80;}
+  else if(score<50){level="Hard";speed=cw*0.009;spawnRate=65;}
+  else{level="Insane";speed=cw*0.011;spawnRate=55;}
+  levelBox.innerText="Level: "+level;
+}
+
+function update(){
+  if(gameOver)return;
+  ctx.clearRect(0,0,cw,ch);
+  ctx.fillStyle='#a200ff';
+  ctx.fillRect(0,ch-ch*0.05,cw,4);
+
+  player.y+=player.dy;
+  if(player.y+player.height<ch-ch*0.05){
+    player.dy+=player.gravity;player.grounded=false;
+  }else{
+    player.y=ch-player.height-ch*0.05;player.dy=0;player.grounded=true;
+  }
+
+  obstacles.forEach((o,i)=>{
+    o.x-=speed;
+    if(o.x+o.width<0){
+      obstacles.splice(i,1);
+      score++;
+      scoreBox.innerText="Score: "+score;
+      updateDifficulty();
+    }
+    if(
+      player.x<o.x+o.width&&
+      player.x+player.width>o.x&&
+      player.y<o.y+o.height&&
+      player.y+player.height>o.y
+    ){
+      gameOver=true;
+      gameOverDiv.style.display='block';
+    }
+  });
+
+  drawPlayer();
+  drawObstacles();
+
+  if(frame%spawnRate===0)spawnObstacle();
+  frame++;
+  requestAnimationFrame(update);
+}
+
+restartBtn.addEventListener('click',()=>{
+  player.y=ch-player.height-ch*0.05;
+  player.dy=0;obstacles=[];frame=0;score=0;
+  level="Easy";speed=cw*0.006;spawnRate=100;
+  gameOver=false;
+  scoreBox.innerText="Score: 0";
+  levelBox.innerText="Level: Easy";
+  gameOverDiv.style.display='none';
+  update();
+});
+update();
+</script>
+</body>
+</html>

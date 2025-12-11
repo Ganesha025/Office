@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scroll Rotate Dial + Glow</title>
+
+<!-- FontAwesome -->
+<link rel="stylesheet" 
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<style>
+  body {
+    height: 250vh;
+    background: #080808;
+  }
+
+  /* Main circle */
+  #social-curved {
+    position: fixed;
+    right: -200px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 350px;
+    height: 350px;
+    background-color: blue;
+    border-radius: 50%;
+    pointer-events: none;
+    transition: transform .2s linear;
+  }
+
+  /* icon bubble */
+  .social-item {
+    position: absolute;
+    width: 65px;
+    height: 65px;
+    border-radius: 50%;
+    color: white;
+    font-size: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: auto;
+    cursor: pointer;
+    opacity: 0;
+
+    /* default no glow */
+    box-shadow: 0 0 0px rgba(255,255,255,0);
+    transition: opacity .6s ease, transform .6s ease, box-shadow .6s ease;
+  }
+
+  .social-item.hidden {
+    transform: scale(0.3);
+    opacity: 0;
+  }
+
+  .social-item.show {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  /* Glow animation */
+  @keyframes glowPulse {
+    0%   { box-shadow: 0 0 0px rgba(255,255,255,0); }
+    40%  { box-shadow: 0 0 20px var(--glow-color), 0 0 35px var(--glow-color); }
+    100% { box-shadow: 0 0 0px rgba(255,255,255,0); }
+  }
+</style>
+</head>
+
+<body>
+
+<!-- CIRCLE -->
+<div id="social-curved"></div>
+
+<script>
+/* your socials */
+const social = [
+  { icon:"fa-whatsapp", link:"https://wa.me/9895120570?text=Hello%20developer%20from%20your%20portfolio", color:"#25D366"},
+  { icon:"fa-instagram", link:"https://www.instagram.com/savage_codee?igsh=MXRkZnJjOXpoZzFnbg==", color:"#E4405F"},
+  { icon:"fa-github", link:"https://github.com/Ganesha025", color:"#333333"},
+  { icon:"fa-solid fa-circle-info", link:"https://in.indeed.com/profile/yourProfile", color:"#2164F3"}
+];
+
+const container = document.getElementById("social-curved");
+const total = social.length;
+
+/* radius from center of circle */
+const radius = 130;
+
+/* LEFT HALF ARC (120° → 240°) */
+const startAngle = 120 * (Math.PI/180);
+const endAngle   = 240 * (Math.PI/180);
+
+social.forEach((item, i) => {
+  const angle = startAngle + (i / (total - 1)) * (endAngle - startAngle);
+
+  const x = radius * Math.cos(angle);
+  const y = radius * Math.sin(angle);
+
+  const div = document.createElement("a");
+  div.href = item.link;
+  div.target = "_blank";
+  div.className = "social-item hidden";
+
+  div.style.background = item.color;
+  div.style.setProperty("--glow-color", item.color);
+
+  div.style.left = 175 + x - 32 + "px";
+  div.style.top  = 175 + y - 32 + "px";
+
+  div.innerHTML = `<i class="fa ${item.icon}"></i>`;
+  container.appendChild(div);
+});
+
+/* scroll animation (appear + glow one-by-one) */
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      
+      document.querySelectorAll(".social-item").forEach((el, index) => {
+        
+        setTimeout(() => {
+          el.classList.add("show");
+
+          // Trigger glow pulse for each icon
+          el.style.animation = "glowPulse 1s ease forwards";
+
+          // Optional: remove animation so it won’t loop
+          setTimeout(() => { el.style.animation = ""; }, 1000);
+
+        }, index * 220);
+      });
+
+    }
+  });
+});
+observer.observe(document.body);
+
+
+/* Scroll rotation */
+window.addEventListener("scroll", () => {
+  const scrollY = window.scrollY;
+  const rotateDeg = scrollY * 0.15;
+
+  container.style.transform = `translateY(-50%) rotate(${rotateDeg}deg)`;
+});
+</script>
+
+</body>
+</html>
