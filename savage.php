@@ -1,56 +1,56 @@
-return $this->response->setJSON([
-    'status' => 'success',
-    'student_id' => $student_id,
-    'message' => 'Student added successfully'
-]);
+function showStudentCard(dept) {
+    const container = document.getElementById('studentList');
+    const title = document.getElementById('studentCardTitle');
+    const fee = document.getElementById('deptFee');
 
+    container.innerHTML = '';
+    title.textContent = dept.department_name;
 
+    const totalUncollected = dept.unpaid_students.reduce(
+        (sum, s) => sum + parseFloat(s.amount), 0
+    );
 
- <div id="toast"
-     class="fixed top-6 right-6 z-50 hidden px-4 py-3 rounded-lg shadow-lg text-white transition-all duration-300">
-    <span id="toastMsg"></span>
-</div>
-<script>
-function showToast(msg, type='success'){
-    const toast = document.getElementById('toast');
-    const text  = document.getElementById('toastMsg');
+    // Total students in dept
+    const totalStudents = dept.total_students || (dept.unpaid_students.length + dept.paid_count || 0);
 
-    toast.classList.remove('hidden','bg-green-600','bg-red-600','bg-yellow-600');
-    toast.classList.add(type==='success'?'bg-green-600':type==='error'?'bg-red-600':'bg-yellow-600');
+    // Students paid = total - unpaid
+    const paidStudentsCount = totalStudents - dept.unpaid_students.length;
 
-    text.textContent = msg;
+    // Total collected = dept fee * paid students
+    const totalCollected = dept.department_fees_amount * paidStudentsCount;
 
-    setTimeout(()=> toast.classList.add('opacity-0'), 2500);
-    setTimeout(()=>{
-        toast.classList.add('hidden');
-        toast.classList.remove('opacity-0');
-    },3000);
-}
-</script>
+    fee.innerHTML = `
+        <div class="flex flex-col text-right">
+            <span style="color:#1e35a3; font-weight:600;">
+                Dept Fee (per student): ₹ ${parseFloat(dept.department_fees_amount).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+            </span>
+            <span class="text-green-600 text-sm font-semibold">
+                Total Collected: ₹ ${totalCollected.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+            </span>
+            <span class="text-red-600 text-sm font-semibold">
+                Uncollected: ₹ ${totalUncollected.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+            </span>
+        </div>
+    `;
 
-$('#formAddStudent').on('submit', function(e){
-    e.preventDefault();
-
-    const form = $(this);
-
-    $.ajax({
-        url: form.attr('action'),
-        type: 'POST',
-        data: form.serialize(),
-        dataType: 'json',
-        success: function(res){
-            if(res.status === 'success'){
-                closeModal();
-                showToast(res.message || 'Student added successfully','success');
-                form[0].reset();
-                $('#formSubmitBtn').prop('disabled', true);
-            } else {
-                showToast(res.message || 'Something went wrong','error');
-            }
-        },
-        error: function(){
-            showToast('Server error. Try again','error');
-        }
+    dept.unpaid_students.forEach(s => {
+        const paidAmt = dept.department_fees_amount - s.amount;
+        const div = document.createElement('div');
+        div.className = "bg-white/50 p-2 rounded-lg flex justify-between items-center shadow-sm";
+        div.innerHTML = `
+            <div class="flex flex-col">
+                <div class="flex items-center space-x-2">
+                    <span class="material-symbols-outlined text-red-600">arrow_circle_down</span>
+                    <span class="font-bold">${s.name}</span>
+                </div>
+                <span class="text-green-600 text-sm ml-7">
+                    + ₹${paidAmt.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                </span>
+            </div>
+            <span class="text-red-600 font-bold">
+                - ₹ ${parseFloat(s.amount).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+            </span>
+        `;
+        container.appendChild(div);
     });
-});
-
+}
