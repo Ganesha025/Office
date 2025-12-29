@@ -2,54 +2,229 @@
 $servername = "localhost";
 $username = "root";
 $password = "";
-$dbname = "test";
+$dbname = "ZenSQLDB";
+
+$conn = new mysqli($servername, $username, $password);
+$conn->set_charset("utf8mb4");
+if ($conn->connect_error) die("Connection failed: " . $conn->connect_error);
+
+$conn->query("CREATE DATABASE IF NOT EXISTS `$dbname` CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci");
+$conn->select_db($dbname);
+
+$createTableSQL = "
+CREATE TABLE IF NOT EXISTS ZenSQLHistory (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    query_text TEXT NOT NULL,
+    status ENUM('success', 'error') NOT NULL,
+    error_message TEXT NULL,
+    executed_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+";
+$conn->query($createTableSQL);
 
 $conn = new mysqli($servername, $username, $password, $dbname);
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
+if ($conn->connect_error) die("Connection failed: " . $conn->connect_error);
 
 $result_html = "";
 $error_msg = "";
+$history_html = "";
 
 if (isset($_POST['query'])) {
     $query = $_POST['query'];
+    $status = 'success';
+    $error_message = null;
+
     if (preg_match('/\bDROP\s+DATABASE\b/i', $query)) {
         $error_msg = "DROP DATABASE queries are not allowed!";
+        $status = 'error';
+        $error_message = $error_msg;
+    } elseif (preg_match('/\bZenSQLHistory\b/i', $query)) {
+        $error_msg = "Queries on ZenSQLHistory table are not allowed!";
+        $status = 'error';
+        $error_message = $error_msg;
     } else {
-        if ($conn->multi_query($query)) {
-            do {
-                if ($result = $conn->store_result()) {
-                    $result_html .= "<div class='overflow-x-auto mb-4'><table class='min-w-full bg-white dark:bg-slate-800 border border-blue-200 dark:border-blue-700'>";
-                    $result_html .= "<thead class='bg-blue-600 dark:bg-blue-800 text-white'>";
-                    $result_html .= "<tr>";
-                    while ($field = $result->fetch_field()) {
-                        $result_html .= "<th class='px-4 py-2 text-left text-sm font-medium border border-blue-300 dark:border-blue-600'>{$field->name}</th>";
-                    }
-                    $result_html .= "</tr></thead><tbody>";
-                    while ($row = $result->fetch_assoc()) {
-                        $result_html .= "<tr class='hover:bg-blue-50 dark:hover:bg-slate-700 transition-colors duration-150'>";
-                        foreach ($row as $cell) {
-                            $result_html .= "<td class='px-4 py-2 border border-blue-200 dark:border-blue-700 text-sm text-gray-900 dark:text-gray-100'>{$cell}</td>";
+        try {
+            if ($conn->multi_query($query)) {
+                do {
+                    if ($result = $conn->store_result()) {
+                        $result_html .= "<div class='overflow-x-auto mb-4'><table class='min-w-full bg-white dark:bg-slate-800 border border-blue-200 dark:border-blue-700'>";
+                        $result_html .= "<thead class='bg-blue-600 dark:bg-blue-800 text-white'><tr>";
+                        while ($field = $result->fetch_field()) {
+                            $result_html .= "<th class='px-4 py-2 text-left text-sm font-medium border border-blue-300 dark:border-blue-600'>{$field->name}</th>";
                         }
-                        $result_html .= "</tr>";
+                        $result_html .= "</tr></thead><tbody>";
+                        while ($row = $result->fetch_assoc()) {
+                            $result_html .= "<tr class='hover:bg-blue-50 dark:hover:bg-slate-700 transition-colors duration-150'>";
+                            foreach ($row as $cell) {
+                                $result_html .= "<td class='px-4 py-2 border border-blue-200 dark:border-blue-700 text-sm text-gray-900 dark:text-gray-100'>{$cell}</td>";
+                            }
+                            $result_html .= "</tr>";
+                        }
+                        $result_html .= "</tbody></table></div>";
+                        $result->free();
+                    } else {
+                        $result_html .= "<div class='p-3 mb-4 bg-blue-50 dark:bg-blue-900 text-blue-700 dark:text-blue-100 border border-blue-200 dark:border-blue-700 rounded-lg'>Query executed successfully. Affected rows: " . $conn->affected_rows . "</div>";
                     }
-                    $result_html .= "</tbody></table></div>";
-                    $result->free();
-                } else {
-                    $result_html .= "<div class='p-3 mb-4 bg-blue-50 dark:bg-blue-900 text-blue-700 dark:text-blue-100 border border-blue-200 dark:border-blue-700 rounded-lg'>Query executed successfully. Affected rows: " . $conn->affected_rows . "</div>";
-                }
-            } while ($conn->more_results() && $conn->next_result());
-        } else {
-            $error_msg = "Query Error: " . $conn->error;
+                } while ($conn->more_results() && $conn->next_result());
+            } else {
+                throw new Exception("Query failed: " . $conn->error);
+            }
+        } catch (Exception $e) {
+            $status = 'error';
+            $error_message = $e->getMessage();
+            $error_msg = "Error: " . $e->getMessage();
         }
     }
+
+    $stmt = $conn->prepare("INSERT INTO ZenSQLHistory (query_text, status, error_message) VALUES (?, ?, ?)");
+    $stmt->bind_param("sss", $query, $status, $error_message);
+    $stmt->execute();
+    $stmt->close();
 }
 
+// Fetch query history
+$history_html = "<div class='mt-6'><h2 class='text-xl font-semibold text-blue-900 dark:text-blue-300 mb-4'>Query History</h2>";
+$history_result = $conn->query("SELECT * FROM ZenSQLHistory ORDER BY executed_at DESC LIMIT 50");
+if ($history_result && $history_result->num_rows > 0) {
+    $history_html .= "<div class='overflow-x-auto'><table class='min-w-full bg-white dark:bg-slate-800 border border-blue-200 dark:border-blue-700'><thead class='bg-blue-600 dark:bg-blue-800 text-white'><tr>
+        <th class='px-4 py-2 border'>ID</th>
+        <th class='px-4 py-2 border'>Query</th>
+        <th class='px-4 py-2 border'>Status</th>
+        <th class='px-4 py-2 border'>Error Message</th>
+        <th class='px-4 py-2 border'>Executed At</th>
+    </tr></thead><tbody>";
+    while ($row = $history_result->fetch_assoc()) {
+        $history_html .= "<tr class='hover:bg-blue-50 dark:hover:bg-slate-700 transition-colors duration-150'>
+            <td class='px-4 py-2 border'>{$row['id']}</td>
+            <td class='px-4 py-2 border'>{$row['query_text']}</td>
+            <td class='px-4 py-2 border'>{$row['status']}</td>
+            <td class='px-4 py-2 border'>{$row['error_message']}</td>
+            <td class='px-4 py-2 border'>{$row['executed_at']}</td>
+        </tr>";
+    }
+    $history_html .= "</tbody></table></div>";
+} else {
+    $history_html .= "<p class='text-blue-500 dark:text-blue-400'>No query history yet.</p>";
+}
+$history_html .= "</div>";
+
+if(isset($_POST['ajax']) && $_POST['ajax'] == 1){
+    echo json_encode([
+        'result_html' => $result_html,
+        'error_msg' => $error_msg,
+        'history_html' => $history_html
+    ]);
+    exit;
+}if(isset($_POST['fetchTables']) && $_POST['fetchTables'] == 1) {
+    $conn = new mysqli($servername, $username, $password, $dbname);
+    $tables_result = $conn->query("SHOW TABLES");
+    $tablesData = [];
+
+    while($row = $tables_result->fetch_array()) {
+        $tableName = $row[0];
+        if(strcasecmp($tableName, 'ZenSQLHistory') === 0) continue;
+
+        $tableRows = [];
+        $res = $conn->query("SELECT * FROM `$tableName` LIMIT 50");
+        while($r = $res->fetch_assoc()) {
+            $tableRows[] = $r;
+        }
+
+        $fields = [];
+        $fields_res = $conn->query("SHOW COLUMNS FROM `$tableName`");
+        while($f = $fields_res->fetch_assoc()) {
+            $fields[] = $f['Field'];
+        }
+
+        $tablesData[] = [
+            'name' => $tableName,
+            'fields' => $fields,
+            'rows' => $tableRows
+        ];
+    }
+
+    $conn->close();
+    echo json_encode($tablesData);
+    exit;
+}
+if(isset($_POST['fetchHistory']) && $_POST['fetchHistory'] == 1) {
+    $conn = new mysqli($servername, $username, $password, $dbname);
+    $history_html = "<div class='flex flex-col gap-3'>";
+
+    $res = $conn->query("SELECT * FROM ZenSQLHistory ORDER BY executed_at DESC");
+    while($row = $res->fetch_assoc()) {
+
+        $dt = new DateTime($row['executed_at']);
+        $formatted = $dt->format('d M y - h:i:s A');
+
+        $isSuccess = $row['status'] === 'success';
+
+        $badgeClass = $isSuccess
+            ? 'bg-green-100 text-green-800'
+            : 'bg-red-100 text-red-800';
+
+        $title = $isSuccess ? 'Success' : 'Error';
+        $icon  = $isSuccess ? 'check_circle' : 'error';
+
+        $history_html .= "
+        <div class='history-card flex items-center justify-between p-4 bg-white dark:bg-slate-800 
+                    border border-blue-200 dark:border-blue-700 rounded-lg shadow-sm 
+                    hover:shadow-md transition-all duration-150 cursor-pointer'
+            data-query='".htmlspecialchars($row['query_text'], ENT_QUOTES)."'
+            data-status='{$row['status']}'
+            data-error='".htmlspecialchars($row['error_message'] ?: '-', ENT_QUOTES)."'
+            data-time='{$formatted}'>
+
+            <div class='flex items-center gap-3'>
+                <span class='material-icons text-lg {$badgeClass} rounded-full p-1'>
+                    {$icon}
+                </span>
+                <span class='font-medium {$badgeClass} px-3 py-1 rounded-full'>
+                    {$title}
+                </span>
+            </div>
+
+            <span class='text-sm text-gray-500 dark:text-gray-400'>
+                {$formatted}
+            </span>
+        </div>";
+    }
+
+    $history_html .= "</div>";
+    $conn->close();
+    echo $history_html;
+    exit;
+}
+if (isset($_POST['fetchSchema']) && $_POST['fetchSchema'] == 1) {
+    $schema = [];
+    $tables = $conn->query("SHOW TABLES");
+
+    while ($t = $tables->fetch_array()) {
+        if (strcasecmp($t[0], 'ZenSQLHistory') === 0) continue;
+
+        $cols = [];
+        $res = $conn->query("SHOW COLUMNS FROM `{$t[0]}`");
+        while ($c = $res->fetch_assoc()) {
+            $cols[] = $c['Field'];
+        }
+        $schema[$t[0]] = $cols;
+    }
+
+    echo json_encode($schema);
+    exit;
+}
+
+
+
+
+
+
+// Fetch tables and schema
 $tables = [];
 $tables_result = $conn->query("SHOW TABLES");
 if ($tables_result) {
     while ($row = $tables_result->fetch_array()) {
+        if (strcasecmp($row[0], 'ZenSQLHistory') === 0) continue;
         $tables[] = $row[0];
     }
 }
@@ -67,6 +242,7 @@ foreach ($tables as $table) {
 $conn->close();
 ?>
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -75,6 +251,8 @@ $conn->close();
     <title>ZenSQL</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="icon" href="https://reactnative.dev/img/header_logo.svg">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <script>
         tailwind.config = {
             darkMode: 'class'
@@ -97,7 +275,37 @@ $conn->close();
         .dark .sql-keyword{color:#f87171}
     </style>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script>
+$(document).on('click', '.history-card', function() {
+    const query = $(this).data('query');
+    const status = $(this).data('status');
+    const error = $(this).data('error');
+    const time = $(this).data('time');
+
+    Swal.fire({
+        title: 'Query Details',
+       html: `
+    <div style="text-align:left">
+        <p><strong>Status:</strong> ${status}</p>
+        <p><strong>Executed At:</strong> ${time}</p>
+        <p><strong>Error:</strong> ${error}</p>
+
+        <pre class="bg-gray-100 dark:bg-slate-700 p-2 rounded mt-2 overflow-auto"
+             style="max-height:300px; white-space:pre-wrap; word-break:break-word;">
+${query}
+        </pre>
+    </div>
+`,
+        icon: status === 'success' ? 'success' : 'error',
+        width: '600px',
+        showCloseButton: true
+    });
+});
+</script>
+
     <script>
   const sqlKeywords = [
     // DML & DDL
@@ -187,35 +395,42 @@ $conn->close();
             document.body.removeChild(div);
             return coordinates;
         }
-        function showSuggestions(input, cursorPos) {
-            const text = input.value.substring(0, cursorPos);
-            const words = text.split(/[\s,();]+/);
-            const currentWord = words[words.length - 1];
+      function showSuggestions(input, cursorPos) {
+    const text = input.value.substring(0, cursorPos);
+    const words = text.split(/[\s,();]+/);
+    const currentWord = words[words.length - 1];
 
-            if (currentWord.length < 1) {
-                hideSuggestions();
-                return;
-            }
-            currentSuggestions = allSuggestions.filter(s => 
-                s.toLowerCase().startsWith(currentWord.toLowerCase())
-            ).slice(0, 15);
-            if (currentSuggestions.length === 0) {
-                hideSuggestions();
-                return;
-            }
-            const dropdown = document.getElementById('suggestions');
-            dropdown.innerHTML = '';
-            currentSuggestions.forEach((sugg, idx) => {
-                const div = document.createElement('div');
-                div.textContent = sugg;
-                div.className = 'px-4 py-2 cursor-pointer hover:bg-blue-500 hover:text-white transition-all duration-150';
-                div.onclick = () => insertSuggestion(input, sugg, currentWord.length);
-                dropdown.appendChild(div);
-            });
-            selectedIndex = -1;
-            dropdown.classList.remove('hidden');
-            positionDropdown(input);
-        }
+    if (currentWord.length < 1) {
+        hideSuggestions();
+        return;
+    }
+
+    currentSuggestions = allSuggestions
+        .filter(s => s.toLowerCase().startsWith(currentWord.toLowerCase()))
+        .slice(0, 15);
+
+    if (currentSuggestions.length === 0) {
+        hideSuggestions();
+        return;
+    }
+
+    const dropdown = document.getElementById('suggestions');
+    dropdown.innerHTML = '';
+
+    currentSuggestions.forEach((sugg, idx) => {
+        const div = document.createElement('div');
+        div.textContent = sugg;
+        div.className = 'px-4 py-2 cursor-pointer hover:bg-blue-500 hover:text-white transition-all duration-150';
+        div.onclick = () => insertSuggestion(input, sugg, currentWord.length);
+        dropdown.appendChild(div);
+    });
+
+    selectedIndex = 0; // VS Code style: first suggestion auto-selected
+    updateSelection();
+    dropdown.classList.remove('hidden');
+    positionDropdown(input);
+}
+
         function hideSuggestions() {
             document.getElementById('suggestions').classList.add('hidden');
             currentSuggestions = [];
@@ -240,41 +455,61 @@ $conn->close();
             dropdown.style.left = coords.left + 'px';
             dropdown.style.minWidth = '200px';
         }
-        function handleKeyDown(e) {
-            const dropdown = document.getElementById('suggestions');
-            if (dropdown.classList.contains('hidden')) return;
+        
+function handleKeyDown(e) {
+    if (e.ctrlKey && e.key === 'Enter') {
+        e.preventDefault();
+        document.getElementById('queryForm').requestSubmit(); // triggers your AJAX form submit
+        return;
+    }
 
-            if (e.key === 'ArrowDown') {
-                e.preventDefault();
-                selectedIndex = Math.min(selectedIndex + 1, currentSuggestions.length - 1);
-                updateSelection();
-            } else if (e.key === 'ArrowUp') {
-                e.preventDefault();
-                selectedIndex = Math.max(selectedIndex - 1, -1);
-                updateSelection();
-            } else if (e.key === 'Enter' && selectedIndex >= 0) {
-                e.preventDefault();
-                const input = document.getElementById('queryInput');
-                const text = input.value.substring(0, input.selectionStart);
-                const words = text.split(/[\s,();]+/);
-                const currentWord = words[words.length - 1];
-                insertSuggestion(input, currentSuggestions[selectedIndex], currentWord.length);
-            } else if (e.key === 'Escape') {
-                hideSuggestions();
-            }
+    const dropdown = document.getElementById('suggestions');
+    if (!dropdown || dropdown.classList.contains('hidden')) return;
+
+    if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        selectedIndex = (selectedIndex + 1) % currentSuggestions.length;
+        updateSelection();
+    } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        selectedIndex = (selectedIndex - 1 + currentSuggestions.length) % currentSuggestions.length;
+        updateSelection();
+    } else if (e.key === 'Enter') {
+        if (selectedIndex >= 0 && currentSuggestions.length > 0) {
+            e.preventDefault();
+            const input = document.getElementById('queryInput');
+            const text = input.value.substring(0, input.selectionStart);
+            const words = text.split(/[\s,();]+/);
+            const currentWord = words[words.length - 1];
+            insertSuggestion(input, currentSuggestions[selectedIndex], currentWord.length);
         }
-        function updateSelection() {
-            const dropdown = document.getElementById('suggestions');
-            const items = dropdown.children;
-            for (let i = 0; i < items.length; i++) {
-                if (i === selectedIndex) {
-                    items[i].classList.add('bg-blue-500', 'text-white');
-                    items[i].scrollIntoView({ block: 'nearest' });
-                } else {
-                    items[i].classList.remove('bg-blue-500', 'text-white');
-                }
-            }
+    } else if (e.key === 'Tab') {
+        if (selectedIndex >= 0 && currentSuggestions.length > 0) {
+            e.preventDefault(); // prevent default tab
+            const input = document.getElementById('queryInput');
+            const text = input.value.substring(0, input.selectionStart);
+            const words = text.split(/[\s,();]+/);
+            const currentWord = words[words.length - 1];
+            insertSuggestion(input, currentSuggestions[selectedIndex], currentWord.length);
         }
+    } else if (e.key === 'Escape') {
+        hideSuggestions();
+    }
+   
+}
+
+function updateSelection() {
+    const dropdown = document.getElementById('suggestions');
+    const items = dropdown.children;
+    for (let i = 0; i < items.length; i++) {
+        if (i === selectedIndex) {
+            items[i].classList.add('bg-blue-500', 'text-white');
+            items[i].scrollIntoView({ block: 'nearest' });
+        } else {
+            items[i].classList.remove('bg-blue-500', 'text-white');
+        }
+    }
+}
         function toggleDarkMode() {
             document.documentElement.classList.toggle('dark');
             localStorage.setItem('darkMode', document.documentElement.classList.contains('dark'));
@@ -312,9 +547,30 @@ $conn->close();
             table.classList.toggle('hidden');
             icon.classList.toggle('rotate-0');
         }
+         document.getElementById('queryInput').addEventListener('keydown', function(e) {
+        if (e.ctrlKey && e.key === 'Enter') { // Ctrl + Enter
+            e.preventDefault(); // prevent newline
+            document.getElementById('queryForm').requestSubmit(); // run the form
+        }
+    });
     </script>
 </head>
 <body class="bg-blue-50 dark:bg-slate-900 min-h-screen p-4 sm:p-6 transition-colors duration-150">
+    <!-- Slide-in History Modal -->
+     <div id="historyModal" class="fixed right-0 top-0 h-full w-96 bg-white dark:bg-slate-800 shadow-lg transform translate-x-full transition-transform duration-300 flex flex-col z-50">
+
+    <div class="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700">
+        <h2 class="text-lg font-semibold text-blue-900 dark:text-blue-300">Query History</h2>
+        <button onclick="closeHistoryModal()" class="text-gray-500 hover:text-gray-900 dark:hover:text-white">
+            <span class="material-icons">close</span>
+        </button>
+    </div>
+    <div id="historyContent" class="p-4 overflow-y-auto flex-1">
+    <?php echo $history_html; ?>
+</div>
+
+</div>
+
 <div class="max-w-7xl mx-auto">
  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 w-full">
   <a href="javascript:location.reload()"
@@ -325,29 +581,85 @@ $conn->close();
 </a>
 
     <div class="flex items-center gap-4">
-       <a href="https://ganesa14.github.io/Portfolios/" 
-   target="_blank"
-class="text-2xl sm text-blue-600 dark:text-blue-400 relative inline-block transition-all duration-300 hover:scale-110 hover:text-blue-500 dark:hover:text-blue-300
-          after:content-[''] after:absolute after:left-0 after:bottom-0 after:w-full after:h-0.5 after:bg-blue-500 dark:after:bg-blue-300 after:scale-x-0 after:origin-right after:transition-transform after:duration-300 hover:after:scale-x-100 hover:after:origin-left
-          hover:drop-shadow-[0_0_12px_rgba(59,130,246,0.8)] dark:hover:drop-shadow-[0_0_12px_rgba(96,165,250,0.8)]">
+     <!-- Contact -->
+    <a href="https://ganesa14.github.io/Portfolios/" target="_blank"
+       class="flex items-center gap-2 text-blue-600 dark:text-blue-400 text-lg font-medium hover:text-blue-500 dark:hover:text-blue-300 transition-all duration-150 cursor-pointer">
+        <span class="material-symbols-outlined text-2xl">contact_page</span>
+        <span>Contact</span>
+    </a>
 
-    Contact us
+    <!-- History -->
+    <span onclick="openHistoryModal()"
+          class="flex items-center gap-2 text-blue-600 dark:text-blue-400 text-lg font-medium hover:text-blue-500 dark:hover:text-blue-300 transition-all duration-150 cursor-pointer">
+        <span class="material-symbols-outlined text-2xl">history</span>
+        <span>History</span>
+    </span>
 
-    <span class="absolute left-0 bottom-0 h-[2px] w-full scale-x-0 origin-right bg-blue-500 dark:bg-blue-300 
-                 transition-transform duration-300 ease-out hover:scale-x-100 hover:origin-left"></span>
-</a>
-
-        <button onclick="toggleDarkMode()" 
-            class="px-4 py-2 rounded-lg bg-blue-100 dark:bg-slate-700 text-blue-700 
-                   dark:text-blue-400 hover:bg-blue-200 dark:hover:bg-slate-600 
-                   transition-all duration-150 shadow-sm flex items-center gap-2">
-            <span class="material-icons text-lg dark:hidden">dark_mode</span>
-            <span class="material-icons text-lg hidden dark:inline">light_mode</span>
-            <span class="dark:hidden">Dark</span>
-            <span class="hidden dark:inline">Light</span>
-        </button>
+    <!-- Dark/Light Mode Toggle -->
+    <button onclick="toggleDarkMode()"
+            class="flex items-center gap-2 px-3 py-1 rounded-lg bg-blue-100 dark:bg-slate-700 text-blue-700 dark:text-blue-400 hover:bg-blue-200 dark:hover:bg-slate-600 transition-all duration-150 shadow-sm">
+        <!-- Dark mode icon (shown in light mode) -->
+        <span class="material-symbols-outlined text-lg dark:hidden">dark_mode</span>
+        <!-- Light mode icon (shown in dark mode) -->
+        <span class="material-symbols-outlined text-lg hidden dark:inline">light_mode</span>
+        <!-- Text -->
+        <span class="dark:hidden">Dark</span>
+        <span class="hidden dark:inline">Light</span>
+    </button>
     </div>
 </div>
+<script>
+function openHistoryModal() {
+    $.post('', { fetchHistory: 1 }, function(html) {
+        $('#historyContent').html(html);
+    });
+    const modal = document.getElementById('historyModal');
+    const historyContent = document.getElementById('historyContent');
+    historyContent.innerHTML = document.getElementById('queryHistory').innerHTML;
+
+    modal.classList.remove('translate-x-full'); // slide in
+
+    // Close modal when clicking outside
+    function outsideClickListener(e) {
+          if (Swal.isVisible()) return;
+
+        if (!modal.contains(e.target) && e.target.id !== 'historyLink') {
+            closeHistoryModal();
+        }
+    }
+    modal.outsideClickListener = outsideClickListener;
+    setTimeout(() => {
+        window.addEventListener('click', outsideClickListener);
+    }, 10);
+
+    // Close modal on Escape key
+    function escapeKeyListener(e) {
+        if (e.key === 'Escape') {
+            closeHistoryModal();
+        }
+    }
+    modal.escapeKeyListener = escapeKeyListener;
+    window.addEventListener('keydown', escapeKeyListener);
+}
+
+function closeHistoryModal() {
+    const modal = document.getElementById('historyModal');
+    modal.classList.add('translate-x-full'); // slide out
+
+    setTimeout(() => {
+        if (modal.outsideClickListener) {
+            window.removeEventListener('click', modal.outsideClickListener);
+            modal.outsideClickListener = null;
+        }
+        if (modal.escapeKeyListener) {
+            window.removeEventListener('keydown', modal.escapeKeyListener);
+            modal.escapeKeyListener = null;
+        }
+    }, 300); // match transition duration
+}
+
+</script>
+
 <form method="post" action="" id="queryForm">
   <div class="relative">
     <div class="editor-container bg-white dark:bg-slate-800 border border-blue-200 dark:border-blue-700 rounded-lg mb-4 relative overflow-hidden flex">
@@ -382,6 +694,69 @@ class="text-2xl sm text-blue-600 dark:text-blue-400 relative inline-block transi
       Execute
   </button>
 </form>
+<div id="queryResult" class="mt-6"></div>
+<div id="queryResult" class="mt-6"></div>
+<div id="queryHistory" class="mt-6"></div>
+
+<script>
+$(document).ready(function() {
+    $('#queryForm').on('submit', function(e) {
+        e.preventDefault(); // prevent page reload
+        let query = $('#queryInput').val();
+
+        $.ajax({
+            url: '', // current PHP file
+            method: 'POST',
+            data: { query: query, ajax: 1 },
+            dataType: 'json',
+           success: function(response) {
+    let html = '';
+    if(response.error_msg) {
+        html += `<div class="p-3 mb-4 bg-red-50 dark:bg-red-900/50 text-red-700 dark:text-red-200 border border-red-200 dark:border-red-700 rounded-lg flex items-start gap-2 transition-all duration-150">
+                    <span class="material-icons text-lg">error</span>
+                    <span>${response.error_msg}</span>
+                </div>`;
+    }
+    if(response.result_html) {
+        html += response.result_html;
+    }
+    $('#queryResult').html(html);
+
+    // Refresh tables without reloading
+    refreshTables();
+}
+,
+            error: function(xhr, status, error) {
+                $('#queryResult').html(`<div class="p-3 mb-4 bg-red-50 dark:bg-red-900/50 text-red-700 dark:text-red-200 border border-red-200 dark:border-red-700 rounded-lg flex items-start gap-2 transition-all duration-150">
+                                            <span class="material-icons text-lg">error</span>
+                                            <span>AJAX error: ${error}</span>
+                                        </div>`);
+            }
+        });
+    });
+
+    $('#queryInput').on('input', function(e) {
+    updateHighlight();
+    showSuggestions(this, this.selectionStart);
+
+    const value = $(this).val();
+    if (value.trim() === "") {
+        // Remove from localStorage if input is empty
+        localStorage.removeItem('zenSQLLastQuery');
+    } else {
+        // Save current query to localStorage while typing
+        localStorage.setItem('zenSQLLastQuery', value);
+    }
+});
+const lastQuery = localStorage.getItem('zenSQLLastQuery');
+if (lastQuery) {
+    $('#queryInput').val(lastQuery);
+    updateHighlight();
+    updateLineNumbers();
+}
+
+});
+</script>
 
 <script>
 const textarea = document.getElementById("queryInput");
@@ -479,5 +854,54 @@ updateHighlight();
         <?php endforeach; ?>
     </div>
 </div>
+<script>
+    function refreshTables() {
+    $.ajax({
+        url: '', // same PHP file
+        method: 'POST',
+        data: { fetchTables: 1 },
+        dataType: 'json',
+        success: function(tables) {
+            const container = $('.grid.grid-cols-1.gap-4');
+            container.empty();
+
+            tables.forEach((table, index) => {
+                let html = `
+                <div class="bg-white dark:bg-slate-800 border border-blue-200 dark:border-blue-700 rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-all duration-150">
+                    <button onclick="toggleTable(${index})" class="w-full text-left px-4 py-3 font-semibold text-blue-900 dark:text-blue-300 hover:bg-blue-50 dark:hover:bg-slate-700 transition-all duration-150 flex justify-between items-center">
+                        <span class="flex items-center gap-2">
+                            <span class="material-icons text-lg">table_chart</span>
+                            ${table.name}
+                        </span>
+                        <span class="material-icons text-blue-600 dark:text-blue-400 transition-transform duration-200 -rotate-180" id="expand-icon-${index}">expand_more</span>
+                    </button>
+                    <div id="table-${index}" class="overflow-x-auto transition-all duration-200">
+                `;
+
+                if(table.rows.length > 0) {
+                    html += `<table class="min-w-full"><thead class="bg-blue-600 dark:bg-blue-800 text-white"><tr>`;
+                    table.fields.forEach(f => html += `<th class='px-4 py-2 text-left text-sm font-medium border border-blue-300 dark:border-blue-600 whitespace-nowrap'>${f}</th>`);
+                    html += `</tr></thead><tbody>`;
+                    table.rows.forEach(row => {
+                        html += "<tr class='hover:bg-blue-50 dark:hover:bg-slate-700 transition-colors duration-150'>";
+                        table.fields.forEach(f => html += `<td class='px-4 py-2 border border-blue-200 dark:border-blue-700 text-sm text-gray-900 dark:text-gray-100'>${row[f]}</td>`);
+                        html += "</tr>";
+                    });
+                    html += "</tbody></table>";
+                } else {
+                    html += `<p class="p-4 text-blue-500 dark:text-blue-400 flex items-center gap-2">
+                                <span class="material-icons">info</span>
+                                Table is empty.
+                             </p>`;
+                }
+
+                html += `</div></div>`;
+                container.append(html);
+            });
+        }
+    });
+}
+
+</script>
 </body>
 </html>
