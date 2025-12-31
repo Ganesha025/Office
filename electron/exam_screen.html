@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>ZenSQL Compiler</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- Tailwind -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+<!-- SweetAlert -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<!-- Google Icons -->
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+<script>
+tailwind.config = { darkMode: 'class' }
+</script>
+
+<style>
+*{outline:none;transition:.15s}
+textarea{scrollbar-width:none}
+textarea::-webkit-scrollbar{display:none}
+.editor-container{position:relative}
+#queryInput{
+    background:transparent;
+    color:transparent;
+    caret-color:#1e293b;
+    z-index:2;
+    resize:none
+}
+.dark #queryInput{caret-color:#e2e8f0}
+#highlight{
+    position:absolute;top:0;left:0;
+    padding:1rem;pointer-events:none;
+    white-space:pre-wrap;font-family:monospace;
+    font-size:.875rem;line-height:1.25rem
+}
+.sql-keyword{color:#dc2626;font-weight:600}
+.dark .sql-keyword{color:#f87171}
+table{border-collapse:collapse;width:100%;margin-top:0.5rem}
+table th, table td{border:1px solid #cbd5e1;padding:0.3rem;text-align:left;font-size:.875rem}
+table thead{background-color:#e2e8f0}
+.dark table thead{background-color:#1e293b;color:#f1f5f9}
+</style>
+</head>
+
+<body class="bg-blue-50 dark:bg-slate-900 min-h-screen p-4">
+
+<div class="max-w-7xl mx-auto">
+
+<!-- Header -->
+<div class="flex justify-between mb-4">
+    <h1 class="text-2xl font-bold text-blue-600 dark:text-blue-400">ZenSQL Compiler</h1>
+    <div class="flex gap-3 items-center">
+        <div id="timer" class="font-semibold text-blue-800 dark:text-blue-300"></div>
+        <button onclick="toggleDarkMode()" class="px-3 py-1 rounded bg-blue-100 dark:bg-slate-700">
+            Toggle Dark
+        </button>
+    </div>
+</div>
+
+<!-- Editor -->
+<div class="editor-container bg-white dark:bg-slate-800 border rounded-lg flex overflow-hidden">
+    <div id="lineNumbers" class="w-12 text-right pr-2 pt-4 text-gray-400 font-mono text-sm"></div>
+    <div class="relative flex-1">
+        <div id="highlight" class="text-gray-900 dark:text-gray-100"></div>
+        <textarea id="queryInput"
+            class="w-full h-40 p-4 font-mono text-sm bg-transparent resize-none"
+            placeholder="Write SQL here..."></textarea>
+    </div>
+</div>
+
+<!-- Suggestions -->
+<div id="suggestions"
+     class="hidden absolute z-50 bg-white dark:bg-slate-800 border rounded-lg shadow max-h-60 overflow-y-auto text-sm"></div>
+
+<!-- Buttons -->
+<div class="mt-4">
+    <button id="runBtn" class="bg-blue-600 text-white px-6 py-2 rounded-lg inline-flex items-center gap-2">
+        <span class="material-icons">play_arrow</span> Execute
+    </button>
+
+    <button id="submitExamBtn"
+        class="ml-4 bg-green-600 text-white px-6 py-2 rounded-lg inline-flex items-center gap-2">
+        <span class="material-icons">check_circle</span> Submit Exam
+    </button>
+</div>
+
+<!-- Database Schema Table -->
+<h3 class="mt-6 font-semibold text-blue-700 dark:text-blue-300">Database Tables & Columns</h3>
+<div id="dbSchema" class="mt-2 bg-white dark:bg-slate-800 border rounded-lg p-3 overflow-x-auto text-sm"></div>
+
+<!-- Query Result -->
+<h3 class="mt-6 font-semibold text-blue-700 dark:text-blue-300">Query Result</h3>
+<div id="queryResult" class="mt-2 bg-white dark:bg-slate-800 border rounded-lg p-3 overflow-x-auto"></div>
+
+<!-- History -->
+<h3 class="mt-6 font-semibold text-blue-700 dark:text-blue-300">Query History</h3>
+<ul id="queryHistory"
+    class="mt-2 bg-white dark:bg-slate-800 border rounded-lg p-3 text-sm max-h-48 overflow-y-auto"></ul>
+
+</div>
+
+<script>
+/* ---------------- GLOBALS ---------------- */
+const sqlKeywords = ['SELECT','FROM','WHERE','INSERT','UPDATE','DELETE','CREATE','ALTER','DROP','TABLE','JOIN','ON','AND','OR','GROUP','BY','ORDER','LIMIT'];
+let allSuggestions = [];
+
+/* ---------------- HIGHLIGHT ---------------- */
+function highlightSQL(text){
+    const escaped = text.replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]));
+    const r = new RegExp('\\b(' + sqlKeywords.join('|') + ')\\b','gi');
+    return escaped.replace(r,'<span class="sql-keyword">$1</span>');
+}
+function updateHighlight(){ highlight.innerHTML = highlightSQL(queryInput.value)+'\n'; }
+
+/* ---------------- LINE NUMBERS ---------------- */
+function updateLineNumbers(){
+    const lines = queryInput.value.split('\n').length;
+    lineNumbers.innerHTML = Array.from({length:lines},(_,i)=>i+1).join('<br>');
+}
+
+/* ---------------- AUTOCOMPLETE ---------------- */
+function showSuggestions(el,pos){
+    const word = el.value.slice(0,pos).split(/\s+/).pop().toUpperCase();
+    if(!word){suggestions.classList.add('hidden');return;}
+    const matches = allSuggestions.filter(s=>s.toUpperCase().startsWith(word)).slice(0,10);
+    if(!matches.length){suggestions.classList.add('hidden');return;}
+    suggestions.innerHTML = matches.map(m=>`<div class="px-3 py-2 cursor-pointer hover:bg-blue-100" onclick="insertSuggestion('${m}')">${m}</div>`).join('');
+    suggestions.classList.remove('hidden');
+}
+function insertSuggestion(t){
+    const pos = queryInput.selectionStart;
+    const before = queryInput.value.slice(0,pos).replace(/\S+$/,'');
+    const after = queryInput.value.slice(pos);
+    queryInput.value = before + t + ' ' + after;
+    updateHighlight();
+    suggestions.classList.add('hidden');
+    queryInput.focus();
+}
+
+/* ---------------- DARK MODE ---------------- */
+function toggleDarkMode(){ document.documentElement.classList.toggle('dark'); }
+
+/* ---------------- TIMER ---------------- */
+let seconds=30*60;
+setInterval(()=>{
+    timer.innerText=`Time Left: ${Math.floor(seconds/60)}:${(seconds%60).toString().padStart(2,'0')}`;
+    if(seconds>0) seconds--;
+},1000);
+
+/* ---------------- LOAD SCHEMA ---------------- */
+/* ---------------- LOAD SCHEMA ---------------- */
+$.post('http://localhost:8080/exam/getSchemaAjax', function(schema){
+    allSuggestions = [...sqlKeywords];
+    let html = '<table><thead><tr><th>Table Name</th><th>Columns</th></tr></thead><tbody>';
+
+    if (schema && typeof schema === 'object' && Object.keys(schema).length > 0) {
+        for(const table in schema){
+            allSuggestions.push(table);
+            if (Array.isArray(schema[table])) {
+                allSuggestions.push(...schema[table]);
+                html += `<tr><td>${table}</td><td>${schema[table].join(', ')}</td></tr>`;
+            } else {
+                html += `<tr><td>${table}</td><td>${schema[table]}</td></tr>`;
+            }
+        }
+    } else {
+        html += `<tr><td colspan="2" class="text-center text-gray-500">No tables found</td></tr>`;
+    }
+
+    html += '</tbody></table>';
+    $('#dbSchema').html(html);
+});
+
+/* ---------------- QUERY HISTORY ---------------- */
+function addToHistory(q,resultHTML='',err=''){
+    const li=document.createElement('li');
+    li.className="border-b py-2";
+    li.innerHTML=`
+        <div class="font-semibold text-blue-600">${q}</div>
+        ${resultHTML?`<div class="mt-1 text-green-600 text-xs">${resultHTML}</div>`:''}
+        ${err?`<div class="mt-1 text-red-600 text-xs">${err}</div>`:''}
+    `;
+    queryHistory.prepend(li);
+}
+
+/* ---------------- EXECUTE QUERY ---------------- */
+$('#runBtn').on('click', ()=>{
+    const query=$('#queryInput').val().trim();
+    if(!query) return;
+
+    $.ajax({
+        url:'http://localhost:8080/exam/executeQuery',
+        method:'POST',
+        data:{query},
+        dataType:'json',
+        success: res => {
+    let resultHTML = '';
+    let error = '';
+
+    if(res.error_msg){
+        error = res.error_msg;
+        $('#queryResult').html(`<div class="text-red-600 font-semibold">${error}</div>`);
+    } else {
+        // If result exists, create table even if empty
+        const data = Array.isArray(res.result) ? res.result : [];
+        if(data.length > 0){
+            const cols = Object.keys(data[0]);
+            resultHTML = '<table><thead><tr>';
+            cols.forEach(c => resultHTML += `<th>${c}</th>`);
+            resultHTML += '</tr></thead><tbody>';
+            data.forEach(row => {
+                resultHTML += '<tr>';
+                cols.forEach(c => resultHTML += `<td>${row[c]}</td>`);
+                resultHTML += '</tr>';
+            });
+            resultHTML += '</tbody></table>';
+        } else {
+            resultHTML = '<table><thead><tr><th>Result</th></tr></thead><tbody><tr><td>No data returned</td></tr></tbody></table>';
+        }
+        $('#queryResult').html(resultHTML);
+    }
+
+    addToHistory($('#queryInput').val(), resultHTML, error);
+},
+
+        error: ()=>{
+            const err='Server / AJAX error';
+            $('#queryResult').html(`<div class="text-red-600">${err}</div>`);
+            addToHistory(query,'',err);
+        }
+    });
+});
+
+/* ---------------- EVENTS ---------------- */
+queryInput.addEventListener('input', ()=>{
+    updateLineNumbers();
+    updateHighlight();
+    showSuggestions(queryInput, queryInput.selectionStart);
+});
+queryInput.addEventListener('scroll', ()=>{
+    lineNumbers.scrollTop=queryInput.scrollTop;
+    highlight.scrollTop=queryInput.scrollTop;
+});
+
+/* ---------------- SUBMIT EXAM ---------------- */
+document.getElementById('submitExamBtn').addEventListener('click', ()=>{
+    Swal.fire({
+        icon: 'success',
+        title: 'Exam Submitted',
+        text: 'Your exam was submitted successfully!',
+        confirmButtonText: 'OK'
+    }).then(()=>{
+        window.location.href='index.html';
+    });
+});
+
+/* ---------------- INIT ---------------- */
+updateLineNumbers();
+updateHighlight();
+</script>
+
+</body>
+</html>
