@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Exam App</title>
+  <style>
+    body { font-family: sans-serif; padding: 50px; text-align: center; }
+    button { padding: 15px 30px; font-size: 18px; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <h1>Welcome to Online Practical Exam</h1>
+  <p>Click the button below to start your test</p>
+  <button onclick="startExam()">Start Exam</button>
+
+  <script>
+    function startExam() {
+      window.electronAPI.startExam();
+    }
+    window.electronAPI.onPopup((message) => {
+      alert(message); // You can replace with custom modal
+    });
+  </script>
+</body>
+</html>

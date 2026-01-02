@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZenSQL Exam</title>
+
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<!-- jQuery & SweetAlert -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<!-- Material Icons -->
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+
+<script> tailwind.config = { darkMode: 'class' } </script>
+
+<style>
+  *{outline:none;transition:all .15s ease}
+  textarea{scrollbar-width:none;-ms-overflow-style:none}
+  textarea::-webkit-scrollbar{display:none}
+  .editor-container{position:relative}
+  #queryInput{background:transparent;color:black;caret-color:#1e293b;resize:none;z-index:2}
+  .dark #queryInput{caret-color:#e2e8f0}
+  #highlight{position:absolute;top:0;left:0;padding:1rem;white-space:pre-wrap;word-wrap:break-word;pointer-events:none;z-index:1;font-family:monospace;font-size:0.875rem;line-height:1.25rem;overflow:hidden}
+  .sql-keyword{color:#dc2626;font-weight:600}
+  .dark .sql-keyword{color:#f87171}
+</style>
+<script>
+  const sqlKeywords = [
+    // DML & DDL
+    'SELECT', 'FROM', 'WHERE', 'INSERT', 'UPDATE', 'DELETE', 'CREATE', 'ALTER', 'DROP',
+    'TABLE', 'DATABASE', 'INDEX', 'VIEW', 'TRIGGER', 'PROCEDURE', 'FUNCTION', 'INTO',
+    'VALUES', 'SET', 'JOIN', 'INNER', 'LEFT', 'RIGHT', 'FULL', 'OUTER', 'CROSS', 'NATURAL', 'ON',
+    'AND', 'OR', 'NOT', 'IN', 'BETWEEN', 'LIKE', 'IS', 'NULL', 'AS', 'DISTINCT', 'ALL',
+    'ORDER', 'BY', 'ASC', 'DESC', 'GROUP', 'HAVING', 'LIMIT', 'OFFSET', 'UNION', 'INTERSECT',
+    'EXCEPT', 'EXISTS', 'CASE', 'WHEN', 'THEN', 'ELSE', 'END', 'PRIMARY', 'KEY', 'FOREIGN',
+    'REFERENCES', 'UNIQUE', 'CHECK', 'DEFAULT', 'AUTO_INCREMENT', 'NOT NULL', 'CONSTRAINT',
+    'ADD', 'MODIFY', 'COLUMN', 'RENAME', 'TRUNCATE', 'CASCADE', 'RESTRICT', 'GRANT', 'REVOKE',
+    'COMMIT', 'ROLLBACK', 'SAVEPOINT', 'TRANSACTION', 'BEGIN', 'START', 'MERGE', 'CALL', 'DECLARE',
+    'LOOP', 'WHILE', 'REPEAT', 'EXIT', 'CONTINUE', 'CURSOR', 'OPEN', 'FETCH', 'CLOSE',
+    'FOR', 'IF', 'ELSEIF', 'ELSE', 'USING', 'MATCH', 'ON DELETE', 'ON UPDATE', 'ARRAY',
+    'TEMPORARY', 'TEMP', 'IDENTITY', 'GENERATED', 'ALWAYS', 'WITH', 'RECURSIVE', 'PARTITION', 'OVER',
+    'ROWS', 'RANGE', 'PRECEDING', 'FOLLOWING', 'UNBOUNDED', 'ROWS BETWEEN', 'RANGE BETWEEN',
+    'COUNT', 'SUM', 'AVG', 'MIN', 'MAX', 'CONCAT', 'SUBSTRING', 'UPPER', 'LOWER', 'TRIM',
+    'LENGTH', 'COALESCE', 'CAST', 'CONVERT', 'IFNULL', 'NULLIF', 'NVL', 'REPLACE', 'ASCII',
+    'CHARINDEX', 'REVERSE', 'REPLICATE', 'POWER', 'CEIL', 'FLOOR', 'ROUND', 'TRUNCATE',
+    'RADIANS', 'DEGREES', 'EXTRACT', 'POSITION', 'DATE', 'TIME', 'DATETIME', 'TIMESTAMP',
+    'YEAR', 'MONTH', 'DAY', 'HOUR', 'MINUTE', 'SECOND', 'NOW', 'CURDATE', 'CURTIME',
+    'CURRENT_DATE', 'CURRENT_TIME', 'CURRENT_TIMESTAMP', 'LOCALTIME', 'LOCALTIMESTAMP',
+    'VARIANCE', 'STDDEV', 'MEDIAN', 'NTILE', 'ROW_NUMBER', 'RANK', 'DENSE_RANK', 'FIRST_VALUE',
+    'LAST_VALUE', 'PERCENT_RANK', 'CUME_DIST', 'WINDOW','INT', 'INTEGER', 'VARCHAR', 'TEXT', 'CHAR', 'NCHAR', 'DECIMAL', 'FLOAT', 'DOUBLE',
+    'BOOLEAN', 'BLOB', 'ENUM', 'NUMERIC', 'VARYING', 'REAL', 'SMALLINT', 'BIGINT', 'DATEONLY',
+    'TIMEONLY', 'TIMESTAMPTZ', 'JSONB','JSON', 'JSON_OBJECT', 'JSON_ARRAY', 'JSON_VALUE', 'JSON_QUERY',
+    'XML', 'XMLAGG', 'XMLFOREST', 'XMLPARSE', 'XMLSERIALIZE','SESSION_USER', 'CURRENT_USER', 'SYSTEM_USER', 'USER', 'TRUE', 'FALSE', 'IFNULL', 'NVL',
+    'SHOW', 'DESCRIBE', 'DESC', 'EXPLAIN', 'USE', 'OVERLAPS', 'IDENTITY', 'GENERATED', 'ALWAYS',
+    'REPLACE', 'TEMP', 'TEMPORARY', 'LEADING', 'TRAILING', 'CONTINUE', 'EXIT', 'DECLARE'
+];
+
+        // const schema = <?php echo json_encode($schema); ?>;
+        // let allSuggestions = [];
+        
+let allSuggestions = [];
+
+$.ajax({
+    url: 'http://localhost:8080/exam/getSchemaAjax',
+    method: 'POST',
+    dataType: 'json',
+    success: function (schema) {
+        allSuggestions = [...sqlKeywords];
+
+        for (const table in schema) {
+            allSuggestions.push(table);
+            allSuggestions = allSuggestions.concat(schema[table]);
+        }
+
+        console.log('Schema loaded', allSuggestions);
+    },
+    error: function (err) {
+        console.error('Schema load failed', err);
+    }
+});
+
+
+
+
+        function initSuggestions() {
+            allSuggestions = [...sqlKeywords];
+            for (const table in schema) {
+                allSuggestions.push(table);
+                allSuggestions = allSuggestions.concat(schema[table]);
+            }
+        }
+
+        let currentSuggestions = [];
+        let selectedIndex = -1;
+
+        function highlightSQL(text) {
+            const pattern = new RegExp('\\b(' + sqlKeywords.join('|') + ')\\b', 'gi');
+            return text.replace(/[<>&]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]))
+                       .replace(pattern, '<span class="sql-keyword">$1</span>');
+        }
+
+        function syncScroll() {
+            const input = document.getElementById('queryInput');
+            const highlight = document.getElementById('highlight');
+            highlight.scrollTop = input.scrollTop;
+            highlight.scrollLeft = input.scrollLeft;
+        }
+
+        function updateHighlight() {
+            const input = document.getElementById('queryInput');
+            const highlight = document.getElementById('highlight');
+            const text = input.value + '\n';
+            highlight.innerHTML = highlightSQL(text);
+        }
+
+        function getCaretCoordinates(element) {
+            const div = document.createElement('div');
+            const style = getComputedStyle(element);
+            ['position', 'top', 'left', 'width', 'height', 'padding', 'border', 'boxSizing', 
+             'font', 'letterSpacing', 'whiteSpace', 'wordWrap', 'lineHeight', 'overflowWrap'].forEach(prop => {
+                div.style[prop] = style[prop];
+            });
+            div.style.position = 'absolute';
+            div.style.visibility = 'hidden';
+            div.style.overflow = 'auto';
+            document.body.appendChild(div);
+            const text = element.value.substring(0, element.selectionStart);
+            div.textContent = text;
+            const span = document.createElement('span');
+            span.textContent = element.value.substring(element.selectionStart) || '.';
+            div.appendChild(span);
+            const rect = element.getBoundingClientRect();
+            const coordinates = {
+                top: rect.top + span.offsetTop + parseInt(style.borderTopWidth) + window.scrollY,
+                left: rect.left + span.offsetLeft + parseInt(style.borderLeftWidth) + window.scrollX
+            };
+            document.body.removeChild(div);
+            return coordinates;
+        }
+      function showSuggestions(input, cursorPos) {
+    const text = input.value.substring(0, cursorPos);
+    const words = text.split(/[\s,();]+/);
+    const currentWord = words[words.length - 1];
+
+    if (currentWord.length < 1) {
+        hideSuggestions();
+        return;
+    }
+
+    currentSuggestions = allSuggestions
+        .filter(s => s.toLowerCase().startsWith(currentWord.toLowerCase()))
+        .slice(0, 15);
+
+    if (currentSuggestions.length === 0) {
+        hideSuggestions();
+        return;
+    }
+
+    const dropdown = document.getElementById('suggestions');
+    dropdown.innerHTML = '';
+
+    currentSuggestions.forEach((sugg, idx) => {
+        const div = document.createElement('div');
+        div.textContent = sugg;
+        div.className = 'px-4 py-2 cursor-pointer hover:bg-blue-500 hover:text-white transition-all duration-150';
+        div.onclick = () => insertSuggestion(input, sugg, currentWord.length);
+        dropdown.appendChild(div);
+    });
+
+    selectedIndex = 0; // VS Code style: first suggestion auto-selected
+    updateSelection();
+    dropdown.classList.remove('hidden');
+    positionDropdown(input);
+}
+
+        function hideSuggestions() {
+            document.getElementById('suggestions').classList.add('hidden');
+            currentSuggestions = [];
+            selectedIndex = -1;
+        }
+        function insertSuggestion(input, suggestion, replaceLength) {
+            const cursorPos = input.selectionStart;
+            const text = input.value;
+            const before = text.substring(0, cursorPos - replaceLength);
+            const after = text.substring(cursorPos);
+            input.value = before + suggestion + after;
+            const newPos = before.length + suggestion.length;
+            input.setSelectionRange(newPos, newPos);
+            updateHighlight();
+            hideSuggestions();
+            input.focus();
+        }
+        function positionDropdown(input) {
+            const dropdown = document.getElementById('suggestions');
+            const coords = getCaretCoordinates(input);
+            dropdown.style.top = (coords.top + 20) + 'px';
+            dropdown.style.left = coords.left + 'px';
+            dropdown.style.minWidth = '200px';
+        }
+        
+function handleKeyDown(e) {
+    if (e.ctrlKey && e.key === 'Enter') {
+        e.preventDefault();
+        document.getElementById('queryForm').requestSubmit(); // triggers your AJAX form submit
+        return;
+    }
+
+    const dropdown = document.getElementById('suggestions');
+    if (!dropdown || dropdown.classList.contains('hidden')) return;
+
+    if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        selectedIndex = (selectedIndex + 1) % currentSuggestions.length;
+        updateSelection();
+    } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        selectedIndex = (selectedIndex - 1 + currentSuggestions.length) % currentSuggestions.length;
+        updateSelection();
+    } else if (e.key === 'Enter') {
+        if (selectedIndex >= 0 && currentSuggestions.length > 0) {
+            e.preventDefault();
+            const input = document.getElementById('queryInput');
+            const text = input.value.substring(0, input.selectionStart);
+            const words = text.split(/[\s,();]+/);
+            const currentWord = words[words.length - 1];
+            insertSuggestion(input, currentSuggestions[selectedIndex], currentWord.length);
+        }
+    } else if (e.key === 'Tab') {
+        if (selectedIndex >= 0 && currentSuggestions.length > 0) {
+            e.preventDefault(); // prevent default tab
+            const input = document.getElementById('queryInput');
+            const text = input.value.substring(0, input.selectionStart);
+            const words = text.split(/[\s,();]+/);
+            const currentWord = words[words.length - 1];
+            insertSuggestion(input, currentSuggestions[selectedIndex], currentWord.length);
+        }
+    } else if (e.key === 'Escape') {
+        hideSuggestions();
+    }
+   
+}
+
+function updateSelection() {
+    const dropdown = document.getElementById('suggestions');
+    const items = dropdown.children;
+    for (let i = 0; i < items.length; i++) {
+        if (i === selectedIndex) {
+            items[i].classList.add('bg-blue-500', 'text-white');
+            items[i].scrollIntoView({ block: 'nearest' });
+        } else {
+            items[i].classList.remove('bg-blue-500', 'text-white');
+        }
+    }
+}
+        function toggleDarkMode() {
+            document.documentElement.classList.toggle('dark');
+            localStorage.setItem('darkMode', document.documentElement.classList.contains('dark'));
+        }
+        
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.documentElement.classList.add('dark');
+        }
+        $(function() {
+            initSuggestions();
+            const $input = $('#queryInput');
+            
+            updateHighlight();
+            
+            $input.on('input', function(e) {
+                updateHighlight();
+                showSuggestions(this, this.selectionStart);
+            });
+            $input.on('scroll', syncScroll);
+            $input.on('keydown', handleKeyDown);
+            $input.on('click', function(e) {
+                showSuggestions(this, this.selectionStart);
+            });
+            $(document).on('click', function(e) {
+                if (!$(e.target).closest('#queryInput, #suggestions').length) {
+                    hideSuggestions();
+                }
+            });
+            $input.focus();
+        });
+
+        function toggleTable(index) {
+            const table = document.getElementById('table-' + index);
+            const icon = document.getElementById('expand-icon-' + index);
+            table.classList.toggle('hidden');
+            icon.classList.toggle('rotate-0');
+        }
+         document.getElementById('queryInput').addEventListener('keydown', function(e) {
+        if (e.ctrlKey && e.key === 'Enter') { // Ctrl + Enter
+            e.preventDefault(); // prevent newline
+            document.getElementById('queryForm').requestSubmit(); // run the form
+        }
+    });
+    </script>
+</head>
+
+<script>
+function openHistoryModal() {
+    $.post('', { fetchHistory: 1 }, function(html) {
+        $('#historyContent').html(html);
+    });
+    const modal = document.getElementById('historyModal');
+    const historyContent = document.getElementById('historyContent');
+    historyContent.innerHTML = document.getElementById('queryHistory').innerHTML;
+
+    modal.classList.remove('translate-x-full'); // slide in
+
+    // Close modal when clicking outside
+    function outsideClickListener(e) {
+          if (Swal.isVisible()) return;
+
+        if (!modal.contains(e.target) && e.target.id !== 'historyLink') {
+            closeHistoryModal();
+        }
+    }
+    modal.outsideClickListener = outsideClickListener;
+    setTimeout(() => {
+        window.addEventListener('click', outsideClickListener);
+    }, 10);
+
+    // Close modal on Escape key
+    function escapeKeyListener(e) {
+        if (e.key === 'Escape') {
+            closeHistoryModal();
+        }
+    }
+    modal.escapeKeyListener = escapeKeyListener;
+    window.addEventListener('keydown', escapeKeyListener);
+}
+
+function closeHistoryModal() {
+    const modal = document.getElementById('historyModal');
+    modal.classList.add('translate-x-full'); // slide out
+
+    setTimeout(() => {
+        if (modal.outsideClickListener) {
+            window.removeEventListener('click', modal.outsideClickListener);
+            modal.outsideClickListener = null;
+        }
+        if (modal.escapeKeyListener) {
+            window.removeEventListener('keydown', modal.escapeKeyListener);
+            modal.escapeKeyListener = null;
+        }
+    }, 300); // match transition duration
+}
+
+</script>
+
+
+<body class="bg-blue-50 dark:bg-slate-900 min-h-screen p-4 sm:p-6 transition-colors duration-150">
+
+<div class="max-w-7xl mx-auto">
+
+  <!-- Header -->
+  <div class="flex justify-between items-center mb-6">
+    <h1 class="text-3xl font-bold text-blue-600 dark:text-blue-400">ZenSQL Exam</h1>
+    <button onclick="toggleDarkMode()" class="px-3 py-1 rounded bg-blue-100 dark:bg-slate-700 text-blue-700 dark:text-blue-400">Toggle Dark</button>
+  </div>
+
+  <!-- Timer -->
+  <div id="timer" class="text-lg font-semibold mb-4 text-blue-700 dark:text-blue-300">Time Left: --:--</div>
+
+  <!-- Query Editor -->
+  <form id="queryForm">
+    <div class="relative mb-4">
+      <div class="editor-container bg-white dark:bg-slate-800 border border-blue-200 dark:border-blue-700 rounded-lg relative overflow-hidden flex">
+        <div id="lineNumbers" class="w-12 text-right pr-2 pt-4 text-gray-400 dark:text-gray-500 font-mono text-sm select-none bg-transparent dark:bg-slate-900"></div>
+        <div class="relative flex-1">
+          <div id="highlight" class="text-gray-900 dark:text-gray-100 font-mono text-sm pl-4 absolute top-0 left-0 w-full h-full pointer-events-none whitespace-pre-wrap break-words"></div>
+          <textarea id="queryInput" name="query" placeholder="Enter SQL query here..." class="w-full h-full p-4 pl-4 font-mono text-sm bg-transparent outline-none resize-none overflow-auto" rows="10" spellcheck="false"></textarea>
+        </div>
+      </div>
+    </div>
+    <button type="submit" class="bg-blue-600 dark:bg-blue-700 text-white px-6 py-2 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 flex items-center gap-2">
+      <span class="material-icons text-lg">play_arrow</span> Execute
+    </button>
+  </form>
+
+  <!-- Query Result -->
+  <div id="queryResult" class="mt-6"></div>
+
+  <!-- Query History -->
+  <h2 class="text-xl font-semibold text-blue-900 dark:text-blue-300 mt-8 mb-4 flex items-center gap-2">
+    <span class="material-icons">history</span> Query History
+  </h2>
+  <ul id="queryHistory" class="list-disc pl-5 text-gray-800 dark:text-gray-200"></ul>
+
+  <!-- Tables -->
+  <h2 class="text-xl font-semibold text-blue-900 dark:text-blue-300 mt-8 mb-4 flex items-center gap-2">
+    <span class="material-icons">storage</span> Your Tables
+  </h2>
+  <div id="tablesContainer" class="grid grid-cols-1 gap-4"></div>
+
+  <!-- Submit -->
+  <button onclick="submitExam()" class="mt-6 bg-green-600 dark:bg-green-700 text-white px-6 py-2 rounded-lg hover:bg-green-700 dark:hover:bg-green-600 flex items-center gap-2">
+    <span class="material-icons">check</span> Submit & Finish
+  </button>
+
+</div>
+<script>
+    function refreshTables() {
+    $.ajax({
+        url: '', // same PHP file
+        method: 'POST',
+        data: { fetchTables: 1 },
+        dataType: 'json',
+        success: function(tables) {
+            const container = $('.grid.grid-cols-1.gap-4');
+            container.empty();
+
+            tables.forEach((table, index) => {
+                let html = `
+                <div class="bg-white dark:bg-slate-800 border border-blue-200 dark:border-blue-700 rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-all duration-150">
+                    <button onclick="toggleTable(${index})" class="w-full text-left px-4 py-3 font-semibold text-blue-900 dark:text-blue-300 hover:bg-blue-50 dark:hover:bg-slate-700 transition-all duration-150 flex justify-between items-center">
+                        <span class="flex items-center gap-2">
+                            <span class="material-icons text-lg">table_chart</span>
+                            ${table.name}
+                        </span>
+                        <span class="material-icons text-blue-600 dark:text-blue-400 transition-transform duration-200 -rotate-180" id="expand-icon-${index}">expand_more</span>
+                    </button>
+                    <div id="table-${index}" class="overflow-x-auto transition-all duration-200">
+                `;
+
+                if(table.rows.length > 0) {
+                    html += `<table class="min-w-full"><thead class="bg-blue-600 dark:bg-blue-800 text-white"><tr>`;
+                    table.fields.forEach(f => html += `<th class='px-4 py-2 text-left text-sm font-medium border border-blue-300 dark:border-blue-600 whitespace-nowrap'>${f}</th>`);
+                    html += `</tr></thead><tbody>`;
+                    table.rows.forEach(row => {
+                        html += "<tr class='hover:bg-blue-50 dark:hover:bg-slate-700 transition-colors duration-150'>";
+                        table.fields.forEach(f => html += `<td class='px-4 py-2 border border-blue-200 dark:border-blue-700 text-sm text-gray-900 dark:text-gray-100'>${row[f]}</td>`);
+                        html += "</tr>";
+                    });
+                    html += "</tbody></table>";
+                } else {
+                    html += `<p class="p-4 text-blue-500 dark:text-blue-400 flex items-center gap-2">
+                                <span class="material-icons">info</span>
+                                Table is empty.
+                             </p>`;
+                }
+
+                html += `</div></div>`;
+                container.append(html);
+            });
+        }
+    });
+}
+
+</script>
+
+<script>
+$(document).ready(function() {
+    $('#queryForm').on('submit', function(e) {
+        e.preventDefault(); // prevent page reload
+        let query = $('#queryInput').val();
+
+        $.ajax({
+            url: '', // current PHP file
+            method: 'POST',
+            data: { query: query, ajax: 1 },
+            dataType: 'json',
+           success: function(response) {
+    let html = '';
+    if(response.error_msg) {
+        html += `<div class="p-3 mb-4 bg-red-50 dark:bg-red-900/50 text-red-700 dark:text-red-200 border border-red-200 dark:border-red-700 rounded-lg flex items-start gap-2 transition-all duration-150">
+                    <span class="material-icons text-lg">error</span>
+                    <span>${response.error_msg}</span>
+                </div>`;
+    }
+    if(response.result_html) {
+        html += response.result_html;
+    }
+    $('#queryResult').html(html);
+
+    // Refresh tables without reloading
+    refreshTables();
+}
+,
+            error: function(xhr, status, error) {
+                $('#queryResult').html(`<div class="p-3 mb-4 bg-red-50 dark:bg-red-900/50 text-red-700 dark:text-red-200 border border-red-200 dark:border-red-700 rounded-lg flex items-start gap-2 transition-all duration-150">
+                                            <span class="material-icons text-lg">error</span>
+                                            <span>AJAX error: ${error}</span>
+                                        </div>`);
+            }
+        });
+    });
+
+    $('#queryInput').on('input', function(e) {
+    updateHighlight();
+    showSuggestions(this, this.selectionStart);
+
+    const value = $(this).val();
+    if (value.trim() === "") {
+        // Remove from localStorage if input is empty
+        localStorage.removeItem('zenSQLLastQuery');
+    } else {
+        // Save current query to localStorage while typing
+        localStorage.setItem('zenSQLLastQuery', value);
+    }
+});
+const lastQuery = localStorage.getItem('zenSQLLastQuery');
+if (lastQuery) {
+    $('#queryInput').val(lastQuery);
+    updateHighlight();
+    updateLineNumbers();
+}
+
+});
+</script>
+
+
+
+</body>
+</html>

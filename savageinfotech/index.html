@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kongunadu Arts and Science College - Student Exam Info</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<style>
+/* Custom SweetAlert2 classes for curved popup and buttons */
+.my-swal-popup {
+    border-radius: 1.5rem !important;
+}
+.my-swal-btn {
+    border-radius: 9999px !important;
+}
+</style>
+</head>
+<body class="bg-gray-100 min-h-screen p-6 font-sans">
+
+<!-- College Header -->
+<div class="max-w-4xl mx-auto mb-6 p-4 bg-white border-2 border-[#1d34a3] rounded-2xl shadow-md">
+    <h1 class="text-3xl font-bold text-[#1d34a3] text-center">Kongunadu Arts and Science College</h1>
+</div>
+
+<!-- Student Info Container -->
+<div class="max-w-4xl mx-auto bg-white rounded-2xl shadow-lg border-2 border-[#1d34a3] p-6">
+    <h2 class="text-2xl font-semibold text-[#1d34a3] mb-6">Student Exam Info</h2>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+        <div class="border p-2 rounded-lg">
+            <p class="text-gray-500 font-medium">Registration Number</p>
+            <p class="text-gray-800 text-lg font-semibold">221CA025</p>
+        </div>
+        <div class="border p-2 rounded-lg">
+            <p class="text-gray-500 font-medium">Department Name</p>
+            <p class="text-gray-800 text-lg font-semibold">Bachelor of Computer Applications</p>
+        </div>
+        <div class="border p-2 rounded-lg">
+            <p class="text-gray-500 font-medium">QP Code</p>
+            <p class="text-gray-800 text-lg font-semibold">22UCA0213</p>
+        </div>
+        <div class="border p-2 rounded-lg">
+            <p class="text-gray-500 font-medium">QP Name</p>
+            <p class="text-gray-800 text-lg font-semibold">MySQL Database</p>
+        </div>
+        <div class="border p-2 rounded-lg">
+            <p class="text-gray-500 font-medium">Date</p>
+            <p id="examDate" class="text-gray-800 text-lg font-semibold"></p>
+        </div>
+        <div class="border p-2 rounded-lg">
+            <p class="text-gray-500 font-medium">Session</p>
+            <p class="text-gray-800 text-lg font-semibold">FN</p>
+        </div>
+    </div>
+
+    <!-- Start Exam Button -->
+    <div class="flex justify-end mt-6">
+        <button id="startExam" class="bg-[#1d34a3] text-white px-6 py-2 rounded-2xl hover:bg-blue-800 transition-all duration-150 shadow-md flex items-center gap-2">
+            <span class="material-icons">play_arrow</span>
+            Start Exam
+        </button>
+    </div>
+</div>
+
+<script>
+// Set today's date
+document.getElementById('examDate').textContent = new Date().toLocaleDateString('en-GB', {
+    day: '2-digit', month: 'short', year: 'numeric'
+});
+
+// Start Exam button with SweetAlert2 curved popup
+const startButton = document.getElementById('startExam');
+startButton.addEventListener('click', () => {
+    Swal.fire({
+        title: 'Start Exam?',
+        text: "Are you ready to begin?",
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, start!',
+        cancelButtonText: 'Cancel',
+        customClass: {
+            popup: 'my-swal-popup',
+            confirmButton: 'my-swal-btn',
+            cancelButton: 'my-swal-btn'
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            window.electronAPI.startExam(); // Trigger main process
+        }
+    });
+});
+
+// Show popup messages from main process
+window.electronAPI.onShowPopup((message) => {
+    Swal.fire({
+        title: 'Info',
+        text: message,
+        icon: 'success',
+        timer: 2000,
+        showConfirmButton: false,
+        customClass: {
+            popup: 'my-swal-popup'
+        }
+    });
+});
+</script>
+
+</body>
+</html>
