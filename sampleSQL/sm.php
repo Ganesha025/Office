@@ -336,17 +336,34 @@ ${query}
     'SHOW', 'DESCRIBE', 'DESC', 'EXPLAIN', 'USE', 'OVERLAPS', 'IDENTITY', 'GENERATED', 'ALWAYS',
     'REPLACE', 'TEMP', 'TEMPORARY', 'LEADING', 'TRAILING', 'CONTINUE', 'EXIT', 'DECLARE'
 ];
-
-        const schema = <?php echo json_encode($schema); ?>;
-        let allSuggestions = [];
-
-        function initSuggestions() {
-            allSuggestions = [...sqlKeywords];
-            for (const table in schema) {
-                allSuggestions.push(table);
-                allSuggestions = allSuggestions.concat(schema[table]);
-            }
+function refreshSchema() {
+    $.ajax({
+        url: '',
+        method: 'POST',
+        data: { fetchSchema: 1 },
+        dataType: 'json',
+        success: function(newSchema) {
+            schema = newSchema;      // update schema
+            initSuggestions();       // rebuild autocomplete
+            console.log('Schema updated:', schema);
+        },
+        error: function() {
+            console.error('Failed to refresh schema');
         }
+    });
+}
+let schema = <?php echo json_encode($schema); ?>;
+
+        let allSuggestions = [];
+function initSuggestions() {
+    allSuggestions = [...sqlKeywords];
+
+    for (const table in schema) {
+        allSuggestions.push(table);
+        allSuggestions.push(...schema[table]);
+    }
+}
+
 
         let currentSuggestions = [];
         let selectedIndex = -1;
@@ -793,6 +810,7 @@ $(document).ready(function() {
 
     // Refresh tables without reloading
     refreshTables();
+     refreshSchema(); 
 }
 ,
             error: function(xhr, status, error) {
