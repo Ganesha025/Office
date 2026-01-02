@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZenSQL</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="icon" href="https://reactnative.dev/img/header_logo.svg">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+<script>
+  tailwind.config = { darkMode: 'class' }
+</script>
+
+<style>
+*{outline:none;transition:all .15s ease}
+input[type="number"]::-webkit-outer-spin-button,input[type="number"]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+textarea{scrollbar-width:none;-ms-overflow-style:none}
+input[type="number"]{-moz-appearance:textfield}
+textarea::-webkit-scrollbar{display:none}
+.editor-container{position:relative}
+#queryInput{background:transparent;position:relative;z-index:2;color:transparent;caret-color:#1e293b;resize:none}
+.dark #queryInput{caret-color:#e2e8f0}
+#highlight{position:absolute;top:0;left:0;padding:1rem;white-space:pre-wrap;word-wrap:break-word;pointer-events:none;z-index:1;font-family:monospace;font-size:0.875rem;line-height:1.25rem;overflow:hidden}
+.sql-keyword{color:#dc2626;font-weight:600}
+.dark .sql-keyword{color:#f87171}
+.rotate-180{transform:rotate(90deg)}
+</style>
+
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+</head>
+<body class="bg-blue-50 dark:bg-slate-900 min-h-screen p-4 sm:p-6 transition-colors duration-150">
+
+<div class="max-w-7xl mx-auto">
+  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 w-full">
+    <a href="javascript:location.reload()"
+       class="text-2xl sm:text-3xl font-bold text-blue-600 dark:text-blue-400 relative inline-block transition-all duration-300 hover:scale-110 hover:text-blue-500 dark:hover:text-blue-300">
+      ZenSQL
+    </a>
+    <div class="flex items-center gap-4">
+      <a href="#" target="_blank" class="flex items-center gap-2 text-blue-600 dark:text-blue-400 text-lg font-medium hover:text-blue-500 dark:hover:text-blue-300 transition-all duration-150 cursor-pointer">
+        <span class="material-symbols-outlined text-2xl">contact_page</span>
+        <span>Contact</span>
+      </a>
+
+      <span onclick="openHistoryModal()"
+            class="flex items-center gap-2 text-blue-600 dark:text-blue-400 text-lg font-medium hover:text-blue-500 dark:hover:text-blue-300 transition-all duration-150 cursor-pointer">
+        <span class="material-symbols-outlined text-2xl">history</span>
+        <span>History</span>
+      </span>
+
+      <button onclick="toggleDarkMode()"
+              class="flex items-center gap-2 px-3 py-1 rounded-lg bg-blue-100 dark:bg-slate-700 text-blue-700 dark:text-blue-400 hover:bg-blue-200 dark:hover:bg-slate-600 transition-all duration-150 shadow-sm">
+        <span class="material-symbols-outlined text-lg dark:hidden">dark_mode</span>
+        <span class="material-symbols-outlined text-lg hidden dark:inline">light_mode</span>
+        <span class="dark:hidden">Dark</span>
+        <span class="hidden dark:inline">Light</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- History Modal -->
+  <div id="historyModal" class="fixed right-0 top-0 h-full w-96 bg-white dark:bg-slate-800 shadow-lg transform translate-x-full transition-transform duration-300 flex flex-col z-50">
+    <div class="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700">
+      <h2 class="text-lg font-semibold text-blue-900 dark:text-blue-300">Query History</h2>
+      <button onclick="closeHistoryModal()" class="text-gray-500 hover:text-gray-900 dark:hover:text-white">
+        <span class="material-icons">close</span>
+      </button>
+    </div>
+    <div id="historyContent" class="p-4 overflow-y-auto flex-1">
+      <!-- History content will be loaded via AJAX -->
+    </div>
+  </div>
+
+  <!-- SQL Editor -->
+  <form method="post" id="queryForm">
+    <div class="relative">
+      <div class="editor-container bg-white dark:bg-slate-800 border border-blue-200 dark:border-blue-700 rounded-lg mb-4 relative overflow-hidden flex">
+        <div id="lineNumbers" class="w-12 text-right pr-2 pt-4 text-gray-400 dark:text-gray-500 font-mono text-sm select-none bg-transparent dark:bg-slate-900"></div>
+        <div class="relative flex-1">
+          <div id="highlight" class="text-gray-900 dark:text-gray-100 font-mono text-sm pl-4 absolute top-0 left-0 w-full h-full pointer-events-none whitespace-pre-wrap break-words"></div>
+          <textarea id="queryInput" placeholder="Enter query here..." name="query" class="w-full h-full p-4 pl-4 font-mono text-sm bg-transparent outline-none resize-none overflow-auto" rows="10" spellcheck="false"></textarea>
+        </div>
+      </div>
+      <div id="suggestions" class="hidden fixed z-50 bg-white dark:bg-slate-800 border border-blue-200 dark:border-blue-700 rounded-lg shadow-lg max-h-60 overflow-y-auto text-sm text-gray-900 dark:text-gray-100 transition-all duration-150"></div>
+    </div>
+    <button type="submit" class="bg-blue-600 dark:bg-blue-700 text-white px-6 py-2 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-all duration-150 shadow-md hover:shadow-lg flex items-center gap-2 hover:scale-105">
+      <span class="material-icons text-lg">play_arrow</span>
+      Execute
+    </button>
+  </form>
+
+  <!-- Query result -->
+  <div id="queryResult" class="mt-6"></div>
+
+  <!-- Tables Section -->
+  <h2 class="text-xl sm:text-2xl font-semibold text-blue-900 dark:text-blue-300 mt-8 mb-4 flex items-center gap-2">
+    <span class="material-icons">storage</span>
+    Your Tables
+  </h2>
+  <div class="grid grid-cols-1 gap-4" id="tablesContainer">
+    <!-- Tables will be loaded via AJAX -->
+  </div>
+</div>
+
+<script>
+// Dark mode
+function toggleDarkMode() {
+  document.documentElement.classList.toggle('dark');
+  localStorage.setItem('darkMode', document.documentElement.classList.contains('dark'));
+}
+if(localStorage.getItem('darkMode')==='true') document.documentElement.classList.add('dark');
+
+// History modal
+function openHistoryModal() {
+  const modal = document.getElementById('historyModal');
+  modal.classList.remove('translate-x-full');
+  // TODO: Load history via AJAX from backend API
+}
+function closeHistoryModal() {
+  document.getElementById('historyModal').classList.add('translate-x-full');
+}
+
+// SQL Editor & line numbers
+const textarea = document.getElementById("queryInput");
+const lineNumbers = document.getElementById("lineNumbers");
+const highlight = document.getElementById("highlight");
+
+function updateLineNumbers() {
+  const lines = textarea.value.split("\n").length;
+  lineNumbers.innerHTML = Array.from({length: lines}, (_, i) => i + 1).join("<br>");
+}
+
+function updateHighlight() {
+  const text = textarea.value.replace(/[<>&]/g, c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]))
+    .replace(/\b(SELECT|FROM|WHERE|INSERT|UPDATE|DELETE|CREATE|ALTER|DROP|TABLE|JOIN|AND|OR|NOT)\b/gi, '<span class="sql-keyword">$1</span>');
+  highlight.innerHTML = text + "\n";
+}
+
+function syncScroll() { lineNumbers.scrollTop = textarea.scrollTop; highlight.scrollTop = textarea.scrollTop; }
+
+textarea.addEventListener("input", () => { updateLineNumbers(); updateHighlight(); });
+textarea.addEventListener("scroll", syncScroll);
+window.addEventListener("resize", updateLineNumbers);
+updateLineNumbers(); updateHighlight();
+$.ajax({
+    url: 'http://localhost:8080/api/execute',
+    method: 'POST',
+    data: { query: $('#queryInput').val(), ajax: 1 },
+    dataType: 'json',
+    success: function(response) {
+        if(response.error_msg) {
+            $('#queryResult').html('<div class="error">'+response.error_msg+'</div>');
+        } else {
+            $('#queryResult').html(response.result_html);
+        }
+    },
+    error: function(xhr, status, error) {
+        $('#queryResult').html('<div class="error">AJAX Error: ' + error + '</div>');
+    }
+});
+
+
+// TODO: Implement suggestions & autocomplete similarly to your PHP version
+</script>
+
+</body>
+</html>
