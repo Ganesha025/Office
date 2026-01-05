@@ -1,184 +1,101 @@
+import os
 import joblib
 import numpy as np
-from sklearn.ensemble import RandomForestRegressor
-import pandas as pd
+from sklearn.linear_model import SGDRegressor
+from sklearn.preprocessing import StandardScaler
+from sklearn.pipeline import Pipeline
 
-df = pd.read_csv(
-    "Model.csv",
-    header=None,
-    names=["attendance", "marks", "fee_due", "incidents"]
-)
+MODEL_PATH = "risk_model.joblib"
 
-def calculate_risk(attendance, marks, pending, incidents):
-    attendance = float(attendance)
-    marks = float(marks)
-    pending = float(pending)
-    # department_fee = float(department_fee)
-    incidents = int(incidents)
+# ==================================================
+# Load or create model
+# ==================================================
+if os.path.exists(MODEL_PATH):
+    model = joblib.load(MODEL_PATH)
+else:
+    scaler = StandardScaler()
+    regressor = SGDRegressor(
+        loss="squared_error",
+        learning_rate="adaptive",
+        eta0=0.01,
+        alpha=0.0005,        # regularization
+        random_state=42
+    )
 
-    risk = 0
+    model = Pipeline([
+        ("scaler", scaler),
+        ("regressor", regressor)
+    ])
 
-    if incidents == 10:
-        risk = 100
-        if marks < 20 or attendance < 75:
-            risk = 100
-        elif marks >= 35 and attendance >= 85 or pending == 0:
-            risk = 70
+    # Proper initialization
+    X_init = np.zeros((1, 4))
+    y_init = np.array([0])
+
+    scaler.partial_fit(X_init)
+    regressor.partial_fit(scaler.transform(X_init), y_init)
+
+    joblib.dump(model, MODEL_PATH)
+
+# ==================================================
+print("🎓 Risk Predictor (Self-Learning Model)")
+print("Feature order: incidents, marks, attendance, pending")
+print("Ctrl+C to exit\n")
+
+# ==================================================
+while True:
+    try:
+        incidents = int(input("Incident count (0–10): "))
+        marks = float(input("Internal marks (0–50): "))
+        attendance = float(input("Attendance %: "))
+        pending = float(input("Pending fees: "))
+
+        # -----------------------------
+        # Feature vector (FIXED ORDER)
+        # -----------------------------
+        X = np.array([[incidents, marks, attendance, pending]])
+
+        # Scale & predict
+        X_scaled = model.named_steps["scaler"].transform(X)
+        predicted = model.named_steps["regressor"].predict(X_scaled)[0]
+
+        # -----------------------------
+        # Hard constraints (PHP safety)
+        # -----------------------------
+        if incidents == 10:
+            predicted = 100
+        if incidents >= 7:
+            predicted = max(predicted, 50)
+        if marks < 20 and attendance < 60:
+            predicted = max(predicted, 75)
+
+        predicted = int(round(max(0, min(predicted, 100))))
+
+        print(f"\n⚠️ Predicted Risk: {predicted}/100")
+
+        # -----------------------------
+        # User feedback
+        # -----------------------------
+        ok = input("Is this correct? (y/n): ").strip().lower()
+
+        if ok == "n":
+            true_risk = int(input("Enter correct risk (0–100): "))
         else:
-            risk += round((50 - min(marks, 50)) / 50 * 15)
+            true_risk = predicted
 
-    elif incidents == 9:
-        risk = 85
-        if marks < 20 or attendance < 75:
-            risk = 100
-        elif marks >= 35 and attendance >= 85 or pending == 0:
-            risk = 70
-        else:
-            risk += round((50 - min(marks, 50)) / 50 * 15)
+        true_risk = max(0, min(true_risk, 100))
 
-    elif incidents == 8:
-        risk = 75
-        if marks < 20:
-            risk += 15
-        elif marks >= 30 and attendance >= 80:
-            risk -= 10
-        else:
-            risk += round((50 - min(marks, 50)) / 50 * 12)
+        # -----------------------------
+        # Incremental learning (CORRECT)
+        # -----------------------------
+        model.named_steps["scaler"].partial_fit(X)
+        X_scaled = model.named_steps["scaler"].transform(X)
+        model.named_steps["regressor"].partial_fit(X_scaled, [true_risk])
 
-    elif incidents == 7:
-        risk = 65
-        if marks < 20 or attendance < 65:
-            risk += 10
-        elif marks >= 35 and attendance >= 85:
-            risk -= 5
-        else:
-            risk += round((50 - min(marks, 50)) / 50 * 10)
+        joblib.dump(model, MODEL_PATH)
+        print("✅ Model updated & saved\n")
 
-    elif incidents == 6:
-        risk = 55
-        if marks < 20:
-            risk += 10
-        elif marks >= 30 and attendance >= 80:
-            risk -= 5
-        else:
-            risk += round((50 - min(marks, 50)) / 50 * 8)
-
-    elif incidents == 5:
-        risk = 50
-        if marks < 20 or attendance < 75:
-            risk += 10
-        elif marks >= 35 and attendance >= 85:
-            risk -= 5
-        else:
-            risk += round((50 - min(marks, 50)) / 50 * 7)
-
-    elif incidents == 4:
-        risk = 40
-        if marks < 20:
-            risk += 5
-        else:
-            risk += round((50 - min(marks, 50)) / 50 * 5)
-
-    elif incidents == 3:
-        risk = 35
-        if marks < 20:
-            risk += 5
-        else:
-            risk += round((50 - min(marks, 50)) / 50 * 4)
-
-    elif incidents == 2:
-        risk = 20
-        if marks < 20:
-            risk += 15
-        else:
-            risk += round((50 - min(marks, 50)) / 50 * 2)
-
-    elif incidents == 1:
-        risk = 10
-        if marks >= 40:
-            risk -= 5
-        else:
-            risk += round((50 - min(marks, 50)) / 50 * 1)
-    elif incidents==0:
-        risk=0
-        if attendance>=80 or marks>=30:
-            risk=0
-        else:
-            risk=2
-        
-    else:
-        risk = 0
-
-    # 📌 Marks-based adjustments
-    if marks < 20:
-        if incidents >= 5:
-            risk += round((50 - marks) / 50 * 30)
-        else:
-            risk += 25 if marks < 10 else 15
-
-    elif marks < 30:
-        if incidents >= 5:
-            risk += round((50 - marks) / 50 * 10)
-        else:
-            risk += 5
-
-    elif marks >= 40:
-        risk -= 10
-
-    # 📌 Pending fees
-    # if pending > 0:
-        # pending_percent = min(1.0, pending / max(1, department_fee))
-        # risk += round(pending_percent * 25)
-
-    # 📌 Attendance
-    if attendance < 50:
-        risk += 20
-    elif attendance < 65:
-        risk += 12
-    elif attendance <= 75:
-        risk += 0
-    elif attendance >= 90:
-        risk -= 5
-
-    # 📌 Hard constraints
-    if incidents >= 7 and risk < 50:
-        risk = 50
-
-    if marks < 20 and attendance < 75:
-        risk = max(risk, 75)
-    if incidents==0 and marks>=45 and attendance >=85 or pending==0:
-        risk=0
-
-    return max(0, min(int(round(risk)), 100))
-
-
-# 🔁 Generate training data
-X, y = [], []
-
-for _, row in df.iterrows():
-    incidents = row["incidents"]
-    marks = row["marks"]
-    attendance = row["attendance"]
-    fee_due = row["fee_due"]
-    # dept_fee = row["department_fee"]
-
-    risk = calculate_risk(attendance, marks, fee_due, incidents)
-
-    X.append([incidents, marks, attendance, fee_due])
-    y.append(risk)
-
-X = np.array(X)
-y = np.array(y)
-
-model = RandomForestRegressor(
-    n_estimators=300,   # number of trees
-    max_depth=10,       # limit tree depth
-    random_state=42,
-    n_jobs=-1           # use all CPU cores
-)
-
-
-model.fit(X, y)
-
-joblib.dump(model, "risk_model.joblib")
-print("✅ Model trained with feature order: incidents, marks, attendance, fee_due")
+    except KeyboardInterrupt:
+        print("\n👋 Exiting...")
+        break
+    except Exception as e:
+        print(f"❌ Error: {e}\nTry again.\n")
