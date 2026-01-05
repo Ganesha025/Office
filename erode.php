@@ -1,332 +1,505 @@
-<?php
+ok 0.0002 seconds.)
+SELECT risk_score from `student_risk_predictions` LIMIT 101;
+ Profiling [ Edit inline ] [ Edit ] [ Explain SQL ] [ Create PHP code ] [ Refresh ]
+Full texts	
+risk_score
 
-namespace App\Services;
+Edit Edit
+Copy Copy
+Delete Delete
+5
 
-use App\Models\StudentAcademicSummaryModel;
-use App\Models\StudentRiskPredictionModel;
-use App\Models\StudentModel;
+Edit Edit
+Copy Copy
+Delete Delete
+50
 
-class RiskRuleEngine{
-    protected $academicModel;
-    protected $studentModel;
-    protected $predictionsModel;
+Edit Edit
+Copy Copy
+Delete Delete
+55
 
-    public function __construct()
-    {
-        $this->academicModel    = model(StudentAcademicSummaryModel::class);
-        $this->studentModel     = model(StudentModel::class);
-        $this->predictionsModel = model(StudentRiskPredictionModel::class);
-    }
-public function fetchAllStudentsData(){
-    // 1. Fetch all academic records
-    $students = $this->academicModel->findAll();
+Edit Edit
+Copy Copy
+Delete Delete
+17
 
-    $result = [];
+Edit Edit
+Copy Copy
+Delete Delete
+42
 
-    foreach ($students as $student) {
-        // 2. Fetch student master data using student_id
-        $studentMaster = $this->studentModel
-            ->where('student_id', $student['student_id'])
-            ->first();
-              // 3. Calculate pending fee safely
-            $departmentFee = $studentMaster['department_fees_amount'];
-            
-            $student['department_fees_amount']=$departmentFee; 
-            $paidFee       = $student['fee_due_amount'];
-        $student['pending_amount'] = $paidFee > 0 ? $departmentFee - $paidFee : 0;
-            $riskScore = $this->calculateRisk($student);
-            $remarks   = $this->generateRemarks($student);
-            
-            $level= $this->getRiskLevel($riskScore);
-        // Data to insert (ONE ROW)
-        $predictionData = [
-            'student_id'       => $studentMaster['id'],
-            'risk_score'       => $riskScore,   // fixed typo
-            'risk_level'       => $level,
-            'ai_remarks'       => $remarks,
-            'prediction_date'  => date('Y-m-d'),
-        ];
+Edit Edit
+Copy Copy
+Delete Delete
+23
 
-        // Save prediction
-        if($riskScore!=0){
-            
-        $this->predictionsModel->save($predictionData);
+Edit Edit
+Copy Copy
+Delete Delete
+18
 
-        }
-        // Collect for response
-        // $result[] = array_merge(['id' => $student['id']], $predictionData);
-        $result[]=[
-            'Academic'=>$studentMaster,
-            'Student'=>$student,
-            'Score'=>$riskScore
-        ];
-    }
+Edit Edit
+Copy Copy
+Delete Delete
+21
 
-    return $result;
-}
+Edit Edit
+Copy Copy
+Delete Delete
+45
 
-    public function calculateAll(){
-        // 1. Fetch all academic records
-        $students = $this->academicModel->findAll();
+Edit Edit
+Copy Copy
+Delete Delete
+55
 
-        foreach ($students as $student) {
+Edit Edit
+Copy Copy
+Delete Delete
+65
 
-            // 2. Fetch student master data using student_id
-            $studentMaster = $this->studentModel
-                ->where('student_id', $student['student_id'])
-                ->first();
+Edit Edit
+Copy Copy
+Delete Delete
+26
 
-            // 3. Calculate pending fee safely
-            $departmentFee = $studentMaster['department_fees_amount'] ?? 0;
-            $paidFee       = $student['fee_due_amount'] ?? 0;
-            $pendingAmount = $departmentFee - $paidFee;
+Edit Edit
+Copy Copy
+Delete Delete
+23
 
-            // 4. Add pending amount to student array
-            $student['pending_amount'] = $pendingAmount;
+Edit Edit
+Copy Copy
+Delete Delete
+22
 
-            // 5. Calculate risk
-            $riskScore = $this->calculateRisk($student);
-            $riskLevel = $this->getRiskLevel($riskScore);
-            $remarks   = $this->generateRemarks($student);
-        $this->predictionsModel->save([
-    'student_id'      => $student['student_id'],
-    'risk_score'      => $riskScore,
-    'risk_level'      => $riskLevel,
-    'ai_remarks'      => $remarks,
-    'prediction_date' => date('Y-m-d')
-]);
+Edit Edit
+Copy Copy
+Delete Delete
+31
 
-        }
+Edit Edit
+Copy Copy
+Delete Delete
+37
 
-        return true;
-    }
+Edit Edit
+Copy Copy
+Delete Delete
+52
 
-public function calculateRisk(array $s): int{
-    $attendance = (float) ($s['attendance_percentage'] ?? 100);
-    $marks = (float) ($s['avg_internal_marks'] ?? 50);
-    $pending = (float) ($s['pending_amount'] ?? 0);
-    $departmentFee = (float) ($s['department_fees_amount'] ?? 0);
-    $incidents = (int) ($s['incident_count'] ?? 0);
+Edit Edit
+Copy Copy
+Delete Delete
+7
 
-    $risk = 0;
+Edit Edit
+Copy Copy
+Delete Delete
+37
 
-  if ($incidents == 10) {
-    $risk = 100;
-} elseif ($incidents == 9) {
-    $risk = 85;
-    if ($marks < 20 || $attendance < 75) {
-        $risk = 100;
-    } elseif ($marks >= 35 && $attendance >= 85 && $pending == 0) {
-        $risk = 70;
-    } else {
-        // compare marks with 50
-        $risk += (int) round((50 - min($marks,50)) / 50 * 15);
-    }
-} elseif ($incidents == 8) {
-    $risk = 75;
-    if ($marks < 20) {
-        $risk += 15;
-    } elseif ($marks >= 30 && $attendance >= 80) {
-        $risk -= 10;
-    } else {
-        $risk += (int) round((50 - min($marks,50)) / 50 * 12);
-    }
-} elseif ($incidents == 7) {
-    $risk = 65;
-    if ($marks < 20 || $attendance < 65) {
-        $risk += 10;
-    } elseif ($marks >= 35 && $attendance >= 85) {
-        $risk -= 5;
-    } else {
-        $risk += (int) round((50 - min($marks,50)) / 50 * 10);
-    }
-} elseif ($incidents == 6) {
-    $risk = 55;
-    if ($marks < 20) {
-        $risk += 10;
-    } elseif ($marks >= 30 && $attendance >= 80) {
-        $risk -= 5;
-    } else {
-        $risk += (int) round((50 - min($marks,50)) / 50 * 8);
-    }
-} elseif ($incidents == 5) {
-    $risk = 50;
-    if ($marks < 20 || $attendance < 65) {
-        $risk += 10;
-    } elseif ($marks >= 35 && $attendance >= 85) {
-        $risk -= 5;
-    } else {
-        $risk += (int) round((50 - min($marks,50)) / 50 * 7);
-    }
-} elseif ($incidents == 4) {
-    $risk = 40;
-    if ($marks < 20) {
-        $risk += 5;
-    } else {
-        $risk += (int) round((50 - min($marks,50)) / 50 * 5);
-    }
-} elseif ($incidents == 3) {
-    $risk = 35;
-    if ($marks < 20) {
-        $risk += 5;
-    } else {
-        $risk += (int) round((50 - min($marks,50)) / 50 * 4);
-    }
-} elseif ($incidents == 2) {
-    $risk = 20;
-    if ($marks < 20) {
-        $risk += 15;
-    } else {
-        $risk += (int) round((50 - min($marks,50)) / 50 * 2);
-    }
-} elseif ($incidents == 1) {
-    $risk = 10;
-    if ($marks >= 40) {
-        $risk -= 5;
-    } else {
-        $risk += (int) round((50 - min($marks,50)) / 50 * 1);
-    }
-} else {
-    $risk = 0;
-}
+Edit Edit
+Copy Copy
+Delete Delete
+10
 
+Edit Edit
+Copy Copy
+Delete Delete
+10
 
-if ($marks < 20) {
-    if ($incidents >= 5) {
-        $risk += (int) round((50 - $marks) / 50 * 30); // scale proportionally to max 30 points
-    } else {
-        $risk += ($marks < 10 ? 25 : 15);
-    }
-} elseif ($marks < 30) {
-    if ($incidents >= 5) {
-        $risk += (int) round((50 - $marks) / 50 * 10); // small adjustment for mid-level incidents
-    } else {
-        $risk += 5;
-    }
-} elseif ($marks >= 40) {
-    $risk -= 10;
-}
+Edit Edit
+Copy Copy
+Delete Delete
+32
 
+Edit Edit
+Copy Copy
+Delete Delete
+16
 
-    if ($pending == 0) {
-        $risk += 0;
-    } elseif ($pending > 0) {
-        $pendingPercent = min(1.0, $pending / max(1, $departmentFee));
-        $risk += (int) round($pendingPercent * 25);
-    }
+Edit Edit
+Copy Copy
+Delete Delete
+5
 
-    if ($attendance < 50) {
-        $risk += 20;
-    } elseif ($attendance < 65) {
-        $risk += 12;
-    } elseif ($attendance <= 75) {
-        $risk += 0;
-    } elseif ($attendance >= 90) {
-        $risk -= 5;
-    }
+Edit Edit
+Copy Copy
+Delete Delete
+30
 
-    if ($incidents >= 7 && $risk < 50) {
-        $risk = 50;
-    }
+Edit Edit
+Copy Copy
+Delete Delete
+5
 
-    if ($marks < 20 && $attendance < 60) {
-        $risk = max($risk, 75);
-    }
+Edit Edit
+Copy Copy
+Delete Delete
+27
 
-    return max(0, min((int) round($risk), 100));
-}
+Edit Edit
+Copy Copy
+Delete Delete
+21
 
+Edit Edit
+Copy Copy
+Delete Delete
+5
 
-public function getRiskLevel(int $score): string{
-        if ($score <= 40) {
-            return 'LOW';
-        } elseif ($score <= 70) {
-            return 'MEDIUM';
-        }
-        return 'HIGH';
-    }
+Edit Edit
+Copy Copy
+Delete Delete
+26
 
-public function generateRemarks(array $s): string
-{
-    $remarks = [];
+Edit Edit
+Copy Copy
+Delete Delete
+49
 
-    $attendance = (float) ($s['attendance_percentage'] ?? 100);
-    $marks      = (float) ($s['avg_internal_marks'] ?? 50);
-    $pending    = (float) ($s['pending_amount'] ?? 0);
-    $department = (float) ($s['department_fees_amount'] ?? 0);
-    $incidents  = (int)   ($s['incident_count'] ?? 0);
+Edit Edit
+Copy Copy
+Delete Delete
+30
 
-    /* ---------------- Behavioral Risk ---------------- */
-    if ($incidents >= 10) {
-        $remarks[] = 'Critical behavioral risk (extreme incident count)';
-    } elseif ($incidents >= 9) {
-        $remarks[] = 'Severe behavioral instability';
-    } elseif ($incidents >= 7) {
-        $remarks[] = 'High behavioral concern';
-    } elseif ($incidents >= 5) {
-        $remarks[] = 'Repeated disciplinary issues';
-    } elseif ($incidents >= 3) {
-        $remarks[] = 'Moderate behavioral warning';
-    } elseif ($incidents >= 1) {
-        $remarks[] = 'Minor behavioral concern';
-    }
+Edit Edit
+Copy Copy
+Delete Delete
+2
 
-    /* ---------------- Academic Risk ---------------- */
-    if ($marks < 10) {
-        $remarks[] = 'Academically critical (very low internal marks)';
-    } elseif ($marks < 20) {
-        $remarks[] = 'Below minimum academic threshold';
-    } elseif ($marks < 30) {
-        $remarks[] = 'Weak academic performance';
-    } elseif ($marks >= 40) {
-        $remarks[] = 'Strong academic standing';
-    }
+Edit Edit
+Copy Copy
+Delete Delete
+25
 
-    /* ---------------- Attendance Risk ---------------- */
-    if ($attendance < 50) {
-        $remarks[] = 'Extremely poor attendance';
-    } elseif ($attendance < 65) {
-        $remarks[] = 'Attendance below acceptable limit';
-    } elseif ($attendance <= 75) {
-        $remarks[] = 'Marginal attendance';
-    } elseif ($attendance >= 90) {
-        $remarks[] = 'Excellent attendance record';
-    }
+Edit Edit
+Copy Copy
+Delete Delete
+31
 
-    /* ---------------- Financial Risk ---------------- */
-    if ($pending > 0) {
-        if ($department > 0) {
-            $pendingPercent = $pending / $department;
-            if ($pendingPercent >= 0.75) {
-                $remarks[] = 'Severe fee default';
-            } elseif ($pendingPercent >= 0.40) {
-                $remarks[] = 'High outstanding fees';
-            } else {
-                $remarks[] = 'Pending fees require attention';
-            }
-        } else {
-            $remarks[] = 'Outstanding fee balance';
-        }
-    }
+Edit Edit
+Copy Copy
+Delete Delete
+16
 
-    /* ---------------- Combined Risk Indicators ---------------- */
-    if ($marks < 20 && $attendance < 60) {
-        $remarks[] = 'Academics and attendance jointly at critical risk';
-    }
+Edit Edit
+Copy Copy
+Delete Delete
+42
 
-    if ($incidents >= 7 && $marks < 30) {
-        $remarks[] = 'Behavioral issues impacting academic performance';
-    }
+Edit Edit
+Copy Copy
+Delete Delete
+20
 
-    if ($incidents >= 7 && $attendance < 65) {
-        $remarks[] = 'Discipline problems affecting attendance';
-    }
+Edit Edit
+Copy Copy
+Delete Delete
+11
 
-    return empty($remarks)
-        ? 'No significant risk indicators detected'
-        : implode(', ', array_unique($remarks));
-}
+Edit Edit
+Copy Copy
+Delete Delete
+5
 
+Edit Edit
+Copy Copy
+Delete Delete
+37
 
+Edit Edit
+Copy Copy
+Delete Delete
+20
 
-}
+Edit Edit
+Copy Copy
+Delete Delete
+48
+
+Edit Edit
+Copy Copy
+Delete Delete
+20
+
+Edit Edit
+Copy Copy
+Delete Delete
+50
+
+Edit Edit
+Copy Copy
+Delete Delete
+22
+
+Edit Edit
+Copy Copy
+Delete Delete
+37
+
+Edit Edit
+Copy Copy
+Delete Delete
+45
+
+Edit Edit
+Copy Copy
+Delete Delete
+42
+
+Edit Edit
+Copy Copy
+Delete Delete
+10
+
+Edit Edit
+Copy Copy
+Delete Delete
+81
+
+Edit Edit
+Copy Copy
+Delete Delete
+10
+
+Edit Edit
+Copy Copy
+Delete Delete
+11
+
+Edit Edit
+Copy Copy
+Delete Delete
+36
+
+Edit Edit
+Copy Copy
+Delete Delete
+43
+
+Edit Edit
+Copy Copy
+Delete Delete
+21
+
+Edit Edit
+Copy Copy
+Delete Delete
+26
+
+Edit Edit
+Copy Copy
+Delete Delete
+25
+
+Edit Edit
+Copy Copy
+Delete Delete
+5
+
+Edit Edit
+Copy Copy
+Delete Delete
+21
+
+Edit Edit
+Copy Copy
+Delete Delete
+31
+
+Edit Edit
+Copy Copy
+Delete Delete
+5
+
+Edit Edit
+Copy Copy
+Delete Delete
+5
+
+Edit Edit
+Copy Copy
+Delete Delete
+43
+
+Edit Edit
+Copy Copy
+Delete Delete
+26
+
+Edit Edit
+Copy Copy
+Delete Delete
+42
+
+Edit Edit
+Copy Copy
+Delete Delete
+2
+
+Edit Edit
+Copy Copy
+Delete Delete
+10
+
+Edit Edit
+Copy Copy
+Delete Delete
+34
+
+Edit Edit
+Copy Copy
+Delete Delete
+55
+
+Edit Edit
+Copy Copy
+Delete Delete
+21
+
+Edit Edit
+Copy Copy
+Delete Delete
+42
+
+Edit Edit
+Copy Copy
+Delete Delete
+80
+
+Edit Edit
+Copy Copy
+Delete Delete
+95
+
+Edit Edit
+Copy Copy
+Delete Delete
+66
+
+Edit Edit
+Copy Copy
+Delete Delete
+5
+
+Edit Edit
+Copy Copy
+Delete Delete
+98
+
+Edit Edit
+Copy Copy
+Delete Delete
+72
+
+Edit Edit
+Copy Copy
+Delete Delete
+70
+
+Edit Edit
+Copy Copy
+Delete Delete
+67
+
+Edit Edit
+Copy Copy
+Delete Delete
+35
+
+Edit Edit
+Copy Copy
+Delete Delete
+87
+
+Edit Edit
+Copy Copy
+Delete Delete
+21
+
+Edit Edit
+Copy Copy
+Delete Delete
+31
+
+Edit Edit
+Copy Copy
+Delete Delete
+37
+
+Edit Edit
+Copy Copy
+Delete Delete
+26
+
+Edit Edit
+Copy Copy
+Delete Delete
+5
+
+Edit Edit
+Copy Copy
+Delete Delete
+18
+
+Edit Edit
+Copy Copy
+Delete Delete
+50
+
+Edit Edit
+Copy Copy
+Delete Delete
+15
+
+Edit Edit
+Copy Copy
+Delete Delete
+37
+
+Edit Edit
+Copy Copy
+Delete Delete
+47
+
+Edit Edit
+Copy Copy
+Delete Delete
+5
+
+Edit Edit
+Copy Copy
+Delete Delete
+100
+
+Edit Edit
+Copy Copy
+Delete Delete
+26
+
+Edit Edit
+Copy Copy
+Delete Delete
+37
+
+Edit Edit
+Copy Copy
+Delete Delete
+26
+
+Edit Edit
+Copy Copy
+Delete Delete
+25
+
+Edit Edit
+Copy Copy
+Delete Delete
+33
+
+Edit Edit
+Copy Copy
+Delete Delete
+45
