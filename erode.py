@@ -182,3 +182,66 @@ model.fit(X, y)
 
 joblib.dump(model, "risk_model.joblib")
 print("✅ Model trained with feature order: incidents, marks, attendance, fee_due")
+
+
+
+
+
+
+
+
+
+
+<div class="card p-6 mb-6">
+
+    <!-- MAIN HEADER (ONLY ONE HEADING) -->
+
+ <div id="savageinfo"
+     class="w-full flex flex-col gap-4
+            lg:flex-row lg:items-center
+            mb-6">
+
+    <!-- LEFT: 70% -->
+    <div class="w-full lg:w-[68%] text-left">
+        <h3 class="text-lg font-bold text-[#000000]">
+            Department Fee Payment Status
+        </h3>
+    </div>
+
+    <!-- RIGHT: 30% (LEFT-ALIGNED CONTENT) -->
+    <div class="w-full lg:w-[32%] flex flex-col items-start text-left">
+        <h3 class="text-sm font-semibold text-[#000000]"
+            id="studentCardTitle">
+            Department List
+        </h3>
+        <p class="text-xs text-[#A3AED0]"
+           id="studentCardSub">
+            Fee Status
+        </p>
+    </div>
+
+</div>
+
+
+    <!-- Chart + List Grid (STARTS AT SAME LINE) -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+        <!-- LEFT: Chart -->
+        <div class="lg:col-span-2 border-r border-[#cccccc] pr-4">
+            <div id="deptChart" class="w-full h-[420px]"></div>
+        </div>
+
+        <!-- RIGHT: Student List -->
+        <div class="h-[420px] flex flex-col">
+            <div id="studentList"
+                 class="flex-1 overflow-y-auto pr-2 space-y-3
+                        bg-[#F8F9FC] rounded-xl p-3
+                        border border-[#E0E5F2]">
+                <div class="text-center text-[#A3AED0] py-10">
+                    Select a department to view pending fees
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
